@@ -14,7 +14,7 @@ The Python code evolves ordinary differential equations with one of three adapti
 | ERK  | embedded      |
 | SDRK | step doubling |
 
-I originally derived the RKM algorithm in one of my papers to solve fluid dynamic equations (see Sec. 3.6 for the derivation)
+The RKM algorithm was first used in one of my papers to solve fluid dynamic equations (see Sec. 3.6 for the derivation)
 
     M. McNelis, D. Bazow and U. Heinz, arXiv:2101.02827 (2021)
     
