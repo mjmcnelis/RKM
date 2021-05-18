@@ -1,2 +1,43 @@
-# RKM
-An explicit ODE solver with a new adaptive step size method
+**RKM (c) Mike McNelis**
+
+Created on 4/20/2021 by Mike McNelis\
+Last edited on 5/18/2021 by Mike McNelis
+
+## Summary
+An explicit Runge-Kutta ODE solver with a new adaptive step size method.
+
+The Python code evolves ordinary differential equations with one of three adaptive stepsize methods:
+
+    RKM  = my adaptive RK
+    ERK  = embedded RK
+    SDRK = step-doubling RK
+
+I originally derived the RKM algorithm in one of my papers to solve fluid dynamic equations (see Sec. 3.6 for the derivation)
+
+    M. McNelis, D. Bazow and U. Heinz, arXiv:2101.02827 (2021)
+    
+This repository is currently under development, but you can run `test.py` to generate an example plot. 
+
+
+## Runge-Kutta methods
+
+A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` and `embedded`. 
+    
+|      Standard       | |
+|:-------------------:|:----:|
+| Euler 1             | E1   |
+| Heun 2              | H2   |
+| Midpoint 2          | M2   |
+| Ralston 2           | R2   |
+| Heun 3              | H3   |
+| Ralston 3           | R3   |
+| Runge Kutta 3       | RK3  |
+| Ralston 4           | R4   |
+| Runge Kutta 4       | RK4  |
+| 3/8 Rule 4          | TER4 |
+| Fehlberg 4          | F4   |
+    
+    
+    
+    
+    
