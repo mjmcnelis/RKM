@@ -6,7 +6,7 @@ Last edited on 5/18/2021 by Mike McNelis
 ## Summary
 An explicit Runge-Kutta ODE solver with a new adaptive step size method.
 
-The Python code evolves ordinary differential equations with one of three adaptive stepsize methods:
+The Python code evolves ordinary differential equations with one of three adaptive methods:
 
 | ||
 |:----:|:-------------:|
