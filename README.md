@@ -21,9 +21,12 @@ This repository is currently under development, but you can run `test.py` to gen
 
 ## Runge-Kutta methods
 
-A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` and `embedded`. 
-    
-|      Standard       | |
+A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` and `embedded`. These are the methods I have gathered so far:
+   
+<table>
+<tr><td>
+
+|      Standard       |      |
 |:-------------------:|:----:|
 | Euler 1             | E1   |
 | Heun 2              | H2   |
@@ -36,8 +39,34 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 | Runge Kutta 4       | RK4  |
 | 3/8 Rule 4          | TER4 |
 | Fehlberg 4          | F4   |
-    
-    
+| Butcher 5           | B5   |
+| Cash Karp 5         | CK5  |
+| Dormand Prince 5    | DP5  |
+| Verner 5            | V5   |
+| Butcher 6           | B6   |
+| Shanks 8            | S8   |
+| Dormand Prince 8    | DP8  |
+| Feagin 10           | F10  |
+| Feagin 14           | F14  |
+
+</td><td>
+
+|      Embedded         |      |
+|:---------------------:|:----:|
+| Heun Euler 2(1)       | HE21 |
+| Fehlberg 1(2)         | F12  |
+| Bogacki Shampine 3(2) | BS32 |
+| Fehlberg 4(5)         | F45  |
+| Cash Karp 5(4)        | CK54 |
+| Dormand Prince 5(4)   | DP54 |
+| Verner 5(6)           | V56  |
+| Dormand Prince 8(7)   | DP87 |
+| Feagin 10(8)          | F108 |
+| Feagin 14(12)         | F1412|
+
+</td></tr> </table>
+
+Note: Feagin's 10th and 14th order tables are not yet ready for high precision runs. 
     
     
     
