@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # import precision
+from exact_solution import y_prime  # todo: pass y_prime instead
 import exact_solution
 
-# todo: move to ode_solver
-from scipy import integrate
+solution = exact_solution.solution
 
 
 # todo: move this elsewhere
@@ -25,16 +25,13 @@ colors = OrderedDict([
     ('gray', '#bab0ac')
 ])
 
-# has verner methods and others
-# http://www.mymathlib.com/diffeq/embedded_runge_kutta/embedded_verner_5_6.html
-
 
 
 # standard RK step
 def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
 
     # todo: pass y_prime as a function
-
+    # todo: make use of FSAL property in BS32, DP54 (for embedded = True)
 
     # y0       = current solution y_n
     # dy1      = first intermediate Euler step \Delta y_n^{(1)}
@@ -49,51 +46,47 @@ def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
     else:
         stages = butcher.shape[0] - 1
 
-    dy_array = [0] * stages                                 # array of intermediate Euler steps
-    dy_array[0] = dy1                                       # first Euler step
+    dy_array = [0] * stages
+    dy_array[0] = dy1                                       # first intermediate Euler step
 
-    for i in range(1, stages):                              # loop over remaining Euler steps
+    for i in range(1, stages):                              # loop over remaining intermediate Euler steps
         dy = 0
-
         for j in range(0, i):
             dy += dy_array[j] * butcher[i,j+1]
 
-        dy_array[i] = dt * y_prime(t + dt*butcher[i,0], y0 + dy)
+        dy_array[i] = dt * y_prime(t + dt*butcher[i,0], y0 + dy, solution)
 
     dy = 0
-
-    for i in range(0, stages):                              # compute primary RK solution (Butcher notation)
+    for i in range(0, stages):                              # primary RK iteration (Butcher notation)
         dy += dy_array[i] * butcher[stages,i+1]
 
-    if embedded:                                            # compute secondary solution for embedded RK (ERK)
+    if embedded:                                            # secondary RK iteration (for embedded RK)
         dyhat = 0
-
         for i in range(0, stages):
-            dyhat += dy_array[i] * butcher[stages+1,i+1]    # todo: make use of FSAL property in BS32, DP54 (for embedded = True)
+            dyhat += dy_array[i] * butcher[stages+1,i+1]
 
-        return (y0 + dyhat), (y0 + dy)                      # secondary, primary solution
+        return (y0 + dyhat), (y0 + dy)                      # updated ERK solutions (secondary, primary)
 
-    return y0 + dy                                          # primary solution
+    return y0 + dy                                          # updated solution (primary)
 
 
 
 # my adaptive RK step
 def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9):
 
-    # y        = current solution y_n
-    # y_prev   = previous solution y_{n-1}
-    # t        = current time t_n
-    # dt_prev  = previous step size dt_{n-1}
-    # eps      = tolerance parameter
-    # adaptive = make dt adaptive if True
-    # norm     = order of vector norm (e.g. 1, 2 (None), np.inf)
-    # dt_min   = min step size
-    # dt_max   = max step size
-    # low      = lower safety bound
-    # high     = upper safety bound
-    # S        = safety factor (todo: try axing this)
+    # y         = current solution y_n
+    # y_prev    = previous solution y_{n-1}
+    # t         = current time t_n
+    # dt_prev   = previous step size dt_{n-1}
+    # eps       = tolerance parameter
+    # adaptive  = make dt adaptive if True
+    # norm      = order of vector norm (e.g. 1, 2 (None), np.inf)
+    # dt_min    = min step size
+    # dt_max    = max step size
+    # low, high = safety bounds for dt growth rate
+    # S         = safety factor (todo: try axing this for RKM)
 
-    f = y_prime(t, y)                                       # for first intermediate Euler step
+    f = y_prime(t, y, solution)                             # for first intermediate Euler step
 
     if adaptive:
         y_star = y + f*dt_prev                              # compute y_star and approximate C
@@ -118,20 +111,23 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
     y_prev = y
-    y = RK_standard(y, dy1, t, dt, method, butcher)         # update y with usual Runge-Kutta method
+    y = RK_standard(y, dy1, t, dt, method, butcher)         # update y with standard Runge-Kutta method
 
-    return y, y_prev, dt
+    return y, y_prev, dt                                    # updated solution, current solution, current step size
 
 
 
 # embedded RK step
-def ERK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
+def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
 
     # y0           = current solution y_n
+    # t            = current time t_n
+    # dt           = starting step size
     # max_attempts = max number of attempts
+    # note: remaining variables have same meaning as RKM
 
-    order = int(method.split('_')[-2])                      # order of primary RK method
-    order_hat = int(method.split('_')[-1])                  # order of secondary RK method
+    order = int(method.split('_')[-2])                      # order of primary method
+    order_hat = int(method.split('_')[-1])                  # order of secondary method
 
     order_min = min(order, order_hat)
     power = 1 / (1 + order_min)
@@ -140,8 +136,9 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e-
 
     for i in range(0, max_attempts):
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
-        dy1 = dt * y_prime(t, y0)
+        dy1 = dt * y_prime(t, y0, solution)
 
+        # propose updated solution (secondary, primary)
         yhat, y = RK_standard(y0, dy1, t, dt, method, butcher, embedded = True)
 
         error_norm = np.linalg.norm(y - yhat, ord = norm)   # estimate local truncation error
@@ -158,7 +155,7 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e-
 
         if error_norm <= tolerance:                         # check if attempt succeeded
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
-            return y, dt, dt_next, i + 1                    # return solution, current step size, next step size, number of attempts
+            return y, dt, dt_next, i + 1                    # updated solution, current step size, next step size, number of attempts
         else:
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
@@ -169,11 +166,11 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e-
 
 
 # step doubling RK step
-def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
+def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
 
     # note: routine is very similar to ERK_step() above
 
-    order = int(method.split('_')[-1])                      # get order of RK method
+    order = int(method.split('_')[-1])                      # get order of method
     power = 1 / (1 + order)
 
     rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
@@ -182,18 +179,18 @@ def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        # full step
-        dy1 = dt * y_prime(t, y0)
+        # full RK step
+        dy1 = dt * y_prime(t, y0, solution)
         y1 = RK_standard(y0, dy1, t, dt, method, butcher, embedded = False)
 
-        # two half-steps
+        # two half RK steps
         y_mid = RK_standard(y0, dy1/2, t, dt/2, method, butcher, embedded = False)
         t_mid = t + dt/2
-        dy1_mid = (dt/2) * y_prime(t_mid, y_mid)
+        dy1_mid = (dt/2) * y_prime(t_mid, y_mid, solution)
         y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, method, butcher, embedded = False)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
-        y = y2 + error                                      # Richardson extrapolation
+        y = y2 + error                                      # propose updated solution (Richardson extrapolation)
 
         error_norm = np.linalg.norm(error, ord = norm)      # error norm
         y_norm = np.linalg.norm(y, ord = norm)
@@ -209,7 +206,7 @@ def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-6, norm = None, dt_min = 1.e
 
         if error_norm <= tolerance:                         # check if attempt succeeded
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
-            return y, dt, dt_next, i + 1                    # return solution, current step size, next step size, number of attempts
+            return y, dt, dt_next, i + 1                    # updated solution, current step size, next step size, number of attempts
         else:
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
