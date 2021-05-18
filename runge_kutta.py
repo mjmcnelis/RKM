@@ -72,7 +72,7 @@ def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
 
 
 # my adaptive RK step
-def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9):
+def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.25):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
@@ -84,7 +84,11 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
     # dt_min    = min step size
     # dt_max    = max step size
     # low, high = safety bounds for dt growth rate
-    # S         = safety factor (todo: try axing this for RKM)
+
+    order = int(method.split('_')[-1])                      # get order of method
+    power = 1 / (1 + order)
+
+    high = high**power
 
     f = y_prime(t, y, solution)                             # for first intermediate Euler step
 
@@ -103,7 +107,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
             else:
                 dt = 2 * eps * f_norm / C_norm
 
-            dt = min(high*dt_prev, max(low*dt_prev, S*dt))  # control rate of change
+            dt = min(high*dt_prev, max(low*dt_prev, dt))    # control rate of change
 
         dt = min(dt_max, max(dt_min, dt))                   # impose dt_min <= dt <= dt_max
     else:
@@ -124,6 +128,7 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-
     # t            = current time t_n
     # dt           = starting step size
     # max_attempts = max number of attempts
+    # S            = safety factor
     # note: remaining variables have same meaning as RKM
 
     order = int(method.split('_')[-2])                      # order of primary method

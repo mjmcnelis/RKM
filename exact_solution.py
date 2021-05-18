@@ -6,7 +6,7 @@ from scipy import integrate
 
 myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
-solution = 'gaussian'                               # solution type
+solution = 'logistic'                               # solution type
 
 
 A = 5                                               # for sin(At) solution

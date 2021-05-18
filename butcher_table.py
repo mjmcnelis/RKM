@@ -210,6 +210,13 @@ feagin_14 = np.array([
 
 # embedded RK methods:
 
+fehlberg_1_2 = np.array([
+                [0, 0, 0, 0],
+                [1/2, 1/2, 0, 0],
+                [1, 1/256, 255/256, 0],
+                [0, 1/256, 255/256, 0],
+                [0, 1/512, 255/256, 1/512]], dtype = myfloat)
+
 heun_euler_2_1 = np.array([
                 [0, 0, 0],
                 [1, 1, 0],
@@ -370,7 +377,8 @@ table_standard = [euler_1,                                                      
                   feagin_10,
                   feagin_14]
                                                                                         #   order   |   pseudonym
-method_embedded = ['heun_euler_2_1',                                                    #   2(1)    |   HE2(1)
+method_embedded = ['fehlberg_1_2',                                                      #   1(2)    |   F1(2)
+                   'heun_euler_2_1',                                                    #   2(1)    |   HE2(1)
                    'bogacki_shampine_3_2',                                              #   3(2)    |   BS3(2)
                    'fehlberg_4_5',                                                      #   4(5)    |   F4(5)
                    'cash_karp_5_4', 'dormand_prince_5_4', 'verner_5_6',                 #   5(4,6)  |   CK5(4), DP5(4), V5(6)
@@ -378,7 +386,8 @@ method_embedded = ['heun_euler_2_1',                                            
                    'feagin_10_8',                                                       #   10(8)   |   F10(8)
                    'feagin_14_12']                                                      #   14(12)  |   F14(12)
 
-table_embedded = [heun_euler_2_1,                                                       # note: double-check list before writing to file
+table_embedded = [fehlberg_1_2,
+                  heun_euler_2_1,                                                       # note: double-check list before writing to file
                   bogacki_shampine_3_2,
                   fehlberg_4_5,
                   cash_karp_5_4, dormand_prince_5_4, verner_5_6,

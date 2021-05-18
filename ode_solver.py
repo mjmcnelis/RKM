@@ -25,12 +25,12 @@ def get_butcher_table(solver, method):
 
 
 
-def method_is_FSAL(method):
-    # note: need to hard-code FSAL methods here (any others?)
-    if method is 'bogacki_shampine_3_2' or method is 'dormand_prince_5_4':
+def method_is_FSAL(butcher):
+    if np.array_equal(butcher[-3,1:], butcher[-2,1:]):  # check second and third to last rows
         return True
     else:
         return False
+
 
 
 def get_stages(butcher, solver, method):
@@ -40,7 +40,7 @@ def get_stages(butcher, solver, method):
     if solver is 'SDRK':
         return 3*stages - 1                             # stages in SDRK
     elif solver is 'ERK':
-        if method_is_FSAL(method):
+        if method_is_FSAL(butcher):
             return stages - 2                           # stages in ERK
         else:
             return stages - 1                           # note: do not use FSAL to save time yet
@@ -70,7 +70,7 @@ def rescale_epsilon(eps, solver, order):
 
 
 # todo: axe return steps (don't really need it)
-def ode_solver(y0, t0, tf, dt0, solver, method, eps = 1.e-8, high = 1.5, n_max = 10000):
+def ode_solver(y0, t0, tf, dt0, solver, method, eps = 1.e-8, n_max = 10000):
 
     # y0     = initial solution
     # t0     = initial time
@@ -114,22 +114,22 @@ def ode_solver(y0, t0, tf, dt0, solver, method, eps = 1.e-8, high = 1.5, n_max =
             if n == 0:
                 method_SD = 'euler_1'                            # estimate first dt w/ step-doubling
                 butcher_SD = get_butcher_table(solver, method_SD)
-                y_SD, dt, dt_next, tries_SD = runge_kutta.SDRK_step(y, t, dt_next, method_SD, butcher_SD, eps = eps/2, high = high)
+                y_SD, dt, dt_next, tries_SD = runge_kutta.SDRK_step(y, t, dt_next, method_SD, butcher_SD, eps = eps/2)
                 evaluations += 2 * tries_SD
 
                 dt = dt_next                                    # then use standard RK
                 dy1 = dt * y_prime(t, y, solution)
                 y = runge_kutta.RK_standard(y, dy1, t, dt, method, butcher)
             else:
-                y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps, high = high)
+                y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps)
 
         # embedded
         elif solver is 'ERK':
-            y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps, high = high)
+            y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps)
 
         # step-doubling
         elif solver is 'SDRK':
-            y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps, high = high)
+            y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps)
 
         dt_array = np.append(dt_array, dt)
 

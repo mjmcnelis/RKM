@@ -18,11 +18,10 @@ else:
     tf = 10
 
 y0 = exact_solution.y_exact(t0, solution)       # todo: replace with own solution
-dt0 = 0.001
+dt0 = 0.01
 
-
-solver = 'ERK'
-method = 'dormand_prince_8_7'
+solver = 'RKM'
+method = 'shanks_8'
 
 y, t, dt, evaluations, finish = ode_solver(y0, t0, tf, dt0, solver, method)
 
