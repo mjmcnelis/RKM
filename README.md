@@ -8,9 +8,11 @@ An explicit Runge-Kutta ODE solver with a new adaptive step size method.
 
 The Python code evolves ordinary differential equations with one of three adaptive stepsize methods:
 
-    RKM  = my adaptive RK
-    ERK  = embedded RK
-    SDRK = step-doubling RK
+| ||
+|:----:|:-------------:|
+| RKM  | new method    |
+| ERK  | embedded      |
+| SDRK | step doubling |
 
 I originally derived the RKM algorithm in one of my papers to solve fluid dynamic equations (see Sec. 3.6 for the derivation)
 
@@ -21,10 +23,10 @@ This repository is currently under development, but you can run `test.py` to gen
 
 ## Runge-Kutta methods
 
-A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` and `embedded`. These are the methods I have gathered so far:
+A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` for RKM and SDRK, and `embedded` for ERK. These are the methods I have gathered so far:
    
 <table>
-<tr><td>
+<tr valign="top"><td>
 
 |      Standard       |      |
 |:-------------------:|:----:|
@@ -49,7 +51,7 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 | Feagin 10           | F10  |
 | Feagin 14           | F14  |
 
-</td><td>
+</td><td valign="top">
 
 |      Embedded         |      |
 |:---------------------:|:----:|
