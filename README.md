@@ -23,7 +23,7 @@ This repository is currently under development, but you can run `test.py` to gen
 
 ## Runge-Kutta methods
 
-A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized into two sub-categories: `standard` for RKM and SDRK, and `embedded` for ERK. These are the methods I have gathered so far:
+A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized in two categories: `standard` for RKM and SDRK, and `embedded` for ERK.
    
 <table>
 <tr valign="top"><td>
