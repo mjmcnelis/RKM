@@ -70,7 +70,7 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 
 </td></tr> </table>
 
-Note: in the `standard` category, the original embedded schemes have their secondary method removed (along with extraneous stages)
+Note: in the `standard` category, the original embedded schemes have their secondary method removed (along with extraneous stages)\
 Note: Feagin's 10th and 14th order tables are not yet ready for high precision runs. 
     
     
