@@ -56,8 +56,8 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 
 |      Embedded         |      |
 |:---------------------:|:----:|
-| Heun Euler 2(1)       | HE21 |
 | Fehlberg 1(2)         | F12  |
+| Heun Euler 2(1)       | HE21 |
 | Bogacki Shampine 3(2) | BS32 |
 | Fehlberg 4(5)         | F45  |
 | Cash Karp 5(4)        | CK54 |
