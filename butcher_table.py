@@ -11,7 +11,9 @@ myfloat = type(precision(1))
 #------------------------------------------------------------------------------------------
 # todo: make a dictionary of methods to warn users if their method is not listed
 
-# todo: fix up feagin (copy/paste from juptyer didn't go well)
+# todo: write a debugging algorithm that checks sum_j a_{ij} = c_i and sum_i b_i = 1 within numerical precision (1.e-15)
+
+# todo: fix up feagin, remove tabs (it's a mess if you use word wrap) and use high-precision decimal values
 # todo: try using decimal for high-order methods, https://zetcode.com/python/decimal/
 # todo: add more of verner methods, http://www.mymathlib.com/diffeq/embedded_runge_kutta/embedded_verner_5_6.html
 
@@ -131,6 +133,20 @@ butcher_6 = np.array([
                 [1/6, -1/360, -11/36, -1/8, 1/2, 1/10, 0, 0],
                 [1, -41/260, 22/13, 43/156, -118/39, 32/195, 80/39, 0],
                 [0, 13/200, 0, 11/40, 11/40, 4/25, 4/25, 13/200]], dtype = myfloat)
+
+fehlberg_7 = np.array([
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [2/27, 2/27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/9, 1/36, 1/12, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/6, 1/24, 0, 1/8, 0, 0, 0, 0, 0, 0, 0, 0],
+                [5/12, 5/12, 0, -25/16, 25/16, 0, 0, 0, 0, 0, 0, 0],
+                [1/2, 1/20, 0, 0, 1/4, 1/5, 0, 0, 0, 0, 0, 0],
+                [5/6, -25/108, 0, 0, 125/108, -65/27, 125/54, 0, 0, 0, 0, 0],
+                [1/6, 31/300, 0, 0, 0, 61/225, -2/9, 13/900, 0, 0, 0, 0],
+                [2/3, 2, 0, 0, -53/6, 704/45, -107/9, 67/90, 3, 0, 0, 0],
+                [1/3, -91/108, 0, 0, 23/108, -976/135, 311/54, -19/60, 17/6, -1/12, 0, 0],
+                [1, 2383/4100, 0, 0, -341/164, 4496/1025, -301/82, 2133/4100, 45/82, 45/164, 18/41, 0],
+                [0, 41/840, 0, 0, 0, 0, 34/105, 9/35, 9/35, 9/280, 9/280, 41/840]], dtype = myfloat)
 
 dormand_prince_8 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -274,6 +290,23 @@ verner_5_6 = np.array([
                 [0, 3/80, 0, 4/25, 243/1120, 77/160, 73/700, 0, 0],
                 [0, 57/640, 0, -16/65, 1377/2240, 121/320, 0, 891/8320, 2/35]], dtype = myfloat)
 
+fehlberg_7_8 = np.array([
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [2/27, 2/27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/9, 1/36, 1/12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/6, 1/24, 0, 1/8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [5/12, 5/12, 0, -25/16, 25/16, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/2, 1/20, 0, 0, 1/4, 1/5, 0, 0, 0, 0, 0, 0, 0, 0],
+                [5/6, -25/108, 0, 0, 125/108, -65/27, 125/54, 0, 0, 0, 0, 0, 0, 0],
+                [1/6, 31/300, 0, 0, 0, 61/225, -2/9, 13/900, 0, 0, 0, 0, 0, 0],
+                [2/3, 2, 0, 0, -53/6, 704/45, -107/9, 67/90, 3, 0, 0, 0, 0, 0],
+                [1/3, -91/108, 0, 0, 23/108, -976/135, 311/54, -19/60, 17/6, -1/12, 0, 0, 0, 0],
+                [1, 2383/4100, 0, 0, -341/164, 4496/1025, -301/82, 2133/4100, 45/82, 45/164, 18/41, 0, 0, 0],
+                [0, 3/205, 0, 0, 0, 0, -6/41, -3/205, -3/41, 3/41, 6/41, 0, 0, 0],
+                [1, -1777/4100, 0, 0, -341/164, 4496/1025, -289/82, 2193/4100, 51/82, 33/164, 12/41, 0, 1, 0],
+                [0, 41/840, 0, 0, 0, 0, 34/105, 9/35, 9/35, 9/280, 9/280, 41/840, 0, 0],
+                [0, 0, 0, 0, 0, 0, 34/105, 9/35, 9/35, 9/280, 9/280, 0, 41/840, 41/840]], dtype = myfloat)
+
 dormand_prince_8_7 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1/18, 1/18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -356,13 +389,14 @@ feagin_14_12 = np.array([
 
 # list of methods
 # note: order of method is conveniently attached to file name
-                                                                                        #   order   |   pseudonym
+                                                                                        #   order   |   label
 method_standard = ['euler_1',                                                           #   1       |   E1
                    'heun_2', 'midpoint_2', 'ralston_2',                                 #   2       |   H2, M2, R2
                    'heun_3', 'ralston_3', 'runge_kutta_3',                              #   3       |   H3, R3, RK3
                    'runge_kutta_4', 'three_eights_rule_4', 'fehlberg_4',                #   4       |   RK4, TER4, F4
                    'butcher_5', 'cash_karp_5', 'dormand_prince_5', 'verner_5',          #   5       |   B5, CK5, DP5, V5
                    'butcher_6',                                                         #   6       |   B6
+                   'fehlberg_7',                                                        #   7       |   F7
                    'dormand_prince_8',                                                  #   8       |   DP8
                    'feagin_10',                                                         #   10      |   F10
                    'feagin_14']                                                         #   14      |   F14
@@ -373,24 +407,27 @@ table_standard = [euler_1,                                                      
                   runge_kutta_4, three_eights_rule_4, fehlberg_4,
                   butcher_5, cash_karp_5, dormand_prince_5, verner_5,
                   butcher_6,
+                  fehlberg_7,
                   dormand_prince_8,
                   feagin_10,
                   feagin_14]
-                                                                                        #   order   |   pseudonym
+                                                                                        #   order   |   label
 method_embedded = ['fehlberg_1_2',                                                      #   1(2)    |   F1(2)
-                   'heun_euler_2_1',                                                    #   2(1)    |   HE2(1)
-                   'bogacki_shampine_3_2',                                              #   3(2)    |   BS3(2)
-                   'fehlberg_4_5',                                                      #   4(5)    |   F4(5)
-                   'cash_karp_5_4', 'dormand_prince_5_4', 'verner_5_6',                 #   5(4,6)  |   CK5(4), DP5(4), V5(6)
-                   'dormand_prince_8_7',                                                #   8(7)    |   DP8(7)
-                   'feagin_10_8',                                                       #   10(8)   |   F10(8)
-                   'feagin_14_12']                                                      #   14(12)  |   F14(12)
+                   'heun_euler_2_1',                                                    #   2(1)    |   HE21
+                   'bogacki_shampine_3_2',                                              #   3(2)    |   BS32
+                   'fehlberg_4_5',                                                      #   4(5)    |   F45
+                   'cash_karp_5_4', 'dormand_prince_5_4', 'verner_5_6',                 #   5(4,6)  |   CK54, DP54, V56   (is Verner 56 or 65?)
+                   'fehlberg_7_8',                                                      #   7(8)    |   F78
+                   'dormand_prince_8_7',                                                #   8(7)    |   DP87
+                   'feagin_10_8',                                                       #   10(8)   |   F108
+                   'feagin_14_12']                                                      #   14(12)  |   F1412
 
 table_embedded = [fehlberg_1_2,
                   heun_euler_2_1,                                                       # note: double-check list before writing to file
                   bogacki_shampine_3_2,
                   fehlberg_4_5,
                   cash_karp_5_4, dormand_prince_5_4, verner_5_6,
+                  fehlberg_7_8,
                   dormand_prince_8_7,
                   feagin_10_8,
                   feagin_14_12]
