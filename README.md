@@ -46,6 +46,7 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 | Dormand Prince 5    | DP5  |
 | Verner 5            | V5   |
 | Butcher 6           | B6   |
+| Fehlberg 7          | F7   |
 | Shanks 8            | S8   |
 | Dormand Prince 8    | DP8  |
 | Feagin 10           | F10  |
@@ -62,6 +63,7 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 | Cash Karp 5(4)        | CK54 |
 | Dormand Prince 5(4)   | DP54 |
 | Verner 5(6)           | V56  |
+| Fehlberg 7(8)         | F78  |
 | Dormand Prince 8(7)   | DP87 |
 | Feagin 10(8)          | F108 |
 | Feagin 14(12)         | F1412|
