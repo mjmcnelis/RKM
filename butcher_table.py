@@ -447,8 +447,47 @@ feagin_14_12 = np.array([
 
 
 
+methods_dict = {'euler_1':              'E1',
+                'heun_2':               'H2',
+                'midpoint_2':           'M2',
+                'ralston_2':            'R2',
+                'heun_3':               'H3',
+                'ralston_3':            'R3',
+                'runge_kutta_3':        'RK3',
+                'runge_kutta_4':        'RK4',
+                'three_eights_rule_4':  'TER4',
+                'ralston_4':            'R4',
+                'fehlberg_4':           'F4',
+                'butcher_5':            'B5',
+                'cash_karp_5':          'CK5',
+                'dormand_prince_5':     'DP5',
+                'verner_5':             'V5',
+                'butcher_6':            'B6',
+                'verner_6':             'V6',
+                'fehlberg_7':           'F7',
+                'shanks_8':             'S8',
+                'dormand_prince_8':     'DP8',
+                'feagin_10':            'F10',
+                'feagin_14':            'F14',
+                #
+                'fehlberg_1_2':         'F12',
+                'heun_euler_2_1':       'HE21',
+                'bogacki_shampine_3_2': 'BS32',
+                'fehlberg_4_5':         'F45',
+                'cash_karp_5_4':        'CK54',
+                'dormand_prince_5_4':   'DP54',
+                'verner_5_6':           'V56',
+                'verner_6_5':           'V65',
+                'fehlberg_7_8':         'F78',
+                'dormand_prince_8_7':   'DP87',
+                'feagin_10_8':          'F108',
+                'feagin_14_12':         'F1412'}
+
+
 # list of methods
 # note: order of method is conveniently attached to file name
+
+# todo: I can probably reorganize this into the dict
                                                                                         #   order   |   label
 method_standard = ['euler_1',                                                           #   1       |   E1
                    'heun_2', 'midpoint_2', 'ralston_2',                                 #   2       |   H2, M2, R2
@@ -515,27 +554,33 @@ def debug_table(method, butcher):
 
 # write butcher tables to file:
 
-for i in range(0, len(method_standard)):
+def main():
+        for i in range(0, len(method_standard)):
+                method = method_standard[i]
+                table = table_standard[i]
 
-    method = method_standard[i]
-    table = table_standard[i]
+                print(method)
+                debug_table(method, table)
 
-    print(method)
-    debug_table(method, table)
+                np.savetxt('butcher_tables/standard/' + method + '.dat', table)
 
-    np.savetxt('butcher_tables/standard/' + method + '.dat', table)
+        print('\n')
 
-print('\n')
+        for i in range(0, len(method_embedded)):
 
-for i in range(0, len(method_embedded)):
+            method = method_embedded[i]
+            table = table_embedded[i]
 
-    method = method_embedded[i]
-    table = table_embedded[i]
+            print(method)
+            debug_table(method, table)
 
-    print(method)
-    debug_table(method, table)
+            np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
 
-    np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
+
+if __name__ == "__main__":
+    main()
+
+
 
 
 

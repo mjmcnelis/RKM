@@ -17,14 +17,14 @@ The Python code evolves ordinary differential equations with one of three adapti
 The RKM algorithm was first used in one of my papers to solve fluid dynamic equations (see Sec. 3.6 for the derivation)
 
     M. McNelis, D. Bazow and U. Heinz, arXiv:2101.02827 (2021)
-    
-This repository is currently under development, but you can run `test.py` to generate an example plot. 
+
+This repository is currently under development, but you can run `test_plot.py` to generate an example plot.
 
 
 ## Runge-Kutta methods
 
 A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized in two categories: `standard` for RKM and SDRK, and `embedded` for ERK.
-   
+
 <table>
 <tr valign="top"><td>
 
@@ -71,7 +71,7 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 </td></tr> </table>
 
 Note: the embedded schemes in `standard` have their secondary method removed (along with extraneous stages)\
-Note: Feagin's 10th and 14th order tables are not yet ready for high precision runs. 
-    
-    
-    
+Note: Feagin's 10th and 14th order tables are not yet ready for high precision runs.
+
+
+

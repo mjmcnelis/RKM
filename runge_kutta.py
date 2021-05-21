@@ -10,21 +10,6 @@ import exact_solution
 solution = exact_solution.solution
 
 
-# todo: move this elsewhere
-from collections import OrderedDict
-colors = OrderedDict([
-    ('blue', '#4e79a7'),
-    ('orange', '#f28e2b'),
-    ('green', '#59a14f'),
-    ('red', '#e15759'),
-    ('cyan', '#76b7b2'),
-    ('purple', '#b07aa1'),
-    ('brown', '#9c755f'),
-    ('yellow', '#edc948'),
-    ('pink', '#ff9da7'),
-    ('gray', '#bab0ac')
-])
-
 
 
 # standard RK step

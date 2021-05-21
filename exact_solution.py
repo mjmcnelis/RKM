@@ -6,10 +6,11 @@ from scipy import integrate
 
 myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
-solution = 'logistic'                               # solution type
+solution = 'sine'                                   # solution type
 
+A = 50                                              # for sin(At) solution
+cycles = 50
 
-A = 5                                               # for sin(At) solution
 
 # exact solution
 def y_exact(t, solution):
@@ -21,8 +22,7 @@ def y_exact(t, solution):
         return np.array([1/(t + 10.01)], dtype = myfloat).reshape(-1,1)
     elif solution is 'sine':
         return np.array([math.sin(A*t), A*math.cos(A*t)], dtype = myfloat).reshape(-1,1)
-    else:
-        # default is exponential
+    elif solution is 'exponential':
         return np.array([math.exp(10*t)], dtype = myfloat).reshape(-1,1)
 
 
@@ -36,8 +36,16 @@ def y_prime(t, y, solution):
         return -y**2
     elif solution is 'sine':
         return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
-    else:
+    elif solution is 'exponential':
         return 10*y
+
+
+
+solution_dict = {'gaussian':        r"$y^{'} = -2ty$",
+                 'logistic':        r"$y^{'} = (y + \frac{1}{2})(\frac{1}{2} - y)$",
+                 'inverse_power':   r"$y^{'} = -y^2$",
+                 'sine':            r"$y^{''} = -%s^{2}y$" % A,
+                 'exponential':     r"$y^{'} = 10y$"}
 
 
 # todo: move to exact solution

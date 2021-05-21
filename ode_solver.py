@@ -3,14 +3,13 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import exact_solution
 from precision import precision     # for myfloat
 import runge_kutta
 from exact_solution import y_prime  # todo: pass y_prime instead
-import exact_solution
+import exact_solution as exact
 
 myfloat = type(precision(1))
-solution = exact_solution.solution
+solution = exact.solution
 
 
 
@@ -70,7 +69,7 @@ def rescale_epsilon(eps, solver, order):
 
 
 # todo: axe return steps (don't really need it)
-def ode_solver(y0, t0, tf, dt0, solver, method, eps = 1.e-8, n_max = 10000):
+def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max = 10000):
 
     # y0     = initial solution
     # t0     = initial time
@@ -146,5 +145,34 @@ def ode_solver(y0, t0, tf, dt0, solver, method, eps = 1.e-8, n_max = 10000):
 
 
 
+
+
+# compute average error vs function evaluations
+def method_efficiency(y0, t0, tf, dt0, solver, method, eps_array, error_type, norm = None, average = True, high = 1.5, n_max = 10000):
+
+    error_array = np.zeros(len(eps_array)).reshape(-1,1)
+    evaluations_array = np.zeros(len(eps_array)).reshape(-1,1)
+
+    print('Testing efficiency of %s %s' % (solver, method))
+
+    for i in range(0, len(eps_array)):
+
+        eps = eps_array[i]
+
+        y, t, dt, evaluations, finish = ode_solver(y0, t0, tf, dt0, solver, method, norm = norm, eps = eps, n_max = n_max)
+
+        error = exact.compute_error_of_exact_solution(t, y, solution, error_type = error_type, average = average, norm = norm)
+
+        if finish:
+            print('eps =', '{:.1e}'.format(eps), 'finished')
+        else:
+            print('eps =', '{:.1e}'.format(eps), 'did not finish')
+
+        error_array[i] = error
+        evaluations_array[i] = evaluations
+
+    print('done\n')
+
+    return error_array, evaluations_array
 
 
