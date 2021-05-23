@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from ode_solver import ode_solver
+import runge_kutta
 import butcher_table
 import precision
 import exact_solution                           # for solution
@@ -36,14 +37,14 @@ else:
     norm = None
 
 y0 = exact_solution.y_exact(t0, solution)       # todo: replace with own solution
-dt0 = 0.01
+dt0 = runge_kutta.dt_MAX
 
-solver = 'RKM'
+solver = 'ERK'
 
 if solver is 'RKM' or solver is 'SDRK':
     method = 'dormand_prince_8'
 else:
-    method = 'dormand_prince_8_7'
+    method = 'verner_6_5'
 
 y, t, dt, evaluations, finish = ode_solver(y0, t0, tf, dt0, solver, method, norm = norm)
 

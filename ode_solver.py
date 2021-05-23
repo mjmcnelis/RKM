@@ -84,6 +84,7 @@ def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max 
     y = y0                                                      # set initial conditions
     t = t0
     dt = dt0
+    # dt = runge_kutta.estimate_first_step_size(y, t, solver, method, norm = norm) # this didn't work well
 
     y_prev = y0                                                 # for RKM
     dt_next = dt                                                # for ERK/SDRK
@@ -106,29 +107,41 @@ def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max 
         y_array = np.append(y_array, y).reshape(-1, y.shape[0]) # append arrays
         t_array = np.append(t_array, t)
 
+
         # RKM
         if solver is 'RKM':
             tries = 1
 
             if n == 0:
+                 # if dt = dt_max, should I take dt or dt_next from SD?
                 method_SD = 'euler_1'                            # estimate first dt w/ step-doubling
-                butcher_SD = get_butcher_table(solver, method_SD)
-                y_SD, dt, dt_next, tries_SD = runge_kutta.SDRK_step(y, t, dt_next, method_SD, butcher_SD, eps = eps/2)
+                butcher_SD = get_butcher_table('SDRK', method_SD)
+                # y_SD, dt, dt_next, tries_SD = runge_kutta.SDRK_step(y, t, dt_next, method_SD, butcher_SD, eps = eps/2)
+                dt_next, tries_SD = runge_kutta.estimate_step_size(y, t, method_SD, butcher_SD, eps = eps/2, norm = norm)
                 evaluations += 2 * tries_SD
+
+                print('RKM: dt = %.2g after %d attempts at n = 0' % (dt_next, tries_SD))
 
                 dt = dt_next                                    # then use standard RK
                 dy1 = dt * y_prime(t, y, solution)
                 y = runge_kutta.RK_standard(y, dy1, t, dt, method, butcher)
             else:
-                y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps)
+                y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps, norm = norm)
 
         # embedded
         elif solver is 'ERK':
-            y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps)
+            y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
+
+            if tries > 1:
+                print('ERK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
 
         # step-doubling
         elif solver is 'SDRK':
-            y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps)
+            y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
+
+            if tries > 1:
+                print('SDRK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
+
 
         dt_array = np.append(dt_array, dt)
 

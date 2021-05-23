@@ -25,7 +25,7 @@ myfloat = type(precision(1))
 # https://pypi.org/project/desolver/
 # https://github.com/Microno95/desolver/blob/fd1b6a2813fc0b4c792dac05b5e1cb4a1f90b458/desolver/integrators/explicit_integration_schemes.py
 
-# note: ralston_4 and shanks_8 were already hard-coded with decimal values
+# note: shanks_(8-10) was hard-coded with decimal values
 #------------------------------------------------------------------------------------------
 
 
@@ -75,6 +75,12 @@ runge_kutta_3 = np.array([
                 [1, -1, 2, 0],
                 [1, 1/6, 2/3, 1/6]], dtype = myfloat)
 
+ralston_4 = np.array([
+                [0, 0, 0, 0, 0],
+                [0.4, 0.4, 0, 0, 0],
+                [0.4557372542187894, 0.2969776092477536, 0.15875964497103556, 0, 0],
+                [1, 0.21810038822592054, -3.050965148692931, 3.8328647604670123, 0],
+                [1, 0.1747602822626904, -0.551480662878733, 1.2055355993965235, 0.17118478121951902]], dtype = myfloat)
 
 runge_kutta_4 = np.array([
                 [0, 0, 0, 0, 0],
@@ -454,9 +460,9 @@ methods_dict = {'euler_1':              'E1',
                 'heun_3':               'H3',
                 'ralston_3':            'R3',
                 'runge_kutta_3':        'RK3',
+                'ralston_4':            'R4',
                 'runge_kutta_4':        'RK4',
                 'three_eights_rule_4':  'TER4',
-                'ralston_4':            'R4',
                 'fehlberg_4':           'F4',
                 'butcher_5':            'B5',
                 'cash_karp_5':          'CK5',
@@ -492,7 +498,7 @@ methods_dict = {'euler_1':              'E1',
 method_standard = ['euler_1',                                                           #   1       |   E1
                    'heun_2', 'midpoint_2', 'ralston_2',                                 #   2       |   H2, M2, R2
                    'heun_3', 'ralston_3', 'runge_kutta_3',                              #   3       |   H3, R3, RK3
-                   'runge_kutta_4', 'three_eights_rule_4', 'fehlberg_4',                #   4       |   RK4, TER4, F4
+                   'ralston_4', 'runge_kutta_4', 'three_eights_rule_4', 'fehlberg_4',   #   4       |   R4, RK4, TER4, F4
                    'butcher_5', 'cash_karp_5', 'dormand_prince_5', 'verner_5',          #   5       |   B5, CK5, DP5, V5
                    'butcher_6', 'verner_6',                                             #   6       |   B6, V6
                    'fehlberg_7',                                                        #   7       |   F7
@@ -503,7 +509,7 @@ method_standard = ['euler_1',                                                   
 table_standard = [euler_1,                                                              # note: double-check list before writing to file
                   heun_2, midpoint_2, ralston_2,
                   heun_3, ralston_3, runge_kutta_3,
-                  runge_kutta_4, three_eights_rule_4, fehlberg_4,
+                  ralston_4, runge_kutta_4, three_eights_rule_4, fehlberg_4,
                   butcher_5, cash_karp_5, dormand_prince_5, verner_5,
                   butcher_6, verner_6,
                   fehlberg_7,
@@ -543,11 +549,9 @@ def debug_table(method, butcher):
     first_column = butcher[:,0]                                         # get the first column
     reduce_block = np.sum(butcher[:,1:], axis = 1)                      # for each row, sum the remaining columns
 
-    eps = 1.e-14
-
     error = np.linalg.norm(reduce_block - first_column, ord = np.inf)   # take the max error element
 
-    if error > eps:
+    if error > 1.e-14:
         print('\ndebug_table warning:', method, 'table does not satisfy usual conditions, error = %.3e (debug table)\n' % error)
 
 

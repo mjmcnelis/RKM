@@ -10,6 +10,12 @@ import exact_solution
 solution = exact_solution.solution
 
 
+# todo: any way to put a macro on flags?
+
+dt_MIN = 1.e-6
+dt_MAX = 1
+LOW = 0.2
+
 
 
 # standard RK step
@@ -57,7 +63,7 @@ def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
 
 
 # my adaptive RK step
-def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.25):
+def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.25):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
@@ -78,7 +84,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
     f = y_prime(t, y, solution)                             # for first intermediate Euler step
 
     if adaptive:
-        y_star = y + f*dt_prev                              # compute y_star and approximate C
+        y_star = y + dt_prev*f                              # compute y_star and approximate C
 
         C_norm = 2 * np.linalg.norm(y_star - 2*y + y_prev, ord = norm) / dt_prev**2
         y_norm = np.linalg.norm(y, ord = norm)
@@ -95,6 +101,9 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
             dt = min(high*dt_prev, max(low*dt_prev, dt))    # control rate of change
 
         dt = min(dt_max, max(dt_min, dt))                   # impose dt_min <= dt <= dt_max
+
+        if dt == dt_min or dt == dt_max:
+            print('RKM_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
     else:
         dt = dt_prev
 
@@ -107,7 +116,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
 
 
 # embedded RK step
-def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
+def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.5, S = 0.9, max_attempts = 100):
 
     # y0           = current solution y_n
     # t            = current time t_n
@@ -126,6 +135,10 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-
 
     for i in range(0, max_attempts):
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
+
+        if (dt == dt_min or dt == dt_max) and rescale < 1:
+            print('ERK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+
         dy1 = dt * y_prime(t, y0, solution)
 
         # propose updated solution (secondary, primary)
@@ -145,18 +158,25 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-
 
         if error_norm <= tolerance:                         # check if attempt succeeded
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
+
+            if dt_next == dt_min or dt_next == dt_max:
+                print('ERK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+
             return y, dt, dt_next, i + 1                    # updated solution, current step size, next step size, number of attempts
         else:
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 
+    if dt_next == dt_min or dt_next == dt_max:
+                print('ERK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+
     return y, dt, dt_next, i + 1                            # return last attempt
 
 
 
 # step doubling RK step
-def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e-6, dt_max = 1, low = 0.5, high = 1.5, S = 0.9, max_attempts = 100):
+def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.5, S = 0.9, max_attempts = 100):
 
     # note: routine is very similar to ERK_step() above
 
@@ -168,6 +188,9 @@ def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e
     for i in range(0, max_attempts):
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
+
+        if (dt == dt_min or dt == dt_max) and rescale < 1:
+            print('SDRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
         # full RK step
         dy1 = dt * y_prime(t, y0, solution)
@@ -196,13 +219,125 @@ def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = 1.e
 
         if error_norm <= tolerance:                         # check if attempt succeeded
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
+
+            if dt_next == dt_min or dt_next == dt_max:
+                print('SDRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+
             return y, dt, dt_next, i + 1                    # updated solution, current step size, next step size, number of attempts
         else:
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 
+    if dt_next == dt_min or dt_next == dt_max:
+        print('SDRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+
     return y, dt, dt_next, i + 1                            # return last attempt
+
+
+
+
+
+
+
+
+def estimate_step_size(y0, t, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = 0.5, high = 10, max_attempts = 100):
+
+    dt = dt_min
+    dt_prev = dt
+
+    order = int(method.split('_')[-1])                      # get order of method
+    power = 1 / (1 + order)
+
+    rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
+
+    for i in range(0, max_attempts):
+
+        dt = min(dt_max, max(dt_min, dt*rescale))           # increase step size for next attempt
+
+        # full RK step
+        dy1 = dt * y_prime(t, y0, solution)
+        y1 = RK_standard(y0, dy1, t, dt, method, butcher, embedded = False)
+
+        # two half RK steps
+        y_mid = RK_standard(y0, dy1/2, t, dt/2, method, butcher, embedded = False)
+        t_mid = t + dt/2
+        dy1_mid = (dt/2) * y_prime(t_mid, y_mid, solution)
+        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, method, butcher, embedded = False)
+
+        error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
+        y = y2 + error                                      # propose updated solution (Richardson extrapolation)
+
+        error_norm = np.linalg.norm(error, ord = norm)      # error norm
+        y_norm = np.linalg.norm(y, ord = norm)
+        dy_norm = np.linalg.norm(y - y0, ord = norm)
+
+        tolerance = eps * max(y_norm, dy_norm)              # compute tolerance
+
+        if error_norm == 0:
+            rescale = high                                  # prevent division by 0
+        else:
+            rescale = (tolerance / error_norm)**power       # scaling factor
+            rescale = min(high, max(low, rescale))
+
+        if error_norm >= tolerance or dt >= dt_max:         # check if attempt succeeded
+            break
+        else:
+            rescale = max(1.1, rescale)
+
+        dt_prev = dt
+
+    return dt_prev, i+1
+
+
+
+def estimate_first_step_size(y_0, t_0, solver, method, norm = None):
+
+    # borrowed this algorithm from Hairer book (didn't work for Gaussian)
+
+    if solver is 'ERK':                                     # get order of method
+        order = int(method.split('_')[-2])
+    else:
+        order = int(method.split('_')[-1])
+
+    power = 1 / (1 + order)
+
+    f_0 = y_prime(t_0, y_0, solution)
+
+    d_0 = np.linalg.norm(y_0, ord = norm)
+    d_1 = np.linalg.norm(f_0, ord = norm)
+
+    if d_0 < 1.e-5 or d_1 < 1.e-5:                            # first guess for dt
+        dt_0 = 1.e-6
+    else:
+        dt_0 = 0.01 * d_0 / d_1
+
+    y_1 = y_0  +  dt_0 * f_0                                        # computer intermediate Euler step
+
+    f_1 = y_prime(t_0 + dt_0, y_1, solution)
+
+    d_2 = np.linalg.norm(f_1 - f_0, ord = norm) / dt_0          # estimate for 2nd derivative
+
+    if max(d_1, d_2) <= 1.e-15:
+        dt_1 = max(1.e-6, d_0/1000)
+    else:
+        dt_1 = (0.01 / max(d_1, d_2))**power
+
+    dt = min(100 * dt_0, dt_1)                                # estimate for first dt
+
+    return dt
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
