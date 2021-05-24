@@ -24,12 +24,26 @@ runge_kutta_3 = np.array([
                 [1, -1, 2, 0],
                 [1, 1/6, 2/3, 1/6]], dtype = myfloat)
 
-# strong stability preserving
+
+# ssp = strong stability preserving
 ssp_runge_kutta_3 = np.array([
                 [0, 0, 0, 0],
                 [1, 1, 0, 0],
                 [1/2, 1/4, 1/4, 0],
                 [1, 1/6, 1/6, 2/3]], dtype = myfloat)
+
+ssp_runge_kutta_4 = np.array([
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/6, 1/6, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/3, 1/6, 1/6, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1/2, 1/6, 1/6, 1/6, 0, 0, 0, 0, 0, 0, 0],
+                [2/3, 1/6, 1/6, 1/6, 1/6, 0, 0, 0, 0, 0, 0],
+                [1/3, 1/15, 1/15, 1/15, 1/15, 1/15, 0, 0, 0, 0, 0],
+                [1/2, 1/15, 1/15, 1/15, 1/15, 1/15, 1/6, 0, 0, 0, 0],
+                [2/3, 1/15, 1/15, 1/15, 1/15, 1/15, 1/6, 1/6, 0, 0, 0],
+                [5/6, 1/15, 1/15, 1/15, 1/15, 1/15, 1/6, 1/6, 1/6, 0, 0],
+                [1, 1/15, 1/15, 1/15, 1/15, 1/15, 1/6, 1/6, 1/6, 1/6, 0],
+                [1, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10]], dtype = myfloat)
 
 three_eights_rule_4 = np.array([
                 [0, 0, 0, 0, 0],
@@ -90,6 +104,7 @@ verner_5_6 = np.array([
 standard_other = {'ralston_2':            [ralston_2,            'R2'],
                   'runge_kutta_3':        [runge_kutta_3,        'RK3'],
                   'ssp_runge_kutta_3':    [ssp_runge_kutta_3,    'SSPRK3'],
+                  'ssp_runge_kutta_4':    [ssp_runge_kutta_4,    'SSPRK4'],
                   'three_eights_rule_4':  [three_eights_rule_4,  'TER4'],
                   'verner_5':             [verner_5,             'V5'],
                   'shanks_pseudo_8':      [shanks_pseudo_8,      'SP8']}
