@@ -31,6 +31,10 @@ if solution is 'sine':                          # set initial conditions
     t0 = 0
     tf = 2*math.pi/A * cycles
     norm = 1
+elif solution is 'inverse_power':
+    t0 = 0.01
+    tf = 10
+    norm = None
 else:
     t0 = -10
     tf = 10
@@ -39,12 +43,12 @@ else:
 y0 = exact_solution.y_exact(t0, solution)       # todo: replace with own solution
 dt0 = runge_kutta.dt_MAX
 
-solver = 'ERK'
+solver = 'RKM'
 
 if solver is 'RKM' or solver is 'SDRK':
     method = 'dormand_prince_8'
 else:
-    method = 'verner_6_5'
+    method = 'dormand_prince_8_7'
 
 y, t, dt, evaluations, finish = ode_solver(y0, t0, tf, dt0, solver, method, norm = norm)
 

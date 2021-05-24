@@ -24,6 +24,9 @@ if solution is 'sine':                          # set initial conditions
     cycles = exact_solution.cycles
     t0 = 0
     tf = 2*math.pi/A * cycles
+elif solution is 'inverse_power':
+    t0 = 0.0001
+    tf = 10
 else:
     t0 = -10
     tf = 10
@@ -47,8 +50,15 @@ elif solution is 'logistic':
     norm = None
     average = True
     error_type = 'absolute'
-    error_label = 'max absolute error'
+    error_label = 'average absolute error'
     evals_min = 1.e+2
+
+elif solution is 'inverse_power':
+    norm = None
+    average = True
+    error_type = 'relative'
+    error_label = 'average relative error'
+    evals_min = 1.e+3
 
 elif solution is 'sine':
     norm = 1
@@ -80,6 +90,9 @@ if order == 0 or order == 2:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-6.5, -14., -1)
         eps_2 = 4 * 10**np.arange(-4.9, -10., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-4.25, -9.25, -1)
+        eps_2 = 4 * 10**np.arange(-3., -7., -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4., -10., -1)
         eps_2 = 4 * 10**np.arange(-4., -7., -1)
@@ -107,6 +120,10 @@ error_RK2_2, evals_RK2_2 = efficiency_RK2_2[:,0], efficiency_RK2_2[:,1]
 method_RK3_1 = 'heun_3'
 method_RK3_2 = 'bogacki_shampine_3_2'
 
+if solution is 'inverse_power':
+    method_RK3_1 = 'ralston_3'
+
+
 if order == 0 or order == 3:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2.2, -11.2, -1)
@@ -114,6 +131,9 @@ if order == 0 or order == 3:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-8., -17., -1)
         eps_2 = 10**np.arange(-6.7, -14., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-2.2, -11.2, -1)
+        eps_2 = 10**np.arange(-2.5, -9.5, -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4.5, -12., -1)
         eps_2 = 10**np.arange(-3.5, -10., -1)
@@ -148,6 +168,9 @@ if order == 0 or order == 4:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-8.5, -20., -1)
         eps_2 = 10**np.arange(-9., -17., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-3., -12., -1)
+        eps_2 = 10**np.arange(-4.5, -13.5, -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4.5, -13., -1)
         eps_2 = 10**np.arange(-5.5, -15., -1)
@@ -178,6 +201,9 @@ error_RK4_2, evals_RK4_2 = efficiency_RK4_2[:,0], efficiency_RK4_2[:,1]
 method_RK5_1 = 'cash_karp_5'
 method_RK5_2 = 'cash_karp_5_4'
 
+if solution is 'inverse_power':
+    method_RK5_1 = 'butcher_5'
+
 if order == 0 or order == 5:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2.8, -11.8, -0.5)
@@ -185,6 +211,9 @@ if order == 0 or order == 5:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-9.2, -21., -0.5)
         eps_2 = 10**np.arange(-9.5, -15.5, -0.5)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-4., -12., -0.5)
+        eps_2 = 10**np.arange(-5.8, -13., -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-5., -15., -1)
         eps_2 = 10**np.arange(-6.3, -15., -1)
@@ -212,6 +241,9 @@ error_RK5_2, evals_RK5_2 = efficiency_RK5_2[:,0], efficiency_RK5_2[:,1]
 method_RK6_1 = 'verner_6'
 method_RK6_2 = 'verner_6_5'
 
+if solution is 'inverse_power':
+    method_RK6_1 = 'butcher_6'
+
 if order == 0 or order == 6:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2., -12., -0.5)
@@ -219,6 +251,9 @@ if order == 0 or order == 6:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-8.5, -23., -1)
         eps_2 = 10**np.arange(-9.2, -15., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-2., -14., -1)
+        eps_2 = 10**np.arange(-4., -14., -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-5., -13., -1)
         eps_2 = 10**np.arange(-6.4, -13., -1)
@@ -246,6 +281,9 @@ error_RK6_2, evals_RK6_2 = efficiency_RK6_2[:,0], efficiency_RK6_2[:,1]
 method_RK8_1 = 'dormand_prince_8'
 method_RK8_2 = 'dormand_prince_8_7'
 
+if solution is 'inverse_power':
+    method_RK8_1 = 'shanks_8'
+
 if order == 0 or order == 8:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2., -12., -1)
@@ -253,6 +291,9 @@ if order == 0 or order == 8:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-1., -22., -1)
         eps_2 = 10**np.arange(-10., -16., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(0., -15., -1)
+        eps_2 = 10**np.arange(-6., -16., -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4.5, -12., -1)
         eps_2 = 10**np.arange(-8.5, -15.5, -0.5)
@@ -290,6 +331,9 @@ if order == 10:
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-12., -22., -1)
         eps_2 = 10**np.arange(-6., -16., -1)
+    elif solution is 'inverse_power':
+        eps_1 = 10**np.arange(-5., -11., -0.5)
+        eps_2 = 10**np.arange(-8.2, -13.7, -0.5)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-6., -12., -0.5)
         eps_2 = 10**np.arange(-9., -15., -1)

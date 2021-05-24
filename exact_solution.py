@@ -6,9 +6,9 @@ from scipy import integrate
 
 myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
-solution = 'logistic'                                   # solution type
+solution = 'inverse_power'                                   # solution type
 
-A = 100                                             # for sin(At) solution
+A = 100                                             # for sin(At) function
 cycles = 20
 
 B = 0.5                                             # for logistic function
@@ -20,7 +20,7 @@ def y_exact(t, solution):
     elif solution is 'gaussian':
         return np.array([math.exp(-t*t)], dtype = myfloat).reshape(-1,1)
     elif solution is 'inverse_power':
-        return np.array([1/(t + 10.01)], dtype = myfloat).reshape(-1,1)
+        return np.array([1/t**2], dtype = myfloat).reshape(-1,1)
     elif solution is 'sine':
         return np.array([math.sin(A*t), A*math.cos(A*t)], dtype = myfloat).reshape(-1,1)
     elif solution is 'exponential':
@@ -34,7 +34,7 @@ def y_prime(t, y, solution):
     elif solution is 'gaussian':
         return - 2 * t * y
     elif solution is 'inverse_power':
-        return -y**2
+        return -2*(y**1.5)
     elif solution is 'sine':
         return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
     elif solution is 'exponential':
@@ -43,7 +43,7 @@ def y_prime(t, y, solution):
 
 solution_dict = {'gaussian':        r"$y^{'} = -2ty$",
                  'logistic':        r"$y^{'} = (y + \frac{1}{2})(\frac{1}{2} - y)$",
-                 'inverse_power':   r"$y^{'} = -y^2$",
+                 'inverse_power':   r"$y^{'} = -2y^{3/2}$",
                  'sine':            r"$y^{''} = -%s^{2}y$" % A,
                  'exponential':     r"$y^{'} = 10y$"}
 

@@ -12,9 +12,14 @@ solution = exact_solution.solution
 
 # todo: any way to put a macro on flags?
 
-dt_MIN = 1.e-6
+dt_MIN = 1.e-7
 dt_MAX = 1
 LOW = 0.2
+# HIGH = 1.5
+HIGH = 5               # for inverse power
+
+# HIGH_RKM = 1.25
+HIGH_RKM = 4           # for inverse power
 
 
 
@@ -63,7 +68,7 @@ def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
 
 
 # my adaptive RK step
-def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.25):
+def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
@@ -116,7 +121,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
 
 
 # embedded RK step
-def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.5, S = 0.9, max_attempts = 100):
+def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
 
     # y0           = current solution y_n
     # t            = current time t_n
@@ -176,7 +181,7 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_M
 
 
 # step doubling RK step
-def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = 1.5, S = 0.9, max_attempts = 100):
+def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
 
     # note: routine is very similar to ERK_step() above
 
