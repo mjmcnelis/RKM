@@ -1,12 +1,12 @@
 **RKM (c) Mike McNelis**
 
 Created on 4/20/2021 by Mike McNelis\
-Last edited on 5/18/2021 by Mike McNelis
+Last edited on 5/24/2021 by Mike McNelis
 
 ## Summary
 An explicit Runge-Kutta ODE solver with a new adaptive step size method.
 
-The Python code evolves ordinary differential equations with one of three adaptive methods:
+This Python code evolves ordinary differential equations with one of three adaptive methods:
 
 | ||
 |:----:|:-------------:|
