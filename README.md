@@ -33,13 +33,10 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 | Euler 1             | E1   |
 | Heun 2              | H2   |
 | Midpoint 2          | M2   |
-| Ralston 2           | R2   |
 | Heun 3              | H3   |
 | Ralston 3           | R3   |
-| Runge Kutta 3       | RK3  |
 | Ralston 4           | R4   |
 | Runge Kutta 4       | RK4  |
-| 3/8 Rule 4          | TER4 |
 | Fehlberg 4          | F4   |
 | Butcher 5           | B5   |
 | Cash Karp 5         | CK5  |
@@ -56,7 +53,6 @@ A list of Runge-Kutta methods in Butcher tableau notation can be found in `butch
 
 |      Embedded         |      |
 |:---------------------:|:----:|
-| Fehlberg 1(2)         | F12  |
 | Heun Euler 2(1)       | HE21 |
 | Bogacki Shampine 3(2) | BS32 |
 | Fehlberg 4(5)         | F45  |

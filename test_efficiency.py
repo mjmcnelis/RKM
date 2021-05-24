@@ -19,6 +19,12 @@ else:
 
 solution = exact_solution.solution
 
+standard_dict = butcher_table.standard_dict     # combine dictionaries (todo: make a function)
+embedded_dict = butcher_table.embedded_dict
+
+total_dict = standard_dict.copy()
+total_dict.update(embedded_dict)
+
 if solution is 'sine':                          # set initial conditions
     A = exact_solution.A                        # can bring back precision()
     cycles = exact_solution.cycles
@@ -355,23 +361,23 @@ if order == 10:
 
 
 plt.figure(figsize = (5,5))
-plt.plot(evals_RK2_1, error_RK2_1, 'red', label = butcher_table.methods_dict[method_RK2_1], linewidth = 1.5)
-plt.plot(evals_RK2_2, error_RK2_2, 'red', label = butcher_table.methods_dict[method_RK2_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK2_1, error_RK2_1, 'red', label = total_dict[method_RK2_1][1], linewidth = 1.5)
+plt.plot(evals_RK2_2, error_RK2_2, 'red', label = total_dict[method_RK2_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK3_1, error_RK3_1, 'darkorange', label = butcher_table.methods_dict[method_RK3_1], linewidth = 1.5)
-plt.plot(evals_RK3_2, error_RK3_2, 'darkorange', label = butcher_table.methods_dict[method_RK3_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK3_1, error_RK3_1, 'darkorange', label = total_dict[method_RK3_1][1], linewidth = 1.5)
+plt.plot(evals_RK3_2, error_RK3_2, 'darkorange', label = total_dict[method_RK3_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK4_1, error_RK4_1, 'gold', label = butcher_table.methods_dict[method_RK4_1], linewidth = 1.5)
-plt.plot(evals_RK4_2, error_RK4_2, 'gold', label = butcher_table.methods_dict[method_RK4_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK4_1, error_RK4_1, 'gold', label = total_dict[method_RK4_1][1], linewidth = 1.5)
+plt.plot(evals_RK4_2, error_RK4_2, 'gold', label = total_dict[method_RK4_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = butcher_table.methods_dict[method_RK5_1], linewidth = 1.5)
-plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = butcher_table.methods_dict[method_RK5_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = total_dict[method_RK5_1][1], linewidth = 1.5)
+plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = total_dict[method_RK5_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK6_1, error_RK6_1, 'deepskyblue', label = butcher_table.methods_dict[method_RK6_1], linewidth = 1.5)
-plt.plot(evals_RK6_2, error_RK6_2, 'deepskyblue', label = butcher_table.methods_dict[method_RK6_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK6_1, error_RK6_1, 'deepskyblue', label = total_dict[method_RK6_1][1], linewidth = 1.5)
+plt.plot(evals_RK6_2, error_RK6_2, 'deepskyblue', label = total_dict[method_RK6_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK8_1, error_RK8_1, 'blue', label = butcher_table.methods_dict[method_RK8_1], linewidth = 1.5)
-plt.plot(evals_RK8_2, error_RK8_2, 'blue', label = butcher_table.methods_dict[method_RK8_2], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK8_1, error_RK8_1, 'blue', label = total_dict[method_RK8_1][1], linewidth = 1.5)
+plt.plot(evals_RK8_2, error_RK8_2, 'blue', label = total_dict[method_RK8_2][1], linestyle = 'dashed', linewidth = 1.5)
 #
 # plt.plot(evals_RK10_1, error_RK10_1, 'blueviolet', label = butcher_table.methods_dict[method_RK10_1], linewidth = 1.5)
 # plt.plot(evals_RK10_2, error_RK10_2, 'blueviolet', label = butcher_table.methods_dict[method_RK10_2], linestyle = 'dashed', linewidth = 1.5)

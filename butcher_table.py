@@ -8,28 +8,6 @@ myfloat = type(precision(1))
 # this script writes a list of butcher tables to file, which are read in by the ode solver
 
 
-#------------------------------------------------------------------------------------------
-# todo: make a dictionary of methods to warn users if their method is not listed
-
-# todo: write a debugging algorithm that checks sum_j a_{ij} = c_i and sum_i b_i = 1 within numerical precision (1.e-15)
-
-# todo: fix up feagin, remove tabs (it's a mess if you use word wrap) and use high-precision decimal values
-# todo: try using decimal for high-order methods, https://zetcode.com/python/decimal/
-
-# todo: add more methods
-#       http://www.mymathlib.com/diffeq/embedded_runge_kutta/embedded_verner_5_6.html
-#       https://diffeq.sciml.ai/stable/solvers/ode_solve/
-
-# note: feagin's personal web pages are not secure (having a hard time finding decimal values)
-# https://codereview.stackexchange.com/questions/83635/terry-feagins-10th-order-explicit-runge-kutta-method
-# https://pypi.org/project/desolver/
-# https://github.com/Microno95/desolver/blob/fd1b6a2813fc0b4c792dac05b5e1cb4a1f90b458/desolver/integrators/explicit_integration_schemes.py
-
-# note: shanks_(8-10) was hard-coded with decimal values
-#------------------------------------------------------------------------------------------
-
-
-
 # standard RK methods:
 
 euler_1 = np.array([
@@ -49,12 +27,6 @@ midpoint_2 = np.array([
                 [1, 0, 1]], dtype = myfloat)
 
 
-ralston_2 = np.array([
-                [0, 0, 0],
-                [2/3, 2/3, 0],
-                [1, 1/4, 3/4]], dtype = myfloat)
-
-
 heun_3 = np.array([
                 [0, 0, 0, 0],
                 [1/3, 1/3, 0, 0],
@@ -69,12 +41,6 @@ ralston_3 = np.array([
                 [1, 2/9, 1/3, 4/9]], dtype = myfloat)
 
 
-runge_kutta_3 = np.array([
-                [0, 0, 0, 0],
-                [1/2, 1/2, 0, 0],
-                [1, -1, 2, 0],
-                [1, 1/6, 2/3, 1/6]], dtype = myfloat)
-
 ralston_4 = np.array([
                 [0, 0, 0, 0, 0],
                 [0.4, 0.4, 0, 0, 0],
@@ -88,14 +54,6 @@ runge_kutta_4 = np.array([
                 [1/2, 0, 1/2, 0, 0],
                 [1, 0, 0, 1, 0],
                 [1, 1/6, 1/3, 1/3, 1/6]], dtype = myfloat)
-
-
-three_eights_rule_4 = np.array([
-                [0, 0, 0, 0, 0],
-                [1/3, 1/3, 0, 0, 0],
-                [2/3, -1/3, 1, 0, 0],
-                [1, 1, -1, 1, 0],
-                [1, 1/8, 3/8, 3/8, 1/8]], dtype = myfloat)
 
 
 fehlberg_4 = np.array([
@@ -135,16 +93,6 @@ dormand_prince_5 = np.array([
                 [8/9, 19372/6561, -25360/2187, 64448/6561, -212/729, 0, 0],
                 [1, 9017/3168, -355/33, 46732/5247, 49/176, -5103/18656, 0],
                 [1, 35/384, 0, 500/1113, 125/192, -2187/6784, 11/84]], dtype = myfloat)
-
-# from Verner 1978 paper 5(6)
-verner_5 = np.array([
-                [0, 0, 0, 0, 0, 0, 0],
-                [1/18, 1/18, 0, 0, 0, 0, 0],
-                [1/6, -1/12, 1/4, 0, 0, 0, 0],
-                [2/9, -2/81, 4/27, 8/81, 0, 0, 0],
-                [2/3, 40/33, -4/11, -56/11, 54/11, 0, 0],
-                [1, -369/73, 72/73, 5380/219, -12285/584, 2695/1752, 0],
-                [1, 3/80, 0, 4/25, 243/1120, 77/160, 73/700]], dtype = myfloat)
 
 
 butcher_6 = np.array([
@@ -217,6 +165,7 @@ dormand_prince_8 = np.array([
                 [1, 185892177/718116043, 0, 0, -3185094517/667107341, -477755414/1098053517, -703635378/230739211, 5731566787/1027545527, 5232866602/850066563, -4093664535/808688257, 3962137247/1805957418, 65686358/487910083, 0],
                 [1, 13451932/455176623, 0, 0, 0, 0, -808719846/976000145, 1757004468/5645159321, 656045339/265891186, -3867574721/1518517206, 465885868/322736535,  53011238/667516719, 2/45]], dtype=myfloat)
 
+# undo word wrap
 feagin_10 = np.array([
                 [0.,                                           0.,                                           0.,                                          0.,                                            0.,                                          0.,                                           0.,                                            0.,                                            0.,                                            0.,                                           0.,                                             0.,                                             0.,                                            0.,                                           0.,                                            0.,                                           0.,       0.],
                 [1./10.,                                       1./10.,                                       0.,                                          0.,                                            0.,                                          0.,                                           0.,                                            0.,                                            0.,                                            0.,                                           0.,                                             0.,                                             0.,                                            0.,                                           0.,                                            0.,                                           0.,       0.],
@@ -237,7 +186,7 @@ feagin_10 = np.array([
                 [1./1.,                                        18178130070009528389./100000000000000000000., 27./40.,                                     17137907992359491997./50000000000000000000.,   0.,                                          25911121454832274451./100000000000000000000., -7165579334359041781./20000000000000000000.,   -20918979188176661219./20000000000000000000.,  93032784541562698329./100000000000000000000.,  88975479715854051223./50000000000000000000.,  1./10.,                                         -28254756953904408161./100000000000000000000.,  -15932735011997254917./100000000000000000000., -7275794732350075543./50000000000000000000.,  -25911121454832274451./100000000000000000000., -17137907992359491997./50000000000000000000., -27./40., 0.],
                 [1, 3333333333333333333./100000000000000000000., 1./40., 3333333333333333333./100000000000000000000., 0., 1./20., 0., 1./25., 0., 2365468476861543627./12500000000000000000., 27742918851774317651./100000000000000000000., 27742918851774317651./100000000000000000000., 2365468476861543627./12500000000000000000., -1./25., -1./20., -3333333333333333333./100000000000000000000., -1./40., 3333333333333333333./100000000000000000000.]], dtype = myfloat)
 
-
+# undo word wrap
 feagin_14 = np.array([
                 [0.,                                     0.,                                         0.,                                      0.,                                     0.,                                   0.,                                    0.,                                    0.,                                     0.,                                     0.,                                      0.,                                      0.,                                       0.,                                     0.,                                         0.,                                         0.,                                       0.,                                        0.,                                      0.,                                        0.,                                       0.,                                      0.,                                      0.,                                      0.,                                    0.,                                       0.,                                      0.,                                       0.,                                      0.,                                       0.,                                     0.,                                      0.,                                     0.,        0.,                                    0.,                                      0.],
                 [11111111111111111./100000000000000000., 11111111111111111./100000000000000000.,     0.,                                      0.,                                     0.,                                   0.,                                    0.,                                    0.,                                     0.,                                     0.,                                      0.,                                      0.,                                       0.,                                     0.,                                         0.,                                         0.,                                       0.,                                        0.,                                      0.,                                        0.,                                       0.,                                      0.,                                      0.,                                      0.,                                    0.,                                       0.,                                      0.,                                       0.,                                      0.,                                       0.,                                     0.,                                      0.,                                     0.,        0.,                                    0.,                                      0.],
@@ -280,18 +229,12 @@ feagin_14 = np.array([
 
 # embedded RK methods:
 
-fehlberg_1_2 = np.array([
-                [0, 0, 0, 0],
-                [1/2, 1/2, 0, 0],
-                [1, 1/256, 255/256, 0],
-                [1, 1/256, 255/256, 0],
-                [1, 1/512, 255/256, 1/512]], dtype = myfloat)
-
 heun_euler_2_1 = np.array([
                 [0, 0, 0],
                 [1, 1, 0],
                 [1, 1/2, 1/2],
                 [1, 1, 0]], dtype = myfloat)
+
 
 bogacki_shampine_3_2 = np.array([
                 [0, 0, 0, 0, 0],
@@ -300,6 +243,7 @@ bogacki_shampine_3_2 = np.array([
                 [1, 2/9, 1/3, 4/9, 0],
                 [1, 2/9, 1/3, 4/9, 0],
                 [1, 7/24, 1/4, 1/3, 1/8]], dtype = myfloat)
+
 
 fehlberg_4_5 = np.array([
                 [0, 0, 0, 0, 0, 0, 0],
@@ -311,6 +255,7 @@ fehlberg_4_5 = np.array([
                 [1, 25/216, 0, 1408/2565, 2197/4104, -1/5, 0],
                 [1, 16/135, 0, 6656/12825, 28561/56430, -9/50, 2/55]], dtype = myfloat)
 
+
 cash_karp_5_4 = np.array([
                 [0, 0, 0, 0, 0, 0, 0],
                 [1/5, 1/5, 0, 0, 0, 0, 0],
@@ -320,6 +265,7 @@ cash_karp_5_4 = np.array([
                 [7/8, 1631/55296, 175/512, 575/13824, 44275/110592, 253/4096, 0],
                 [1, 37/378, 0, 250/621, 125/594, 0, 512/1771],
                 [1, 2825/27648, 0, 18575/48384, 13525/55296, 277/14336, 1/4]], dtype = myfloat)
+
 
 dormand_prince_5_4 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0],
@@ -332,17 +278,6 @@ dormand_prince_5_4 = np.array([
                 [1, 35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0],
                 [1, 5179/57600, 0, 7571/16695, 393/640, -92097/339200, 187/2100, 1/40]], dtype = myfloat)
 
-verner_5_6 = np.array([
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1/18, 1/18, 0, 0, 0, 0, 0, 0, 0],
-                [1/6, -1/12, 1/4, 0, 0, 0, 0, 0, 0],
-                [2/9, -2/81, 4/27, 8/81, 0, 0, 0, 0, 0],
-                [2/3, 40/33, -4/11, -56/11, 54/11, 0, 0, 0, 0],
-                [1, -369/73, 72/73, 5380/219, -12285/584, 2695/1752, 0, 0, 0],
-                [8/9, -8716/891, 656/297, 39520/891, -416/11, 52/27, 0, 0, 0],
-                [1, 3015/256, -9/4, -4219/78, 5985/128, -539/384, 0, 693/3328, 0],
-                [1, 3/80, 0, 4/25, 243/1120, 77/160, 73/700, 0, 0],
-                [1, 57/640, 0, -16/65, 1377/2240, 121/320, 0, 891/8320, 2/35]], dtype = myfloat)
 
 verner_6_5 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -355,6 +290,7 @@ verner_6_5 = np.array([
                 [1, 3501/1720, -300/43, 297275/52632, -319/2322, 24068/84065, 0, 3850/26703, 0],
                 [1, 3/40, 0, 875/2244, 23/72, 264/1955, 0, 125/11592, 43/616],
                 [1, 13/160, 0, 2375/5984, 5/16, 12/85, 3/44, 0, 0]], dtype = myfloat)
+
 
 fehlberg_7_8 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -373,6 +309,7 @@ fehlberg_7_8 = np.array([
                 [1, 41/840, 0, 0, 0, 0, 34/105, 9/35, 9/35, 9/280, 9/280, 41/840, 0, 0],
                 [1, 0, 0, 0, 0, 0, 34/105, 9/35, 9/35, 9/280, 9/280, 0, 41/840, 41/840]], dtype = myfloat)
 
+
 dormand_prince_8_7 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1/18, 1/18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -390,6 +327,8 @@ dormand_prince_8_7 = np.array([
                 [1, 13451932/455176623, 0, 0, 0, 0, -808719846/976000145, 1757004468/5645159321, 656045339/265891186, -3867574721/1518517206, 465885868/322736535,  53011238/667516719, 2/45, 0],
                 [1, 14005451/335480064, 0, 0, 0, 0, -59238493/1068277825, 181606767/758867731, 561292985/797845732, -1041891430/1371343529, 760417239/1151165299, 118820643/751138087, -528747749/2220607170, 1/4]], dtype=myfloat)
 
+
+# undo word wrap
 feagin_10_8 = np.array([
                 [0.,                                           0.,                                           0.,                                          0.,                                            0.,                                          0.,                                           0.,                                            0.,                                            0.,                                            0.,                                           0.,                                             0.,                                             0.,                                            0.,                                           0.,                                            0.,                                           0.,       0.],
                 [1./10.,                                       1./10.,                                       0.,                                          0.,                                            0.,                                          0.,                                           0.,                                            0.,                                            0.,                                            0.,                                           0.,                                             0.,                                             0.,                                            0.,                                           0.,                                            0.,                                           0.,       0.],
@@ -411,7 +350,7 @@ feagin_10_8 = np.array([
                 [1, 3333333333333333333./100000000000000000000., 1./40., 3333333333333333333./100000000000000000000., 0., 1./20., 0., 1./25., 0., 2365468476861543627./12500000000000000000., 27742918851774317651./100000000000000000000., 27742918851774317651./100000000000000000000., 2365468476861543627./12500000000000000000., -1./25., -1./20., -3333333333333333333./100000000000000000000., -1./40., 3333333333333333333./100000000000000000000.],
                 [1, 3333333333333333333./100000000000000000000., 1./36., 3333333333333333333./100000000000000000000., 0., 1./20., 0., 1./25., 0., 2365468476861543627./12500000000000000000., 27742918851774317651./100000000000000000000., 27742918851774317651./100000000000000000000., 2365468476861543627./12500000000000000000., -1./25., -1./20., -3333333333333333333./100000000000000000000., -1./36., 3333333333333333333./100000000000000000000.]], dtype = myfloat)
 
-
+# undo word wrap
 feagin_14_12 = np.array([
                 [0.,                                     0.,                                         0.,                                      0.,                                     0.,                                   0.,                                    0.,                                    0.,                                     0.,                                     0.,                                      0.,                                      0.,                                       0.,                                     0.,                                         0.,                                         0.,                                       0.,                                        0.,                                      0.,                                        0.,                                       0.,                                      0.,                                      0.,                                      0.,                                    0.,                                       0.,                                      0.,                                       0.,                                      0.,                                       0.,                                     0.,                                      0.,                                     0.,        0.,                                    0.,                                      0.],
                 [11111111111111111./100000000000000000., 11111111111111111./100000000000000000.,     0.,                                      0.,                                     0.,                                   0.,                                    0.,                                    0.,                                     0.,                                     0.,                                      0.,                                      0.,                                       0.,                                     0.,                                         0.,                                         0.,                                       0.,                                        0.,                                      0.,                                        0.,                                       0.,                                      0.,                                      0.,                                      0.,                                    0.,                                       0.,                                      0.,                                       0.,                                      0.,                                       0.,                                     0.,                                      0.,                                     0.,        0.,                                    0.,                                      0.],
@@ -452,93 +391,38 @@ feagin_14_12 = np.array([
                 [1., 892857142857143./50000000000000000., 242968749999999999./50000000000000000000., 3./256., 0., 9./512., 0., 3./128., 15./512., 0., 9./256., 21./512., 3./64., 0., 27./512., 15./256., 33./512., 0., 5267605678587651./50000000000000000., 8528067312087609./50000000000000000., 10311469866467597./50000000000000000., 10311469866467597./50000000000000000., 8528067312087609./50000000000000000., 5267605678587651./50000000000000000., -33./512., -15./256., -27./512., -3./64., -21./512., -9./256., -15./512., -3./128., -9./512., -3./256., -242968749999999999./50000000000000000000., 892857142857143./50000000000000000.]], dtype = myfloat)
 
 
-
-methods_dict = {'euler_1':              'E1',
-                'heun_2':               'H2',
-                'midpoint_2':           'M2',
-                'ralston_2':            'R2',
-                'heun_3':               'H3',
-                'ralston_3':            'R3',
-                'runge_kutta_3':        'RK3',
-                'ralston_4':            'R4',
-                'runge_kutta_4':        'RK4',
-                'three_eights_rule_4':  'TER4',
-                'fehlberg_4':           'F4',
-                'butcher_5':            'B5',
-                'cash_karp_5':          'CK5',
-                'dormand_prince_5':     'DP5',
-                'verner_5':             'V5',
-                'butcher_6':            'B6',
-                'verner_6':             'V6',
-                'fehlberg_7':           'F7',
-                'shanks_8':             'S8',
-                'dormand_prince_8':     'DP8',
-                'feagin_10':            'F10',
-                'feagin_14':            'F14',
-                #
-                'fehlberg_1_2':         'F12',
-                'heun_euler_2_1':       'HE21',
-                'bogacki_shampine_3_2': 'BS32',
-                'fehlberg_4_5':         'F45',
-                'cash_karp_5_4':        'CK54',
-                'dormand_prince_5_4':   'DP54',
-                'verner_5_6':           'V56',
-                'verner_6_5':           'V65',
-                'fehlberg_7_8':         'F78',
-                'dormand_prince_8_7':   'DP87',
-                'feagin_10_8':          'F108',
-                'feagin_14_12':         'F1412'}
-
-
-# list of methods
 # note: order of method is conveniently attached to file name
 
-# todo: I can probably reorganize this into the dict
-                                                                                        #   order   |   label
-method_standard = ['euler_1',                                                           #   1       |   E1
-                   'heun_2', 'midpoint_2', 'ralston_2',                                 #   2       |   H2, M2, R2
-                   'heun_3', 'ralston_3', 'runge_kutta_3',                              #   3       |   H3, R3, RK3
-                   'ralston_4', 'runge_kutta_4', 'three_eights_rule_4', 'fehlberg_4',   #   4       |   R4, RK4, TER4, F4
-                   'butcher_5', 'cash_karp_5', 'dormand_prince_5', 'verner_5',          #   5       |   B5, CK5, DP5, V5
-                   'butcher_6', 'verner_6',                                             #   6       |   B6, V6
-                   'fehlberg_7',                                                        #   7       |   F7
-                   'shanks_8', 'dormand_prince_8',                                      #   8       |   S8, DP8
-                   'feagin_10',                                                         #   10      |   F10
-                   'feagin_14']                                                         #   14      |   F14
+standard_dict = {'euler_1':              [euler_1,              'E1'],
+                 'heun_2':               [heun_2,               'H2'],
+                 'midpoint_2':           [midpoint_2,           'M2'],
+                 'heun_3':               [heun_3,               'H3'],
+                 'ralston_3':            [ralston_3,            'R3'],
+                 'ralston_4':            [ralston_4,            'R4'],
+                 'runge_kutta_4':        [runge_kutta_4,        'RK4'],
+                 'fehlberg_4':           [fehlberg_4,           'F4'],
+                 'butcher_5':            [butcher_5,            'B5'],
+                 'cash_karp_5':          [cash_karp_5,          'CK5'],
+                 'dormand_prince_5':     [dormand_prince_5,     'DP5'],
+                 'butcher_6':            [butcher_6,            'B6'],
+                 'verner_6':             [verner_6,             'V6'],
+                 'fehlberg_7':           [fehlberg_7,           'F7'],
+                 'shanks_8':             [shanks_8,             'S8'],
+                 'dormand_prince_8':     [dormand_prince_8,     'DP8'],
+                 'feagin_10':            [feagin_10,            'F10'],
+                 'feagin_14':            [feagin_14,            'F14']}
 
-table_standard = [euler_1,                                                              # note: double-check list before writing to file
-                  heun_2, midpoint_2, ralston_2,
-                  heun_3, ralston_3, runge_kutta_3,
-                  ralston_4, runge_kutta_4, three_eights_rule_4, fehlberg_4,
-                  butcher_5, cash_karp_5, dormand_prince_5, verner_5,
-                  butcher_6, verner_6,
-                  fehlberg_7,
-                  shanks_8, dormand_prince_8,
-                  feagin_10,
-                  feagin_14]
-                                                                                        #   order   |   label
-method_embedded = ['fehlberg_1_2',                                                      #   1(2)    |   F1(2)
-                   'heun_euler_2_1',                                                    #   2(1)    |   HE21
-                   'bogacki_shampine_3_2',                                              #   3(2)    |   BS32
-                   'fehlberg_4_5',                                                      #   4(5)    |   F45
-                   'cash_karp_5_4', 'dormand_prince_5_4', 'verner_5_6',                 #   5(4,6)  |   CK54, DP54, V56   (is Verner 56 or 65?)
-                   'verner_6_5',                                                        #   6(5)    |   V65
-                   'fehlberg_7_8',                                                      #   7(8)    |   F78
-                   'dormand_prince_8_7',                                                #   8(7)    |   DP87
-                   'feagin_10_8',                                                       #   10(8)   |   F108
-                   'feagin_14_12']                                                      #   14(12)  |   F1412
 
-table_embedded = [fehlberg_1_2,
-                  heun_euler_2_1,                                                       # note: double-check list before writing to file
-                  bogacki_shampine_3_2,
-                  fehlberg_4_5,
-                  cash_karp_5_4, dormand_prince_5_4, verner_5_6,
-                  verner_6_5,
-                  fehlberg_7_8,
-                  dormand_prince_8_7,
-                  feagin_10_8,
-                  feagin_14_12]
-
+embedded_dict = {'heun_euler_2_1':       [heun_euler_2_1,       'HE21'],
+                 'bogacki_shampine_3_2': [bogacki_shampine_3_2, 'BS32'],
+                 'fehlberg_4_5':         [fehlberg_4_5,         'F45'],
+                 'cash_karp_5_4':        [cash_karp_5_4,        'CK54'],
+                 'dormand_prince_5_4':   [dormand_prince_5_4,   'DP54'],
+                 'verner_6_5':           [verner_6_5,           'V65'],
+                 'fehlberg_7_8':         [fehlberg_7_8,         'F78'],
+                 'dormand_prince_8_7':   [dormand_prince_8_7,   'DP87'],
+                 'feagin_10_8':          [feagin_10_8,          'F108'],
+                 'feagin_14_12':         [feagin_14_12,         'F1412']}
 
 
 def debug_table(method, butcher):
@@ -559,26 +443,25 @@ def debug_table(method, butcher):
 # write butcher tables to file:
 
 def main():
-        for i in range(0, len(method_standard)):
-                method = method_standard[i]
-                table = table_standard[i]
+
+        for method in standard_dict:
+
+                table = standard_dict[method][0]
 
                 print(method)
                 debug_table(method, table)
 
                 np.savetxt('butcher_tables/standard/' + method + '.dat', table)
 
-        print('\n')
 
-        for i in range(0, len(method_embedded)):
+        for method in embedded_dict:
 
-            method = method_embedded[i]
-            table = table_embedded[i]
+                table = embedded_dict[method][0]
 
-            print(method)
-            debug_table(method, table)
+                print(method)
+                debug_table(method, table)
 
-            np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
+                np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
 
 
 if __name__ == "__main__":
@@ -589,4 +472,23 @@ if __name__ == "__main__":
 
 
 
+
+#------------------------------------------------------------------------------------------
+# todo: warn users if their method isn't listed via dictionary
+
+
+# todo: fix up feagin, remove tabs (it's a mess if you use word wrap) and use high-precision decimal values
+# todo: try using decimal for high-order methods, https://zetcode.com/python/decimal/
+
+# todo: add more methods
+#       http://www.mymathlib.com/diffeq/embedded_runge_kutta/embedded_verner_5_6.html
+#       https://diffeq.sciml.ai/stable/solvers/ode_solve/
+
+# note: feagin's personal web pages are not secure (having a hard time finding decimal values)
+# https://codereview.stackexchange.com/questions/83635/terry-feagins-10th-order-explicit-runge-kutta-method
+# https://pypi.org/project/desolver/
+# https://github.com/Microno95/desolver/blob/fd1b6a2813fc0b4c792dac05b5e1cb4a1f90b458/desolver/integrators/explicit_integration_schemes.py
+
+# note: shanks_(8-10) was hard-coded with decimal values
+#------------------------------------------------------------------------------------------
 

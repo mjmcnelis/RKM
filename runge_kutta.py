@@ -15,11 +15,11 @@ solution = exact_solution.solution
 dt_MIN = 1.e-7
 dt_MAX = 1
 LOW = 0.2
-# HIGH = 1.5
-HIGH = 5               # for inverse power
+HIGH = 1.5
+# HIGH = 5               # for inverse power
 
-# HIGH_RKM = 1.25
-HIGH_RKM = 4           # for inverse power
+HIGH_RKM = 1.25
+# HIGH_RKM = 4           # for inverse power
 
 
 

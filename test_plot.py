@@ -25,6 +25,13 @@ colors = OrderedDict([
 
 solution = exact_solution.solution
 
+standard_dict = butcher_table.standard_dict     # combine dictionaries
+embedded_dict = butcher_table.embedded_dict
+
+total_dict = standard_dict.copy()
+total_dict.update(embedded_dict)
+
+
 if solution is 'sine':                          # set initial conditions
     A = exact_solution.A                        # can bring back precision()
     cycles = exact_solution.cycles
@@ -57,7 +64,7 @@ error = exact_solution.compute_error_of_exact_solution(t, y, solution, error_typ
 
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4), squeeze = False)
 
-axes[0][0].plot(t, y[:,0], 'blue', label = butcher_table.methods_dict[method], linewidth = 1.5)
+axes[0][0].plot(t, y[:,0], 'blue', label = total_dict[method][1], linewidth = 1.5)
 axes[0][0].text(t0 + 0.15*(tf-t0), 0.95*max(y[:,0]), r'$\langle \mathcal{E}_{\mathrm{rel}} \rangle = %.2e$' % error, fontsize=10)
 axes[0][0].set_ylabel('y', fontsize=14)
 axes[0][0].set_xlabel('t', fontsize=14)
