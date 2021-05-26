@@ -4,12 +4,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from precision import precision     # for myfloat
+from butcher_table import standard_dict, embedded_dict
 import runge_kutta
 from exact_solution import y_prime  # todo: pass y_prime instead
 import exact_solution as exact
 
 myfloat = type(precision(1))
 solution = exact.solution
+
+
+# combine dictionaries (todo: make a function)
+#-----------------------------------------------------------
+# standard_dict = butcher_table.standard_dict
+# embedded_dict = butcher_table.embedded_dict
+
+total_dict = standard_dict.copy()
+total_dict.update(embedded_dict)
+#-----------------------------------------------------------
+
+
+def get_method_file_name(method_label):
+    return total_dict[method_label][0]
 
 
 
@@ -69,7 +84,7 @@ def rescale_epsilon(eps, solver, order):
 
 
 # todo: axe return steps (don't really need it)
-def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max = 10000):
+def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, n_max = 10000):
 
     # y0     = initial solution
     # t0     = initial time
@@ -93,6 +108,7 @@ def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max 
     t_array  = np.empty(shape = [0], dtype = myfloat)
     dt_array = np.empty(shape = [0], dtype = myfloat)
 
+    method = get_method_file_name(method_label)
     butcher = get_butcher_table(solver, method)                 # read in butcher table
     order = get_order(solver, method)                           # get order of method
 
@@ -124,13 +140,16 @@ def ode_solver(y0, t0, tf, dt0, solver, method, norm = None, eps = 1.e-8, n_max 
 
                 dt = dt_next                                    # then use standard RK
                 dy1 = dt * y_prime(t, y, solution)
-                y = runge_kutta.RK_standard(y, dy1, t, dt, method, butcher)
+                y = runge_kutta.RK_standard(y, dy1, t, dt, butcher)
             else:
                 y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps, norm = norm)
 
         # embedded
         elif solver is 'ERK':
             y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
+
+
+            # todo: add one evaluation to failed attempts of FSAL methods
 
             if tries > 1:
                 print('ERK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))

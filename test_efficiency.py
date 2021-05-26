@@ -19,11 +19,9 @@ else:
 
 solution = exact_solution.solution
 
-standard_dict = butcher_table.standard_dict     # combine dictionaries (todo: make a function)
-embedded_dict = butcher_table.embedded_dict
 
-total_dict = standard_dict.copy()
-total_dict.update(embedded_dict)
+
+
 
 if solution is 'sine':                          # set initial conditions
     A = exact_solution.A                        # can bring back precision()
@@ -86,8 +84,8 @@ else:
 
 
 # RK2 peformance
-method_RK2_1 = 'heun_2'
-method_RK2_2 = 'heun_euler_2_1'
+method_RK2_1 = 'H2'
+method_RK2_2 = 'HE21'
 
 if order == 0 or order == 2:
     if solution is 'gaussian':
@@ -123,11 +121,11 @@ error_RK2_2, evals_RK2_2 = efficiency_RK2_2[:,0], efficiency_RK2_2[:,1]
 
 
 # RK3 peformance
-method_RK3_1 = 'heun_3'
-method_RK3_2 = 'bogacki_shampine_3_2'
+method_RK3_1 = 'H3'
+method_RK3_2 = 'BS32'
 
 if solution is 'inverse_power':
-    method_RK3_1 = 'ralston_3'
+    method_RK3_1 = 'R3'
 
 
 if order == 0 or order == 3:
@@ -164,8 +162,8 @@ error_RK3_2, evals_RK3_2 = efficiency_RK3_2[:,0], efficiency_RK3_2[:,1]
 
 
 # RK4 peformance
-method_RK4_1 = 'fehlberg_4'
-method_RK4_2 = 'fehlberg_4_5'
+method_RK4_1 = 'F4'
+method_RK4_2 = 'F45'
 
 if order == 0 or order == 4:
     if solution is 'gaussian':
@@ -204,28 +202,29 @@ error_RK4_2, evals_RK4_2 = efficiency_RK4_2[:,0], efficiency_RK4_2[:,1]
 
 
 # RK5 peformance
-method_RK5_1 = 'cash_karp_5'
-method_RK5_2 = 'cash_karp_5_4'
+method_RK5_1 = 'BS5'
+method_RK5_2 = 'BS54'
 
-if solution is 'inverse_power':
-    method_RK5_1 = 'butcher_5'
+if solution is 'logistic':
+    method_RK5_1 = 'T5'
+    method_RK5_2 = 'T54'
 
 if order == 0 or order == 5:
     if solution is 'gaussian':
-        eps_1 = 10**np.arange(-2.8, -11.8, -0.5)
-        eps_2 = 10**np.arange(-5., -13., -1)
+        eps_1 = 10**np.arange(-2., -12., -1)
+        eps_2 = 10**np.arange(-5.3, -13., -0.5)
     elif solution is 'logistic':
-        eps_1 = 10**np.arange(-9.2, -21., -0.5)
-        eps_2 = 10**np.arange(-9.5, -15.5, -0.5)
+        eps_1 = 10**np.arange(-9., -21., -1)
+        eps_2 = 10**np.arange(-9., -15., -1)
     elif solution is 'inverse_power':
-        eps_1 = 10**np.arange(-4., -12., -0.5)
-        eps_2 = 10**np.arange(-5.8, -13., -1)
+        eps_1 = 10**np.arange(-2., -12., -1)
+        eps_2 = 10**np.arange(-6., -13., -1)
     elif solution is 'sine':
-        eps_1 = 10**np.arange(-5., -15., -1)
-        eps_2 = 10**np.arange(-6.3, -15., -1)
+        eps_1 = 10**np.arange(-4.5, -13.5, -1)
+        eps_2 = 10**np.arange(-7., -15., -1)
     elif solution is 'exponential':
-        eps_1 = 10**np.arange(-4.5, -13., -1)
-        eps_2 = 10**np.arange(-6.5, -14., -1)
+        eps_1 = 10**np.arange(-4., -12., -1)
+        eps_2 = 10**np.arange(-7.2, -13.2, -0.5)
 
     n_max = 100000
 
@@ -244,11 +243,11 @@ error_RK5_2, evals_RK5_2 = efficiency_RK5_2[:,0], efficiency_RK5_2[:,1]
 
 
 # RK6 peformance
-method_RK6_1 = 'verner_6'
-method_RK6_2 = 'verner_6_5'
+method_RK6_1 = 'V6'
+method_RK6_2 = 'V65'
 
 if solution is 'inverse_power':
-    method_RK6_1 = 'butcher_6'
+    method_RK6_1 = 'B6'
 
 if order == 0 or order == 6:
     if solution is 'gaussian':
@@ -284,11 +283,13 @@ error_RK6_2, evals_RK6_2 = efficiency_RK6_2[:,0], efficiency_RK6_2[:,1]
 
 
 # RK8 peformance
-method_RK8_1 = 'dormand_prince_8'
-method_RK8_2 = 'dormand_prince_8_7'
+method_RK8_1 = 'DP8'
+method_RK8_2 = 'DP87'
 
-if solution is 'inverse_power':
-    method_RK8_1 = 'shanks_8'
+if solution is 'sine':
+    method_RK8_1 = 'C8'
+elif solution is 'inverse_power':
+    method_RK8_1 = 'C8'
 
 if order == 0 or order == 8:
     if solution is 'gaussian':
@@ -301,7 +302,7 @@ if order == 0 or order == 8:
         eps_1 = 10**np.arange(0., -15., -1)
         eps_2 = 10**np.arange(-6., -16., -1)
     elif solution is 'sine':
-        eps_1 = 10**np.arange(-4.5, -12., -1)
+        eps_1 = 10**np.arange(-4.8, -12.8, -1)
         eps_2 = 10**np.arange(-8.5, -15.5, -0.5)
     elif solution is 'exponential':
         eps_1 = 10**np.arange(-4., -11., -1)
@@ -327,8 +328,8 @@ error_RK8_2, evals_RK8_2 = efficiency_RK8_2[:,0], efficiency_RK8_2[:,1]
 
 
 # RK10 peformance
-method_RK10_1 = 'feagin_10'
-method_RK10_2 = 'feagin_10_8'
+method_RK10_1 = 'F10'
+method_RK10_2 = 'F108'
 
 if order == 10:
     if solution is 'gaussian' or solution is 'exponential':
@@ -361,23 +362,23 @@ if order == 10:
 
 
 plt.figure(figsize = (5,5))
-plt.plot(evals_RK2_1, error_RK2_1, 'red', label = total_dict[method_RK2_1][1], linewidth = 1.5)
-plt.plot(evals_RK2_2, error_RK2_2, 'red', label = total_dict[method_RK2_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK2_1, error_RK2_1, 'red',         label = method_RK2_1, linewidth = 1.5)
+plt.plot(evals_RK2_2, error_RK2_2, 'red',         label = method_RK2_2, linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK3_1, error_RK3_1, 'darkorange', label = total_dict[method_RK3_1][1], linewidth = 1.5)
-plt.plot(evals_RK3_2, error_RK3_2, 'darkorange', label = total_dict[method_RK3_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK3_1, error_RK3_1, 'darkorange',  label = method_RK3_1, linewidth = 1.5)
+plt.plot(evals_RK3_2, error_RK3_2, 'darkorange',  label = method_RK3_2, linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK4_1, error_RK4_1, 'gold', label = total_dict[method_RK4_1][1], linewidth = 1.5)
-plt.plot(evals_RK4_2, error_RK4_2, 'gold', label = total_dict[method_RK4_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK4_1, error_RK4_1, 'gold',        label = method_RK4_1, linewidth = 1.5)
+plt.plot(evals_RK4_2, error_RK4_2, 'gold',        label = method_RK4_2, linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = total_dict[method_RK5_1][1], linewidth = 1.5)
-plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = total_dict[method_RK5_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = method_RK5_1, linewidth = 1.5)
+plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = method_RK5_2, linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK6_1, error_RK6_1, 'deepskyblue', label = total_dict[method_RK6_1][1], linewidth = 1.5)
-plt.plot(evals_RK6_2, error_RK6_2, 'deepskyblue', label = total_dict[method_RK6_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK6_1, error_RK6_1, 'deepskyblue', label = method_RK6_1, linewidth = 1.5)
+plt.plot(evals_RK6_2, error_RK6_2, 'deepskyblue', label = method_RK6_2, linestyle = 'dashed', linewidth = 1.5)
 #
-plt.plot(evals_RK8_1, error_RK8_1, 'blue', label = total_dict[method_RK8_1][1], linewidth = 1.5)
-plt.plot(evals_RK8_2, error_RK8_2, 'blue', label = total_dict[method_RK8_2][1], linestyle = 'dashed', linewidth = 1.5)
+plt.plot(evals_RK8_1, error_RK8_1, 'blue',        label = method_RK8_1, linewidth = 1.5)
+plt.plot(evals_RK8_2, error_RK8_2, 'blue',        label = method_RK8_2, linestyle = 'dashed', linewidth = 1.5)
 #
 # plt.plot(evals_RK10_1, error_RK10_1, 'blueviolet', label = butcher_table.methods_dict[method_RK10_1], linewidth = 1.5)
 # plt.plot(evals_RK10_2, error_RK10_2, 'blueviolet', label = butcher_table.methods_dict[method_RK10_2], linestyle = 'dashed', linewidth = 1.5)

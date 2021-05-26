@@ -14,17 +14,19 @@ solution = exact_solution.solution
 
 dt_MIN = 1.e-7
 dt_MAX = 1
-LOW = 0.2
-HIGH = 1.5
-# HIGH = 5               # for inverse power
 
-HIGH_RKM = 1.25
-# HIGH_RKM = 4           # for inverse power
+LOW = 0.2
+HIGH = 5
+
+# HIGH_RKM = 1.25      # this might be too low
+
+HIGH_RKM = 1.4
+# HIGH_RKM = 5           # for inverse power
 
 
 
 # standard RK step
-def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
+def RK_standard(y0, dy1, t, dt, butcher, embedded = False):
 
     # todo: pass y_prime as a function
     # todo: make use of FSAL property in BS32, DP54 (for embedded = True)
@@ -33,7 +35,6 @@ def RK_standard(y0, dy1, t, dt, method, butcher, embedded = False):
     # dy1      = first intermediate Euler step \Delta y_n^{(1)}
     # t        = current time t_n
     # dt       = current stepsize dt_n
-    # method   = Runge-Kutta method
     # butcher  = Butcher table
     # embedded = return primary/secondary solutions if True
 
@@ -114,7 +115,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
     y_prev = y
-    y = RK_standard(y, dy1, t, dt, method, butcher)         # update y with standard Runge-Kutta method
+    y = RK_standard(y, dy1, t, dt, butcher)                 # update y with standard Runge-Kutta method
 
     return y, y_prev, dt                                    # updated solution, current solution, current step size
 
@@ -147,7 +148,7 @@ def ERK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_M
         dy1 = dt * y_prime(t, y0, solution)
 
         # propose updated solution (secondary, primary)
-        yhat, y = RK_standard(y0, dy1, t, dt, method, butcher, embedded = True)
+        yhat, y = RK_standard(y0, dy1, t, dt, butcher, embedded = True)
 
         error_norm = np.linalg.norm(y - yhat, ord = norm)   # estimate local truncation error
         y_norm = np.linalg.norm(y, ord = norm)
@@ -199,13 +200,13 @@ def SDRK_step(y0, t, dt, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_
 
         # full RK step
         dy1 = dt * y_prime(t, y0, solution)
-        y1 = RK_standard(y0, dy1, t, dt, method, butcher, embedded = False)
+        y1 = RK_standard(y0, dy1, t, dt, butcher, embedded = False)
 
         # two half RK steps
-        y_mid = RK_standard(y0, dy1/2, t, dt/2, method, butcher, embedded = False)
+        y_mid = RK_standard(y0, dy1/2, t, dt/2, butcher, embedded = False)
         t_mid = t + dt/2
         dy1_mid = (dt/2) * y_prime(t_mid, y_mid, solution)
-        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, method, butcher, embedded = False)
+        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, butcher, embedded = False)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
         y = y2 + error                                      # propose updated solution (Richardson extrapolation)
@@ -262,13 +263,13 @@ def estimate_step_size(y0, t, method, butcher, eps = 1.e-8, norm = None, dt_min 
 
         # full RK step
         dy1 = dt * y_prime(t, y0, solution)
-        y1 = RK_standard(y0, dy1, t, dt, method, butcher, embedded = False)
+        y1 = RK_standard(y0, dy1, t, dt, butcher, embedded = False)
 
         # two half RK steps
-        y_mid = RK_standard(y0, dy1/2, t, dt/2, method, butcher, embedded = False)
+        y_mid = RK_standard(y0, dy1/2, t, dt/2, butcher, embedded = False)
         t_mid = t + dt/2
         dy1_mid = (dt/2) * y_prime(t_mid, y_mid, solution)
-        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, method, butcher, embedded = False)
+        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, butcher, embedded = False)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
         y = y2 + error                                      # propose updated solution (Richardson extrapolation)
