@@ -25,6 +25,7 @@ These are all of the Runge-Kutta methods I have compiled so far:
 
 </td></tr> </table>
 
+Note: the embedded schemes in `standard` have their secondary method removed (along with extraneous stages)\
 Note: SSP = strong stability preserving
 
 ## Medium order (4-6)
@@ -101,5 +102,4 @@ Note: SSP = strong stability preserving
 
 </td></tr> </table>
 
-
-Note: the right column is the code name (or label) of the method. 
+Note: Feagin's 10th and 14th order tables are not yet ready for high precision runs.
