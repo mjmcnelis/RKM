@@ -1,3 +1,4 @@
+These are all of the Runge-Kutta methods I have compiled so far:
 
 ## Low order (1-3)
 <table>
@@ -59,8 +60,6 @@ Note: SSP = strong stability preserving
 | Verner 6(5)           | V65  |
 
 </td></tr> </table>
-
-Note: Bogacki Shampine 5(4) does not include the second fourth-order pair.
 
 ## High order (7-9)
 <table>
