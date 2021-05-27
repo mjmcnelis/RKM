@@ -102,3 +102,4 @@ Note: SSP = strong stability preserving
 </td></tr> </table>
 
 
+Note: the right column is the code name (or label) of the method. 
