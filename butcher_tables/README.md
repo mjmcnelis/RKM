@@ -61,7 +61,7 @@ Note: SSP = strong stability preserving
 
 </td></tr> </table>
 
-Note: the embedded schemes in `standard` have their secondary method removed, along with extraneous stages (e.g. F4 has 5 stages instead of 6). 
+Note: the embedded schemes in `standard` have their secondary method removed, along with extraneous stages (e.g. F4 uses the fourth-order method and has 5 stages instead of 6). 
 
 ## High order (7-9)
 <table>
