@@ -8,6 +8,7 @@
 | Euler 1             | E1     |
 | Heun 2              | H2     |
 | Midpoint 2          | M2     |
+| Ralston 2           | R2     |
 | Heun 3              | H3     |
 | Ralston 3           | R3     |
 | Runge Kutta 3       | RK3    |
@@ -23,7 +24,7 @@
 
 </td></tr> </table>
 
-Note: SSP means strong stability preserving
+Note: SSP = strong stability preserving
 
 ## Medium order (4-6)
 <table>
@@ -68,7 +69,9 @@ Note: Bogacki Shampine 5(4) does not include the second fourth-order pair.
 |      Standard       |      |
 |:-------------------:|:----:|
 | Fehlberg 7          | F7   |
+| Curtis 8            | C8   |
 | Shanks 8            | S8   |
+| Shanks Pseudo 8     | SP8  |
 | Dormand Prince 8    | DP8  |
 
 </td><td valign="top">
