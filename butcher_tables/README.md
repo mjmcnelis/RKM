@@ -41,7 +41,7 @@ Note: SSP = strong stability preserving
 | Butcher 5           | B5     |
 | Cash Karp 5         | CK5    |
 | Dormand Prince 5    | DP5    |
-| Bogacki Shampone 5  | BS5    |
+| Bogacki Shampine 5  | BS5    |
 | Tsitouras 5         | T5     |
 | Verner 5            | V5     |
 | Butcher 6           | B6     |
