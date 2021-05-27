@@ -25,7 +25,6 @@ These are all of the Runge-Kutta methods I have compiled so far:
 
 </td></tr> </table>
 
-Note: the embedded schemes in `standard` have their secondary method removed (along with extraneous stages)\
 Note: SSP = strong stability preserving
 
 ## Medium order (4-6)
@@ -61,6 +60,8 @@ Note: SSP = strong stability preserving
 | Verner 6(5)           | V65  |
 
 </td></tr> </table>
+
+Note: the embedded schemes in `standard` have their secondary method removed (along with extraneous stages).
 
 ## High order (7-9)
 <table>
