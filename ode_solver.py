@@ -12,15 +12,9 @@ import exact_solution as exact
 myfloat = type(precision(1))
 solution = exact.solution
 
-
-# combine dictionaries (todo: make a function)
-#-----------------------------------------------------------
-# standard_dict = butcher_table.standard_dict
-# embedded_dict = butcher_table.embedded_dict
-
+# combine dictionaries
 total_dict = standard_dict.copy()
 total_dict.update(embedded_dict)
-#-----------------------------------------------------------
 
 
 def get_method_file_name(method_label):
@@ -99,7 +93,6 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
     y = y0                                                      # set initial conditions
     t = t0
     dt = dt0
-    # dt = runge_kutta.estimate_first_step_size(y, t, solver, method, norm = norm) # this didn't work well
 
     y_prev = y0                                                 # for RKM
     dt_next = dt                                                # for ERK/SDRK
@@ -108,13 +101,13 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
     t_array  = np.empty(shape = [0], dtype = myfloat)
     dt_array = np.empty(shape = [0], dtype = myfloat)
 
-    method = get_method_file_name(method_label)
+    method  = get_method_file_name(method_label)
     butcher = get_butcher_table(solver, method)                 # read in butcher table
-    order = get_order(solver, method)                           # get order of method
+    order   = get_order(solver, method)                         # get order of method
+    stages  = get_stages(butcher, solver, method)
 
     eps = rescale_epsilon(eps, solver, order)                   # rescale epsilon_0
 
-    attempts = 0
     evaluations = 0
     finish = False
 
@@ -129,10 +122,8 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
             tries = 1
 
             if n == 0:
-                 # if dt = dt_max, should I take dt or dt_next from SD?
-                method_SD = 'euler_1'                            # estimate first dt w/ step-doubling
+                method_SD = 'euler_1'                           # estimate first dt w/ step-doubling
                 butcher_SD = get_butcher_table('SDRK', method_SD)
-                # y_SD, dt, dt_next, tries_SD = runge_kutta.SDRK_step(y, t, dt_next, method_SD, butcher_SD, eps = eps/2)
                 dt_next, tries_SD = runge_kutta.estimate_step_size(y, t, method_SD, butcher_SD, eps = eps/2, norm = norm)
                 evaluations += 2 * tries_SD
 
@@ -141,15 +132,21 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
                 dt = dt_next                                    # then use standard RK
                 dy1 = dt * y_prime(t, y, solution)
                 y = runge_kutta.RK_standard(y, dy1, t, dt, butcher)
+
+                evaluations += stages
             else:
                 y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, method, butcher, eps = eps, norm = norm)
+
+                evaluations += stages
 
         # embedded
         elif solver is 'ERK':
             y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
 
-
-            # todo: add one evaluation to failed attempts of FSAL methods
+            if method_is_FSAL(butcher) and tries > 1:
+                evaluations += (stages  +  (tries - 1) * (stages + 1))
+            else:
+                evaluations += tries * stages
 
             if tries > 1:
                 print('ERK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
@@ -157,6 +154,8 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
         # step-doubling
         elif solver is 'SDRK':
             y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
+
+            evaluations += stages
 
             if tries > 1:
                 print('SDRK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
@@ -169,9 +168,7 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
             break
 
         t += dt
-        attempts += tries
 
-    evaluations += attempts * get_stages(butcher, solver, method)   # get function evaluations
 
     return y_array, t_array, dt_array, evaluations, finish
 
