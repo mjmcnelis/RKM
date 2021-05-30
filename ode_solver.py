@@ -46,12 +46,12 @@ def get_stages(butcher, solver, method):
     stages = butcher.shape[0] - 1
 
     if solver is 'SDRK':
-        return 3*stages - 1                             # stages in SDRK
+        return (3*stages - 1)                           # stages in SDRK
     elif solver is 'ERK':
         if method_is_FSAL(butcher):
-            return stages - 2                           # stages in ERK
+            return (stages - 2)                         # stages in ERK
         else:
-            return stages - 1                           # note: do not use FSAL to save time yet
+            return (stages - 1)                         # note: do not use FSAL to save time yet
 
     return stages                                       # stages in RKM
 
@@ -146,7 +146,7 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
             if method_is_FSAL(butcher) and tries > 1:
                 evaluations += (stages  +  (tries - 1) * (stages + 1))
             else:
-                evaluations += tries * stages
+                evaluations += (tries * stages)
 
             if tries > 1:
                 print('ERK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
@@ -155,7 +155,7 @@ def ode_solver(y0, t0, tf, dt0, solver, method_label, norm = None, eps = 1.e-8, 
         elif solver is 'SDRK':
             y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, method, butcher, eps = eps, norm = norm)
 
-            evaluations += stages
+            evaluations += (tries * stages)
 
             if tries > 1:
                 print('SDRK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))

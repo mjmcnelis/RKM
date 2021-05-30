@@ -18,6 +18,8 @@ dt_MAX = 1
 LOW = 0.2
 HIGH = 5
 
+# a small HIGH (1.1) doesn't help for sine
+
 # HIGH_RKM = 1.25      # this might be too low
 
 HIGH_RKM = 1.4
