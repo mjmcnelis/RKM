@@ -9,7 +9,6 @@ import exact_solution
 
 solution = exact_solution.solution
 
-
 # todo: any way to put a macro on flags?
 
 dt_MIN = 1.e-7
@@ -18,13 +17,10 @@ dt_MAX = 1
 LOW = 0.2
 HIGH = 5
 
-# a small HIGH (1.1) doesn't help for sine
-
-# HIGH_RKM = 1.25      # this might be too low
-
-HIGH_RKM = 1.4
-# HIGH_RKM = 5           # for inverse power
-
+if solution is 'inverse_power':
+    HIGH_RKM = 5
+else:
+    HIGH_RKM = 1.4
 
 
 # standard RK step
@@ -71,14 +67,14 @@ def RK_standard(y0, dy1, t, dt, butcher, embedded = False):
 
 
 # my adaptive RK step
-def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = True, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
+def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, norm = None,
+             dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
     # t         = current time t_n
     # dt_prev   = previous step size dt_{n-1}
     # eps       = tolerance parameter
-    # adaptive  = make dt adaptive if True
     # norm      = order of vector norm (e.g. 1, 2 (None), np.inf)
     # dt_min    = min step size
     # dt_max    = max step size
@@ -91,29 +87,26 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, adaptive = Tru
 
     f = y_prime(t, y, solution)                             # for first intermediate Euler step
 
-    if adaptive:
-        y_star = y + dt_prev*f                              # compute y_star and approximate C
+    y_star = y + dt_prev*f                                  # compute y_star and approximate C
 
-        C_norm = 2 * np.linalg.norm(y_star - 2*y + y_prev, ord = norm) / dt_prev**2
-        y_norm = np.linalg.norm(y, ord = norm)
-        f_norm = np.linalg.norm(f, ord = norm)
+    C_norm = 2 * np.linalg.norm(y_star - 2*y + y_prev, ord = norm) / dt_prev**2
+    y_norm = np.linalg.norm(y, ord = norm)
+    f_norm = np.linalg.norm(f, ord = norm)
 
-        if C_norm == 0:                                     # prevent division by 0
-            dt = dt_prev
-        else:
-            if (C_norm * y_norm) > (2 * eps * f_norm**2):   # compute adaptive step size (piecewise formula)
-                dt = (2 * eps * y_norm / C_norm)**0.5
-            else:
-                dt = 2 * eps * f_norm / C_norm
-
-            dt = min(high*dt_prev, max(low*dt_prev, dt))    # control rate of change
-
-        dt = min(dt_max, max(dt_min, dt))                   # impose dt_min <= dt <= dt_max
-
-        if dt == dt_min or dt == dt_max:
-            print('RKM_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
-    else:
+    if C_norm == 0:                                         # prevent division by 0
         dt = dt_prev
+    else:
+        if (C_norm * y_norm) > (2 * eps * f_norm**2):       # compute adaptive step size
+            dt = (2 * eps * y_norm / C_norm)**0.5
+        else:
+            dt = 2 * eps * f_norm / C_norm
+
+        dt = min(high*dt_prev, max(low*dt_prev, dt))        # control rate of change
+
+    dt = min(dt_max, max(dt_min, dt))                       # impose dt_min <= dt <= dt_max
+
+    if dt == dt_min or dt == dt_max:
+        print('RKM_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
     y_prev = y
