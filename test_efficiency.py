@@ -186,6 +186,7 @@ if order == 0 or order == 4:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2.5, -12., -1)
         eps_2 = 10**np.arange(-4., -14., -1)
+        # eps_2 = 10**np.arange(-1., -4., -1)   # for F41
         eps_3 = 10**np.arange(-3.1, -13., -1)
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-8.5, -20., -1)
@@ -198,6 +199,7 @@ if order == 0 or order == 4:
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4.5, -13., -1)
         eps_2 = 10**np.arange(-5.5, -15., -1)
+        # eps_2 = 10**np.arange(-1., -6., -1)
         eps_3 = 10**np.arange(-4.5, -14., -1)
     elif solution is 'exponential':
         eps_1 = 10**np.arange(-4., -12., -1)
@@ -368,11 +370,11 @@ if order == 0 or order == 8:
 
     error_RK8_1, evals_RK8_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK8_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
     error_RK8_2, evals_RK8_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK8_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK8_3, evals_RK8_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK8_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    # error_RK8_3, evals_RK8_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK8_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat', np.concatenate((error_RK8_1, evals_RK8_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat', np.concatenate((error_RK8_2, evals_RK8_2), axis=1))
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_RK8_3, evals_RK8_3), axis=1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_RK8_3, evals_RK8_3), axis=1))
 
 efficiency_RK8_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat')
 efficiency_RK8_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat')
@@ -433,11 +435,12 @@ plt.plot(evals_RK4_3, error_RK4_3, 'gold',        label = method_RK4_3 + 'SD', l
 plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = method_RK5_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = method_RK5_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK5_3, error_RK5_3, 'forestgreen', label = method_RK5_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
-#
+
+
 # plt.plot(evals_RK6_1, error_RK6_1, 'deepskyblue', label = method_RK6_1 + 'M',  linewidth = 1.5)
 # plt.plot(evals_RK6_2, error_RK6_2, 'deepskyblue', label = method_RK6_2,        linestyle = 'dashed', linewidth = 1.5)
 # plt.plot(evals_RK6_3, error_RK6_3, 'deepskyblue', label = method_RK6_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
-#
+
 plt.plot(evals_RK8_1, error_RK8_1, 'blue',        label = method_RK8_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK8_2, error_RK8_2, 'blue',        label = method_RK8_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK8_3, error_RK8_3, 'blue',        label = method_RK8_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)

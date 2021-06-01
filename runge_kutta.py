@@ -20,7 +20,7 @@ HIGH = 5
 if solution is 'inverse_power':
     HIGH_RKM = 5
 else:
-    HIGH_RKM = 1.4
+    HIGH_RKM = 1.5
 
 
 # standard RK step
@@ -81,15 +81,16 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, norm = None,
     # low, high = safety bounds for dt growth rate
 
     order = int(method.split('_')[-1])                      # get order of method
-    power = 1 / (1 + order)
 
-    high = high**power
+    high = high**(1/order)
 
     f = y_prime(t, y, solution)                             # for first intermediate Euler step
 
     y_star = y + dt_prev*f                                  # compute y_star and approximate C
 
-    C_norm = 2 * np.linalg.norm(y_star - 2*y + y_prev, ord = norm) / dt_prev**2
+    C = 2 * (y_star - 2*y + y_prev) / dt_prev**2
+
+    C_norm = np.linalg.norm(C, ord = norm)
     y_norm = np.linalg.norm(y, ord = norm)
     f_norm = np.linalg.norm(f, ord = norm)
 
@@ -109,6 +110,7 @@ def RKM_step(y, y_prev, t, dt_prev, method, butcher, eps = 1.e-2, norm = None,
         print('RKM_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
+
     y_prev = y
     y = RK_standard(y, dy1, t, dt, butcher)                 # update y with standard Runge-Kutta method
 
