@@ -7,7 +7,7 @@ import matplotlib.colors as mcolors
 
 from ode_solver import method_efficiency
 from runge_kutta import dt_MAX
-from exact_solution import y_exact, solution, solution_dict, A, cycles
+from exact_solution import y_exact, y_prime, solution, solution_dict, A, cycles
 # import precision
 
 if len(sys.argv) > 1:
@@ -26,7 +26,10 @@ else:
     t0 = -10
     tf = 10
 
-y0 = y_exact(t0, solution)                      # todo: replace with own solution
+# y0 = exact_solution.y_exact(t0)
+y0 = y_exact(t0)
+# y_prime = exact_solution.y_prime
+
 dt0 = dt_MAX
 
 solver_1 = 'RKM'
@@ -107,9 +110,9 @@ if order == 0 or order == 2:
 
     n_max = 100000
 
-    error_RK2_1, evals_RK2_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK2_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK2_2, evals_RK2_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK2_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK2_3, evals_RK2_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK2_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK2_1, evals_RK2_1 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_1, method_RK2_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK2_2, evals_RK2_2 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_2, method_RK2_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK2_3, evals_RK2_3 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_3, method_RK2_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2_M.dat', np.concatenate((error_RK2_1, evals_RK2_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2_E.dat', np.concatenate((error_RK2_2, evals_RK2_2), axis=1))
@@ -133,7 +136,6 @@ method_RK3_3 = 'H3'
 if solution is 'inverse_power':
     method_RK3_1 = 'R3'
     method_RK3_3 = 'R3'
-
 
 if order == 0 or order == 3:
     if solution is 'gaussian':
@@ -159,9 +161,9 @@ if order == 0 or order == 3:
 
     n_max = 100000
 
-    error_RK3_1, evals_RK3_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK3_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK3_2, evals_RK3_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK3_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK3_3, evals_RK3_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK3_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK3_1, evals_RK3_1 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_1, method_RK3_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK3_2, evals_RK3_2 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_2, method_RK3_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK3_3, evals_RK3_3 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_3, method_RK3_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3_M.dat', np.concatenate((error_RK3_1, evals_RK3_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3_E.dat', np.concatenate((error_RK3_2, evals_RK3_2), axis=1))
@@ -208,9 +210,9 @@ if order == 0 or order == 4:
 
     n_max = 100000
 
-    error_RK4_1, evals_RK4_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK4_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK4_2, evals_RK4_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK4_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK4_3, evals_RK4_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK4_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK4_1, evals_RK4_1 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_1, method_RK4_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK4_2, evals_RK4_2 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_2, method_RK4_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK4_3, evals_RK4_3 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_3, method_RK4_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4_M.dat', np.concatenate((error_RK4_1, evals_RK4_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4_E.dat', np.concatenate((error_RK4_2, evals_RK4_2), axis=1))
@@ -264,9 +266,9 @@ if order == 0 or order == 5:
 
     n_max = 100000
 
-    error_RK5_1, evals_RK5_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK5_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK5_2, evals_RK5_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK5_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK5_3, evals_RK5_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK5_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK5_1, evals_RK5_1 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_1, method_RK5_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK5_2, evals_RK5_2 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_2, method_RK5_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK5_3, evals_RK5_3 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_3, method_RK5_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_M.dat', np.concatenate((error_RK5_1, evals_RK5_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_E.dat', np.concatenate((error_RK5_2, evals_RK5_2), axis=1))
@@ -348,6 +350,7 @@ if order == 0 or order == 8:
     if solution is 'gaussian':
         eps_1 = 10**np.arange(-2., -12., -1)
         eps_2 = 10**np.arange(-6.5, -15., -0.5)
+        # eps_2 = 10**np.arange(-0.5, -3.5, -0.5)
         eps_3 = 10**np.arange(-5., -14., -0.5)
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-1., -22., -1)
@@ -368,13 +371,13 @@ if order == 0 or order == 8:
 
     n_max = 10000
 
-    error_RK8_1, evals_RK8_1 = method_efficiency(y0, t0, tf, dt0, solver_1, method_RK8_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
-    error_RK8_2, evals_RK8_2 = method_efficiency(y0, t0, tf, dt0, solver_2, method_RK8_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
-    # error_RK8_3, evals_RK8_3 = method_efficiency(y0, t0, tf, dt0, solver_3, method_RK8_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK8_1, evals_RK8_1 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_1, method_RK8_1, eps_1, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK8_2, evals_RK8_2 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_2, method_RK8_2, eps_2, error_type, norm = norm, average = average, n_max = n_max)
+    error_RK8_3, evals_RK8_3 = method_efficiency(y0, t0, tf, dt0, y_prime, solver_3, method_RK8_3, eps_3, error_type, norm = norm, average = average, n_max = n_max)
 
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat', np.concatenate((error_RK8_1, evals_RK8_1), axis=1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat', np.concatenate((error_RK8_2, evals_RK8_2), axis=1))
-    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_RK8_3, evals_RK8_3), axis=1))
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_RK8_3, evals_RK8_3), axis=1))
 
 efficiency_RK8_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat')
 efficiency_RK8_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat')

@@ -6,7 +6,7 @@ from scipy import integrate
 
 myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
-solution = 'logistic'                                   # solution type
+solution = 'sine'                                   # solution type
 
 A = 100                                             # for sin(At) function
 cycles = 20
@@ -14,11 +14,11 @@ cycles = 20
 B = 0.5                                             # for logistic function
 
 # exact solution
-def y_exact(t, solution):
+def y_exact(t):
     if solution is 'logistic':
         return np.array([math.exp(t) / (1 + math.exp(t)) - B], dtype = myfloat).reshape(-1,1)
     elif solution is 'gaussian':
-        return np.array([math.exp(-t*t)], dtype = myfloat).reshape(-1,1)
+        return np.array([math.exp(-t**2)], dtype = myfloat).reshape(-1,1)
     elif solution is 'inverse_power':
         return np.array([1/t**2], dtype = myfloat).reshape(-1,1)
     elif solution is 'sine':
@@ -28,7 +28,7 @@ def y_exact(t, solution):
 
 
 # dy/dt of exact solution
-def y_prime(t, y, solution):
+def y_prime(t, y):
     if solution is 'logistic':
         return (y + B) * (1 - y - B)
     elif solution is 'gaussian':
@@ -49,13 +49,13 @@ solution_dict = {'gaussian':        r"$y^{'} = -2ty$",
 
 
 # todo: move to exact solution
-def compute_error_of_exact_solution(t, y, solution, error_type = 'absolute', average = True, norm = None):
+def compute_error_of_exact_solution(t, y, y_exact, error_type = 'absolute', average = True, norm = None):
 
     error_array = np.zeros(len(t))
 
     for i in range(0, len(t)):
 
-        Y = y_exact(t[i], solution)
+        Y = y_exact(t[i])
 
         error = np.linalg.norm(y[i].reshape(-1,1) - Y, ord = norm)
 
