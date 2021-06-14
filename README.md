@@ -1,7 +1,7 @@
 **RKM (c) Mike McNelis**
 
 Created on 4/20/2021 by Mike McNelis\
-Last edited on 5/24/2021 by Mike McNelis
+Last edited on 6/14/2021 by Mike McNelis
 
 ## Summary
 An explicit Runge-Kutta ODE solver with a new adaptive step size method.
@@ -25,7 +25,7 @@ This repository is currently under development, but you can run `test_plot.py` t
 
 A list of Runge-Kutta methods in Butcher tableau notation can be found in `butcher_tables`. They are organized in two categories: `standard` for RKM and SDRK, and `embedded` for ERK.
 
-Note: we do not consider multiple secondary pairs, if any, in the embedded schemes (e.g. BS54 does not include the second fourth-order pair).
+Note: we do not consider multiple secondary pairs, if any, in the embedded schemes (e.g. Bogacki-Shampine 5(4) does not include the second fourth-order pair).
 
 
 
