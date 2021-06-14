@@ -15,7 +15,6 @@ if len(sys.argv) > 1:
 else:
     order = np.inf
 
-
 if solution is 'sine':                          # set initial conditions (can bring back precision)
     t0 = 0
     tf = 2*math.pi/A * cycles
@@ -26,10 +25,7 @@ else:
     t0 = -10
     tf = 10
 
-# y0 = exact_solution.y_exact(t0)
 y0 = y_exact(t0)
-# y_prime = exact_solution.y_prime
-
 dt0 = dt_MAX
 
 solver_1 = 'RKM'
@@ -200,7 +196,7 @@ if order == 0 or order == 4:
         eps_3 = 10**np.arange(-5.1, -12.1, -1)
     elif solution is 'sine':
         eps_1 = 10**np.arange(-4.5, -13., -1)
-        eps_2 = 10**np.arange(-5.5, -15., -1)
+        eps_2 = 10**np.arange(-5.5, -14., -1)
         # eps_2 = 10**np.arange(-1., -6., -1)
         eps_3 = 10**np.arange(-4.5, -14., -1)
     elif solution is 'exponential':
@@ -493,10 +489,6 @@ plt.savefig('efficiency_plots/' + solution + '/' + solution + '_efficiency.png',
 # plt.figure(figsize=(5,5))
 # plt.plot(evals_array, error_RK8_1_interp/error_RK8_2_interp, 'b', linewidth = 2.5)
 # plt.show()
-
-
-
-
 
 
 

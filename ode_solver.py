@@ -135,7 +135,6 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
 
                 evaluations += stages
             else:
-
                 y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps = eps, norm = norm)
 
                 evaluations += stages
