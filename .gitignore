@@ -1,5 +1,8 @@
 .DS_Store
-test_plot.png
+test_exact.png
+test_implicit.png
+new_table.py
+references
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

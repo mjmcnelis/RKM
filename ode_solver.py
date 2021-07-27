@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 from precision import precision     # for myfloat
 from butcher_table import standard_dict, embedded_dict
-import runge_kutta
+import explicit_runge_kutta
+import implicit_runge_kutta
 import exact_solution as exact
 
 myfloat = type(precision(1))
@@ -123,7 +124,7 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
             if n == 0:
                 method_SD = 'euler_1'                           # estimate first dt w/ step-doubling
                 butcher_SD = get_butcher_table('SDRK', method_SD)
-                dt_next, tries_SD = runge_kutta.estimate_step_size(y, t, y_prime, method_SD, butcher_SD, eps = eps/2, norm = norm)
+                dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, method_SD, butcher_SD, eps = eps/2, norm = norm)
 
                 evaluations += 2 * tries_SD
 
@@ -131,18 +132,18 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
 
                 dt = dt_next                                    # then use standard RK
                 dy1 = dt * y_prime(t, y)
-                y = runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
+                y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
 
                 evaluations += stages
             else:
-                y, y_prev, dt = runge_kutta.RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps = eps, norm = norm)
+                y, y_prev, dt = explicit_runge_kutta.RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps = eps, norm = norm)
 
                 evaluations += stages
                 total_attempts += tries
 
         # embedded
         elif solver is 'ERK':
-            y, dt, dt_next, tries = runge_kutta.ERK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
+            y, dt, dt_next, tries = explicit_runge_kutta.ERK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
 
             if method_is_FSAL(butcher) and tries > 1:
                 evaluations += (stages  +  (tries - 1) * (stages + 1))
@@ -157,7 +158,7 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
 
         # step-doubling
         elif solver is 'SDRK':
-            y, dt, dt_next, tries = runge_kutta.SDRK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
+            y, dt, dt_next, tries = explicit_runge_kutta.SDRK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
 
             evaluations += (tries * stages)
 
@@ -184,6 +185,65 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
     return y_array, t_array, dt_array, evaluations, rejection_rate, finish
 
 
+
+
+
+def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-8, n_max = 10000):
+
+    y = y0                                                      # set initial conditions
+    t = t0
+    dt = dt0
+
+    y_prev = y0                                                 # for RKM
+    dt_next = dt                                                # for ERK/SDRK
+
+    solver = 'RKM'  # temp
+
+    y_array  = np.empty(shape = [0], dtype = myfloat)           # construct arrays for (y, t, dt)
+    t_array  = np.empty(shape = [0], dtype = myfloat)
+    dt_array = np.empty(shape = [0], dtype = myfloat)
+
+    method  = get_method_fname(method_label)
+
+    butcher = get_butcher_table(solver, method)                 # read in butcher table
+    order   = get_order(solver, method)                         # get order of method
+    stages  = get_stages(butcher, solver, method)
+
+    eps = rescale_epsilon(eps, solver, order)                   # rescale epsilon_0
+
+    evaluations = 0
+    total_iterations = 0
+    finish = False
+
+    for n in range(0, n_max):                                   # start evolution loop
+
+        y_array = np.append(y_array, y).reshape(-1, y.shape[0]) # append arrays
+        t_array = np.append(t_array, t)
+
+        y, iterations = implicit_runge_kutta.standard_DIRK_step(y, t, dt, y_prime, butcher)     # will also have to account for iterations in standard RK routine
+
+        total_iterations += iterations
+
+        dt_array = np.append(dt_array, dt)
+
+        if t >= tf:                                             # stop evolution
+            finish = True
+            break
+
+        t += dt
+
+
+    steps = n
+
+    # total_iterations is for implicit (set to 1 if explicit)
+    # total_attempts is for ERK (don't change)
+
+    # rejection_rate = 100 * (1 - steps/total_attempts)           # percentage of attempts that were rejected
+    rejection_rate = 0
+
+    evaluations = total_iterations * stages
+
+    return y_array, t_array, dt_array, evaluations, rejection_rate, finish
 
 
 
