@@ -1,7 +1,7 @@
 **RKM (c) Mike McNelis**
 
-Created on 4/20/2021 by Mike McNelis\
-Last edited on 7/27/2021 by Mike McNelis
+Created on 4/20/2021\
+Last edited on 7/27/2021
 
 ## Summary
 A Runge-Kutta ODE solver with a new adaptive step size method.
