@@ -8,9 +8,7 @@ myfloat = type(precision(1))
 
 
 
-
-
-# standard RK methods:
+# standard RK methods (explicit):
 
 # low order (1-3)
 #--------------------------------------------------------------------------------------------------
@@ -330,7 +328,7 @@ feagin_14 = np.array([
 
 
 
-# embedded RK methods:
+# embedded RK methods (explicit):
 
 
 # low order (1-3)
@@ -478,6 +476,9 @@ dormand_prince_8_7 = np.array([
                 [1, 13451932/455176623, 0, 0, 0, 0, -808719846/976000145, 1757004468/5645159321, 656045339/265891186, -3867574721/1518517206, 465885868/322736535,  53011238/667516719, 2/45, 0],
                 [1, 14005451/335480064, 0, 0, 0, 0, -59238493/1068277825, 181606767/758867731, 561292985/797845732, -1041891430/1371343529, 760417239/1151165299, 118820643/751138087, -528747749/2220607170, 1/4]], dtype=myfloat)
 
+
+# todo: find automated way to include these possibilities (take embedded method, option variable: free = None, 1, 2)
+
 # dormand_prince_8_1 = np.array([
 #                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 #                 [1/18, 1/18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -579,58 +580,102 @@ feagin_14_12 = np.array([
 
 
 
+# standard RK methods (implicit):
+
+
+# low order (1-3):
+#--------------------------------------------------------------------------------------------------
+backward_euler_1 = np.array([
+                [1, 1],
+                [1, 1]], dtype = myfloat)
+
+implicit_midpoint_2 = np.array([
+                [1/2, 1/2],
+                [1, 1]], dtype = myfloat)
+
+crank_nicolson_2 = np.array([
+                [0, 0, 0],
+                [1, 1/2, 1/2],
+                [1, 1/2, 1/2]], dtype = myfloat)
+#--------------------------------------------------------------------------------------------------
+
+
+
+
+# embedded RK methods (implicit):
+
+
+# low order (1-3):
+#--------------------------------------------------------------------------------------------------
+crank_nicolson_2_1 = np.array([
+                [0, 0, 0],
+                [1, 1/2, 1/2],
+                [1, 1/2, 1/2],
+                [1, 1, 0]], dtype = myfloat)
+
+
+
+
 # dictionaries
 #--------------------------------------------------------------------------------------------------
-standard_dict = {'E1':     ['euler_1',             euler_1],
-                 'H2':     ['heun_2',              heun_2],
-                 'M2':     ['midpoint_2',          midpoint_2],
-                 'R2':     ['ralston_2',           ralston_2],
-                 'H3':     ['heun_3',              heun_3],
-                 'R3':     ['ralston_3',           ralston_3],
-                 'RK3':    ['runge_kutta_3',       runge_kutta_3],
-                 'SSPRK3': ['ssp_runge_kutta_3',   ssp_runge_kutta_3],
-                 'RK4':    ['runge_kutta_4',       runge_kutta_4],
-                 'TER4':   ['three_eights_rule_4', three_eights_rule_4],
-                 'R4':     ['ralston_4',           ralston_4],
-                 'SSPRK4': ['ssp_runge_kutta_4',   ssp_runge_kutta_4],
-                 'F4':     ['fehlberg_4',          fehlberg_4],
-                 'B5':     ['butcher_5',           butcher_5],
-                 'CK5':    ['cash_karp_5',         cash_karp_5],
-                 'DP5':    ['dormand_prince_5',    dormand_prince_5],
-                 'BS5':    ['bogacki_shampine_5',  bogacki_shampine_5],
-                 'T5':     ['tsitouras_5',         tsitouras_5],
-                 'V5':     ['verner_5',            verner_5],
-                 'B6':     ['butcher_6',           butcher_6],
-                 'V6':     ['verner_6',            verner_6],
-                 'F7':     ['fehlberg_7',          fehlberg_7],
-                 'C8':     ['curtis_8',            curtis_8],
-                 'S8':     ['shanks_8',            shanks_8],
-                 'SP8':    ['shanks_pseudo_8',     shanks_pseudo_8],
-                 'DP8':    ['dormand_prince_8',    dormand_prince_8],
-                 'F10':    ['feagin_10',           feagin_10],
-                 'F14':    ['feagin_14',           feagin_14]}
+standard_dict = {'E1':     ['euler_1',              euler_1],               # explicit
+                 'H2':     ['heun_2',               heun_2],
+                 'M2':     ['midpoint_2',           midpoint_2],
+                 'R2':     ['ralston_2',            ralston_2],
+                 'H3':     ['heun_3',               heun_3],
+                 'R3':     ['ralston_3',            ralston_3],
+                 'RK3':    ['runge_kutta_3',        runge_kutta_3],
+                 'SSPRK3': ['ssp_runge_kutta_3',    ssp_runge_kutta_3],
+                 'RK4':    ['runge_kutta_4',        runge_kutta_4],
+                 'TER4':   ['three_eights_rule_4',  three_eights_rule_4],
+                 'R4':     ['ralston_4',            ralston_4],
+                 'SSPRK4': ['ssp_runge_kutta_4',    ssp_runge_kutta_4],
+                 'F4':     ['fehlberg_4',           fehlberg_4],
+                 'B5':     ['butcher_5',            butcher_5],
+                 'CK5':    ['cash_karp_5',          cash_karp_5],
+                 'DP5':    ['dormand_prince_5',     dormand_prince_5],
+                 'BS5':    ['bogacki_shampine_5',   bogacki_shampine_5],
+                 'T5':     ['tsitouras_5',          tsitouras_5],
+                 'V5':     ['verner_5',             verner_5],
+                 'B6':     ['butcher_6',            butcher_6],
+                 'V6':     ['verner_6',             verner_6],
+                 'F7':     ['fehlberg_7',           fehlberg_7],
+                 'C8':     ['curtis_8',             curtis_8],
+                 'S8':     ['shanks_8',             shanks_8],
+                 'SP8':    ['shanks_pseudo_8',      shanks_pseudo_8],
+                 'DP8':    ['dormand_prince_8',     dormand_prince_8],
+                 'F10':    ['feagin_10',            feagin_10],
+                 'F14':    ['feagin_14',            feagin_14],
+
+                 'BE1':    ['backward_euler_1',     backward_euler_1],      # implicit
+                 'IM2':    ['implicit_midpoint_2',  implicit_midpoint_2],
+                 'CN2':    ['crank_nicolson_2',     crank_nicolson_2]}
 
 
-embedded_dict = {'F12':   ['fehlberg_1_2',         fehlberg_1_2],
-                 'HE21':  ['heun_euler_2_1',       heun_euler_2_1],
-                 'BS32':  ['bogacki_shampine_3_2', bogacki_shampine_3_2],
-                 'F45':   ['fehlberg_4_5',         fehlberg_4_5],
-                 'CK54':  ['cash_karp_5_4',        cash_karp_5_4],
-                 'DP54':  ['dormand_prince_5_4',   dormand_prince_5_4],
-                 'BS54':  ['bogacki_shampine_5_4', bogacki_shampine_5_4],
-                 'T54':   ['tsitouras_5_4',        tsitouras_5_4],
-                 'V56':   ['verner_5_6',           verner_5_6],
-                 'V65':   ['verner_6_5',           verner_6_5],
-                 'F78':   ['fehlberg_7_8',         fehlberg_7_8],
-                 'DP87':  ['dormand_prince_8_7',   dormand_prince_8_7],
-                 # 'DP82':  ['dormand_prince_8_2',   dormand_prince_8_2],
-                 # 'DP81':  ['dormand_prince_8_1',   dormand_prince_8_1],
-                 'F108':  ['feagin_10_8',          feagin_10_8],
-                 'F1412': ['feagin_14_12',         feagin_14_12]}
+embedded_dict = {'F12':    ['fehlberg_1_2',         fehlberg_1_2],          # explicit
+                 'HE21':   ['heun_euler_2_1',       heun_euler_2_1],
+                 'BS32':   ['bogacki_shampine_3_2', bogacki_shampine_3_2],
+                 'F45':    ['fehlberg_4_5',         fehlberg_4_5],
+                 'CK54':   ['cash_karp_5_4',        cash_karp_5_4],
+                 'DP54':   ['dormand_prince_5_4',   dormand_prince_5_4],
+                 'BS54':   ['bogacki_shampine_5_4', bogacki_shampine_5_4],
+                 'T54':    ['tsitouras_5_4',        tsitouras_5_4],
+                 'V56':    ['verner_5_6',           verner_5_6],
+                 'V65':    ['verner_6_5',           verner_6_5],
+                 'F78':    ['fehlberg_7_8',         fehlberg_7_8],
+                 'DP87':   ['dormand_prince_8_7',   dormand_prince_8_7],
+                # 'DP82':   ['dormand_prince_8_2',   dormand_prince_8_2],
+                # 'DP81':   ['dormand_prince_8_1',   dormand_prince_8_1],
+                 'F108':   ['feagin_10_8',          feagin_10_8],
+                 'F1412':  ['feagin_14_12',         feagin_14_12],
+
+                 'CN21':   ['crank_nicolson_2_1',   crank_nicolson_2_1]     # implicit
+                 }
+
+
 
 # note: order of method is conveniently attached to file name
 #--------------------------------------------------------------------------------------------------
-
 
 
 def debug_table(method, butcher):
@@ -649,13 +694,41 @@ def debug_table(method, butcher):
 
 
 
+
+
+# move this function to ode solver I guess
+def explicit_or_implicit(butcher):
+
+    a = butcher[:-1, 1:]                                                # a_ij
+
+    lower_triangular = np.allclose(a, np.tril(a))                       # check whether matrix is lower triangular
+
+    if lower_triangular:
+
+        diag_a = np.diag(a)                                             # diagonal of a_ij
+
+        zero_diagonal = np.array_equal(diag_a, np.zeros(len(diag_a)))   # check whether diagonal elements are all zero
+
+        if zero_diagonal:
+            return 'explicit'
+        else:
+            return 'diagonal_implicit'
+    else:
+        return 'fully_implicit'
+
+
+
+
+
+
 def main():
         for label in standard_dict:                                     # write butcher tables to file
 
                 method = standard_dict[label][0]
-                table = standard_dict[label][1]
+                table  = standard_dict[label][1]
 
                 print(method)
+
                 debug_table(method, table)
 
                 np.savetxt('butcher_tables/standard/' + method + '.dat', table)
@@ -664,9 +737,10 @@ def main():
         for label in embedded_dict:
 
                 method = embedded_dict[label][0]
-                table = embedded_dict[label][1]
+                table  = embedded_dict[label][1]
 
                 print(method)
+
                 debug_table(method, table)
 
                 np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
