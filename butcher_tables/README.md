@@ -4,25 +4,47 @@ These are all of the Runge-Kutta methods I have compiled so far:
 <table>
 <tr valign="top"><td>
 
-|      Standard       |        |
-|:-------------------:|:------:|
-| Euler 1             | E1     |
-| Heun 2              | H2     |
-| Midpoint 2          | M2     |
-| Ralston 2           | R2     |
-| Heun 3              | H3     |
-| Ralston 3           | R3     |
-| Runge Kutta 3       | RK3    |
-| SSP Runge Kutta 3   | SSPRK3 |
+  |  Standard Explicit  |        |
+  |:-------------------:|:------:|
+  | Euler 1             | E1     |
+  | Heun 2              | H2     |
+  | Midpoint 2          | M2     |
+  | Ralston 2           | R2     |
+  | Heun 3              | H3     |
+  | Ralston 3           | R3     |
+  | Runge Kutta 3       | RK3    |
+  | SSP Shu Osher 3     | SSPSO3 |
+  | SSP Spiteri Ruuth 3 | SSPSR3 |
+  
+</td><td valign="top">
+  
+  |   Embedded Explicit   |      |
+  |:---------------------:|:----:|
+  | Fehlberg 1(2)         | F12  |
+  | Heun Euler 2(1)       | HE21 |
+  | Bogacki Shampine 3(2) | BS32 |
+
+</td></tr> </table>
+
+<table>
+<tr valign="top"><td>
+  
+  |   Standard Implicit   |      |
+  |:---------------------:|:----:|
+  | Backward Euler 1      | BE1  |
+  | Implicit Midpoint 2   | IM2  |
+  | Crank Nicolson 2      | CN2  |
+  | Qin Zhang 2           | QZ2  |
+  | Pareschi Russo 2      | PR2  |
+  | Pareschi Russo 3      | PR3  |
+  | Crouzeix 3            | C3   |
 
 </td><td valign="top">
 
-|      Embedded         |      |
-|:---------------------:|:----:|
-| Fehlberg 1(2)         | F12  |
-| Heun Euler 2(1)       | HE21 |
-| Bogacki Shampine 3(2) | BS32 |
-
+  |   Embedded Implicit   |      |
+  |:---------------------:|:----:|
+  | Crank Nicolson 2(1)   | CN21 |
+  
 </td></tr> </table>
 
 Note: SSP = strong stability preserving
@@ -31,7 +53,7 @@ Note: SSP = strong stability preserving
 <table>
 <tr valign="top"><td>
 
-|      Standard       |        |
+| Standard Explicit   |        |
 |:-------------------:|:------:|
 | Runge Kutta 4       | RK4    |
 | Three Eights Rule 4 | TER4   |
@@ -48,7 +70,7 @@ Note: SSP = strong stability preserving
 | Verner 6            | V6     |
   
 </td><td valign="top">
-
+ 
 |      Embedded         |      |
 |:---------------------:|:----:|
 | Fehlberg 4(5)         | F45  |
@@ -58,6 +80,16 @@ Note: SSP = strong stability preserving
 | Tsitouras 5(4)        | T54  |
 | Verner 5(6)           | V56  |
 | Verner 6(5)           | V65  |
+  
+</td></tr> </table>
+
+<table>
+<tr valign="top"><td>
+
+| Standard Implicit   |        |
+|:-------------------:|:------:|
+| Norsett 4             | N4   |
+| Gauss Legendre 4      | GL4  |
 
 </td></tr> </table>
 
