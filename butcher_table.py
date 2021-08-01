@@ -50,11 +50,18 @@ runge_kutta_3 = np.array([
                 [1, 1/6, 2/3, 1/6]], dtype = myfloat)
 
 # ssp = strong stability preserving
-ssp_runge_kutta_3 = np.array([
+ssp_shu_osher_3 = np.array([
                 [0, 0, 0, 0],
                 [1, 1, 0, 0],
                 [1/2, 1/4, 1/4, 0],
                 [1, 1/6, 1/6, 2/3]], dtype = myfloat)
+
+ssp_spiteri_ruuth_3 = np.array([
+                [0, 0, 0, 0, 0],
+                [1/2, 1/2, 0, 0, 0],
+                [1, 1/2, 1/2, 0, 0],
+                [1/2, 1/6, 1/6, 1/6, 0],
+                [1, 1/6, 1/6, 1/6, 1/2]], dtype = myfloat)
 #--------------------------------------------------------------------------------------------------
 
 
@@ -591,13 +598,66 @@ backward_euler_1 = np.array([
 
 implicit_midpoint_2 = np.array([
                 [1/2, 1/2],
-                [1, 1]], dtype = myfloat)
+                [1, 1]], dtype = myfloat)         # symplectic integrator (any way to characterize automatically?)
 
 crank_nicolson_2 = np.array([
                 [0, 0, 0],
                 [1, 1/2, 1/2],
                 [1, 1/2, 1/2]], dtype = myfloat)
+
+qin_zhang_2 = np.array([
+                [1/4, 1/4, 0],
+                [3/4, 1/2, 1/4],
+                [1, 1/2, 1/2]], dtype = myfloat)  # symplectic 
+
+kraaijevanger_spijker_2 = np.array([
+                [1/2, 1/2, 0],
+                [3/2, -1/2, 2],
+                [1, -1/2, 3/2]], dtype = myfloat)
+
+gamma = 1 - 1/(2**0.5)      # https://arxiv.org/pdf/1009.2757.pdf
+
+pareschi_russo_2 = np.array([
+                [gamma, gamma, 0],
+                [1 - gamma, 1 - 2*gamma, gamma],
+                [1, 1/2, 1/2]], dtype = myfloat)
+
+pareschi_russo_3 = np.array([
+                [gamma, gamma, 0, 0],
+                [1 - gamma, 1 - 2*gamma, gamma, 0],
+                [1/2, 1/2 - gamma, 0, gamma],
+                [1, 1/6, 1/6, 2/3]], dtype = myfloat)
+
+crouzeix_3 = np.array([
+                [1/2 + (3**0.5)/6, 1/2 + (3**0.5)/6, 0],
+                [1/2 - (3**0.5)/6, -(3**0.5)/3, 1/2 + (3**0.5)/6],
+                [1, 1/2, 1/2]], dtype = myfloat)
+
+mystery_3 = np.array([
+                [1/2, 1/2, 0, 0, 0],
+                [2/3, 1/6, 1/2, 0, 0],
+                [1/2, -1/2, 1/2, 1/2, 0], 
+                [1, 3/2, -3/2, 1/2, 1/2],
+                [1, 3/2, -3/2, 1/2, 1/2]], dtype = myfloat)
+
+x1 = 1.06857902130163       # https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods
+
+norsett_4 = np.array([
+                [x1, x1, 0, 0],
+                [1/2, 1/2 - x1, x1, 0],
+                [1 - x1, 2*x1, 1 - 4*x1, x1],
+                [1, 1/(6*(1 - 2*x1)**2), 1 - 1/(3*(1 - 2*x1)**2), 1/(6*(1 - 2*x1)**2)]], dtype = myfloat)
+
+
 #--------------------------------------------------------------------------------------------------
+
+
+# mid order (4-6)
+#--------------------------------------------------------------------------------------------------
+gauss_legendre_4 = np.array([
+                [1/2 - (3**0.5)/6, 1/4, 1/4 - (3**0.5)/6],
+                [1/2 + (3**0.5)/6, 1/4 + (3**0.5)/6, 1/4],
+                [1, 1/2, 1/2]], dtype = myfloat)
 
 
 
@@ -613,63 +673,74 @@ crank_nicolson_2_1 = np.array([
                 [1, 1/2, 1/2],
                 [1, 1, 0]], dtype = myfloat)
 
-
+gauss_legendre_4_2 = np.array([
+                [1/2 - (3**0.5)/6, 1/4, 1/4 - (3**0.5)/6],
+                [1/2 + (3**0.5)/6, 1/4 + (3**0.5)/6, 1/4],
+                [1, 1/2, 1/2], 
+                [1, 1/2 + (3**0.5)/2, 1/2 - (3**0.5)/2]], dtype = myfloat)
 
 
 # dictionaries
 #--------------------------------------------------------------------------------------------------
-standard_dict = {'E1':     ['euler_1',              euler_1],               # explicit
-                 'H2':     ['heun_2',               heun_2],
-                 'M2':     ['midpoint_2',           midpoint_2],
-                 'R2':     ['ralston_2',            ralston_2],
-                 'H3':     ['heun_3',               heun_3],
-                 'R3':     ['ralston_3',            ralston_3],
-                 'RK3':    ['runge_kutta_3',        runge_kutta_3],
-                 'SSPRK3': ['ssp_runge_kutta_3',    ssp_runge_kutta_3],
-                 'RK4':    ['runge_kutta_4',        runge_kutta_4],
-                 'TER4':   ['three_eights_rule_4',  three_eights_rule_4],
-                 'R4':     ['ralston_4',            ralston_4],
-                 'SSPRK4': ['ssp_runge_kutta_4',    ssp_runge_kutta_4],
-                 'F4':     ['fehlberg_4',           fehlberg_4],
-                 'B5':     ['butcher_5',            butcher_5],
-                 'CK5':    ['cash_karp_5',          cash_karp_5],
-                 'DP5':    ['dormand_prince_5',     dormand_prince_5],
-                 'BS5':    ['bogacki_shampine_5',   bogacki_shampine_5],
-                 'T5':     ['tsitouras_5',          tsitouras_5],
-                 'V5':     ['verner_5',             verner_5],
-                 'B6':     ['butcher_6',            butcher_6],
-                 'V6':     ['verner_6',             verner_6],
-                 'F7':     ['fehlberg_7',           fehlberg_7],
-                 'C8':     ['curtis_8',             curtis_8],
-                 'S8':     ['shanks_8',             shanks_8],
-                 'SP8':    ['shanks_pseudo_8',      shanks_pseudo_8],
-                 'DP8':    ['dormand_prince_8',     dormand_prince_8],
-                 'F10':    ['feagin_10',            feagin_10],
-                 'F14':    ['feagin_14',            feagin_14],
+standard_dict = {'E1':     ['euler_1',                 euler_1],                # explicit
+                 'H2':     ['heun_2',                  heun_2],                 # SSP (strong stability preserving)
+                 'M2':     ['midpoint_2',              midpoint_2],
+                 'R2':     ['ralston_2',               ralston_2],
+                 'H3':     ['heun_3',                  heun_3],
+                 'R3':     ['ralston_3',               ralston_3],
+                 'RK3':    ['runge_kutta_3',           runge_kutta_3],
+                 'SSPSO3': ['ssp_shu_osher_3',         ssp_shu_osher_3],           
+                 'SSPSR3': ['ssp_spiteri_ruuth_3',     ssp_spiteri_ruuth_3],       
+                 'RK4':    ['runge_kutta_4',           runge_kutta_4],
+                 'TER4':   ['three_eights_rule_4',     three_eights_rule_4],
+                 'R4':     ['ralston_4',               ralston_4],
+                 'SSPRK4': ['ssp_runge_kutta_4',       ssp_runge_kutta_4],     
+                 'F4':     ['fehlberg_4',              fehlberg_4],
+                 'B5':     ['butcher_5',               butcher_5],
+                 'CK5':    ['cash_karp_5',             cash_karp_5],
+                 'DP5':    ['dormand_prince_5',        dormand_prince_5],
+                 'BS5':    ['bogacki_shampine_5',      bogacki_shampine_5],
+                 'T5':     ['tsitouras_5',             tsitouras_5],
+                 'V5':     ['verner_5',                verner_5],
+                 'B6':     ['butcher_6',               butcher_6],
+                 'V6':     ['verner_6',                verner_6],
+                 'F7':     ['fehlberg_7',              fehlberg_7],
+                 'C8':     ['curtis_8',                curtis_8],
+                 'S8':     ['shanks_8',                shanks_8],
+                 'SP8':    ['shanks_pseudo_8',         shanks_pseudo_8],
+                 'DP8':    ['dormand_prince_8',        dormand_prince_8],
+                 'F10':    ['feagin_10',               feagin_10],
+                 'F14':    ['feagin_14',               feagin_14],
 
-                 'BE1':    ['backward_euler_1',     backward_euler_1],      # implicit
-                 'IM2':    ['implicit_midpoint_2',  implicit_midpoint_2],
-                 'CN2':    ['crank_nicolson_2',     crank_nicolson_2]}
+                 'BE1':    ['backward_euler_1',        backward_euler_1],       # implicit
+                 'IM2':    ['implicit_midpoint_2',     implicit_midpoint_2],
+                 'CN2':    ['crank_nicolson_2',        crank_nicolson_2],
+                 'QZ2':    ['qin_zhang_2',             qin_zhang_2],
+                 'PR2':    ['pareschi_russo_2',        pareschi_russo_2],
+                 'PR3':    ['pareschi_russo_3',        pareschi_russo_3],
+                 'KS2':    ['kraaijevanger_spijker_2', kraaijevanger_spijker_2],
+                 'C3':     ['crouzeix_3',              crouzeix_3],
+                 'N4':     ['norsett_4',               norsett_4],
+                 'GL4':    ['gauss_legendre_4',        gauss_legendre_4]}
 
 
-embedded_dict = {'F12':    ['fehlberg_1_2',         fehlberg_1_2],          # explicit
-                 'HE21':   ['heun_euler_2_1',       heun_euler_2_1],
-                 'BS32':   ['bogacki_shampine_3_2', bogacki_shampine_3_2],
-                 'F45':    ['fehlberg_4_5',         fehlberg_4_5],
-                 'CK54':   ['cash_karp_5_4',        cash_karp_5_4],
-                 'DP54':   ['dormand_prince_5_4',   dormand_prince_5_4],
-                 'BS54':   ['bogacki_shampine_5_4', bogacki_shampine_5_4],
-                 'T54':    ['tsitouras_5_4',        tsitouras_5_4],
-                 'V56':    ['verner_5_6',           verner_5_6],
-                 'V65':    ['verner_6_5',           verner_6_5],
-                 'F78':    ['fehlberg_7_8',         fehlberg_7_8],
-                 'DP87':   ['dormand_prince_8_7',   dormand_prince_8_7],
-                # 'DP82':   ['dormand_prince_8_2',   dormand_prince_8_2],
-                # 'DP81':   ['dormand_prince_8_1',   dormand_prince_8_1],
-                 'F108':   ['feagin_10_8',          feagin_10_8],
-                 'F1412':  ['feagin_14_12',         feagin_14_12],
+embedded_dict = {'F12':    ['fehlberg_1_2',            fehlberg_1_2],           # explicit
+                 'HE21':   ['heun_euler_2_1',          heun_euler_2_1],
+                 'BS32':   ['bogacki_shampine_3_2',    bogacki_shampine_3_2],
+                 'F45':    ['fehlberg_4_5',            fehlberg_4_5],
+                 'CK54':   ['cash_karp_5_4',           cash_karp_5_4],
+                 'DP54':   ['dormand_prince_5_4',      dormand_prince_5_4],
+                 'BS54':   ['bogacki_shampine_5_4',    bogacki_shampine_5_4],
+                 'T54':    ['tsitouras_5_4',           tsitouras_5_4],
+                 'V56':    ['verner_5_6',              verner_5_6],
+                 'V65':    ['verner_6_5',              verner_6_5],
+                 'F78':    ['fehlberg_7_8',            fehlberg_7_8],
+                 'DP87':   ['dormand_prince_8_7',      dormand_prince_8_7],
+                 'F108':   ['feagin_10_8',             feagin_10_8],
+                 'F1412':  ['feagin_14_12',            feagin_14_12],
 
-                 'CN21':   ['crank_nicolson_2_1',   crank_nicolson_2_1]     # implicit
+                 'CN21':   ['crank_nicolson_2_1',      crank_nicolson_2_1],     # implicit
+                 'GL42':   ['gauss_legendre_4_2',      gauss_legendre_4_2]
                  }
 
 
@@ -689,17 +760,17 @@ def debug_table(method, butcher):
     error = np.linalg.norm(reduce_block - first_column, ord = np.inf)   # take the max error element
 
     if error > 1.e-14:
-        print('\ndebug_table warning:', method, 'table does not satisfy usual conditions, error = %.3e (debug table)\n' % error)
+        print('\ndebug_table warning:', method, 'table does not satisfy usual conditions, error = %.3e (may need to debug table)\n' % error)
 
 
 
+# check if butcher is explicit or diagonal (fully) impliciy (also for debugging table)
+def explicit_or_implicit_method(butcher, embedded = False):
 
-
-
-# move this function to ode solver I guess
-def explicit_or_implicit(butcher):
-
-    a = butcher[:-1, 1:]                                                # a_ij
+    if embedded:
+        a = butcher[:-2, 1:]
+    else:
+        a = butcher[:-1, 1:]                                            # a_ij
 
     lower_triangular = np.allclose(a, np.tril(a))                       # check whether matrix is lower triangular
 
@@ -718,28 +789,26 @@ def explicit_or_implicit(butcher):
 
 
 
-
-
-
 def main():
         for label in standard_dict:                                     # write butcher tables to file
 
                 method = standard_dict[label][0]
                 table  = standard_dict[label][1]
 
-                print(method)
+                print(method, '\t', explicit_or_implicit_method(table))
 
                 debug_table(method, table)
 
                 np.savetxt('butcher_tables/standard/' + method + '.dat', table)
 
+        print()
 
         for label in embedded_dict:
 
                 method = embedded_dict[label][0]
                 table  = embedded_dict[label][1]
 
-                print(method)
+                print(method, '\t', explicit_or_implicit_method(table, embedded = True))
 
                 debug_table(method, table)
 

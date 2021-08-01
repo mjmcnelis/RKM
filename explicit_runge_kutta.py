@@ -37,6 +37,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
     for i in range(1, stages):                              # loop over remaining intermediate Euler steps
         dy = 0
+        
         for j in range(0, i):
             dy += dy_array[j] * butcher[i,j+1]
 
@@ -48,6 +49,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
     if embedded:                                            # secondary RK iteration (for embedded RK)
         dyhat = 0
+
         for i in range(0, stages):
             dyhat += dy_array[i] * butcher[stages+1,i+1]
 

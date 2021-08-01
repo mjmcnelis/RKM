@@ -27,7 +27,7 @@ def y_exact(t):
         return np.array([math.exp(10*t)], dtype = myfloat).reshape(-1,1)
 
 
-# dy/dt of exact solution
+# dy/dt = f of exact solution
 def y_prime(t, y):
     if solution is 'logistic':
         return (y + B) * (1 - y - B)
@@ -39,6 +39,24 @@ def y_prime(t, y):
         return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
     elif solution is 'exponential':
         return 10*y
+
+# jacobian df/dy of exact solution
+def jacobian(t, y):
+    if solution is 'logistic':
+        return 1 - 2*(y + B)
+
+
+
+
+
+    # elif solution is 'gaussian':
+    #     return - 2 * t * y
+    # elif solution is 'inverse_power':
+    #     return -2*(y**1.5)
+    # elif solution is 'sine':
+    #     return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
+    # elif solution is 'exponential':
+    #     return 10*y
 
 
 solution_dict = {'gaussian':        r"$y^{'} = -2ty$",

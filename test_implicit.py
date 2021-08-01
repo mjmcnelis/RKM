@@ -23,12 +23,15 @@ else:
 	tf = 10
 y0 = exact_solution.y_exact(t0)
 y_prime = exact_solution.y_prime
+jacobian = exact_solution.jacobian
 
 dt0 = 0.01
 
-method = 'CN2'
+solver = 'RKM'
+method = 'C3'
+root = 'newton_fast'
 
-y, t, dt, evaluations, reject, finish = ode_implicit(y0, t0, tf, dt0, y_prime, method)
+y, t, dt, evaluations, reject, finish = ode_implicit(y0, t0, tf, dt0, y_prime, jacobian, solver, method, root = root)  
 
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4), squeeze = False)
 axes[0][0].plot(t, y[:,0], 'blue', linewidth = 1.5)

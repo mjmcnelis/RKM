@@ -2,6 +2,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.core.defchararray import upper
 
 from precision import precision     # for myfloat
 from butcher_table import standard_dict, embedded_dict
@@ -64,6 +65,53 @@ def get_order(solver, method):
         order = int(method.split('_')[-1])              # order of standard method
 
     return order
+
+
+
+def get_method_type(butcher, solver):
+
+    if solver is 'ERK':
+        a = butcher[:-2, 1:]
+    else:
+        a = butcher[:-1, 1:]                                            # a_ij
+
+    lower_triangular = np.allclose(a, np.tril(a))                       # check whether matrix is lower triangular
+
+    if lower_triangular:
+
+        diag_a = np.diag(a)                                             # diagonal of a_ij
+
+        zero_diagonal = np.array_equal(diag_a, np.zeros(len(diag_a)))   # check whether diagonal elements are all zero
+
+        if zero_diagonal:
+            return 'explicit'
+        else:
+            return 'diagonal_implicit'
+    else:
+        return 'fully_implicit'
+
+
+
+def get_explicit_stages(butcher, solver):
+
+    if solver is 'ERK':
+        a = butcher[:-2, 1:]                                    # get a_ij block of butcher table
+    else:
+        a = butcher[:-1, 1:]
+
+    stages = a.shape[0]                                         # number of stages in a_ij
+
+    explicit_stages = np.zeros(stages)                          # 0 = implicit, 1 = explicit
+
+    for i in range(0, stages):
+        upper_right_row = a[i, i:]                              # get row, starting with diagonal entry
+
+        upper_right_row_zero = np.array_equal(upper_right_row, np.zeros(len(upper_right_row)))
+
+        if upper_right_row_zero:
+            explicit_stages[i] = 1                              # mark stage as explicit 
+
+    return explicit_stages
 
 
 
@@ -186,9 +234,9 @@ def ode_solver(y0, t0, tf, dt0, y_prime, solver, method_label, norm = None, eps 
 
 
 
+def ode_implicit(y0, t0, tf, dt0, y_prime, jacobian, solver, method_label, root = 'fixed_point', norm = None, eps = 1.e-8, n_max = 10000):
 
-
-def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-8, n_max = 10000):
+    # for testing purposes, the implicit solver is separated from ode_solver()
 
     y = y0                                                      # set initial conditions
     t = t0
@@ -197,17 +245,22 @@ def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-
     y_prev = y0                                                 # for RKM
     dt_next = dt                                                # for ERK/SDRK
 
-    solver = 'RKM'  # temp
-
     y_array  = np.empty(shape = [0], dtype = myfloat)           # construct arrays for (y, t, dt)
     t_array  = np.empty(shape = [0], dtype = myfloat)
     dt_array = np.empty(shape = [0], dtype = myfloat)
-
-    method  = get_method_fname(method_label)
-
+    
+    method  = get_method_fname(method_label)                    # filename corresponding to code label
     butcher = get_butcher_table(solver, method)                 # read in butcher table
     order   = get_order(solver, method)                         # get order of method
     stages  = get_stages(butcher, solver, method)
+    
+    method_type = get_method_type(butcher, solver)              # explicit or diagonal (fully) implicit 
+
+    if(method_type is 'fully_implicit'):                        # for now we only at diagonal implicit methods
+        print('ode_implicit error: method is %s' % method_type)
+        quit()
+
+    explicit_stages = get_explicit_stages(butcher, solver)      # mark explicit stages so we can evaluate them w/o reiterating
 
     eps = rescale_epsilon(eps, solver, order)                   # rescale epsilon_0
 
@@ -220,7 +273,7 @@ def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-
         y_array = np.append(y_array, y).reshape(-1, y.shape[0]) # append arrays
         t_array = np.append(t_array, t)
 
-        y, iterations = implicit_runge_kutta.standard_DIRK_step(y, t, dt, y_prime, butcher)     # will also have to account for iterations in standard RK routine
+        y, iterations = implicit_runge_kutta.standard_DIRK_step(y, t, dt, y_prime, jacobian, butcher, explicit_stages, root = root)     
 
         total_iterations += iterations
 
@@ -232,7 +285,6 @@ def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-
 
         t += dt
 
-
     steps = n
 
     # total_iterations is for implicit (set to 1 if explicit)
@@ -241,7 +293,7 @@ def ode_implicit(y0, t0, tf, dt0, y_prime, method_label, norm = None, eps = 1.e-
     # rejection_rate = 100 * (1 - steps/total_attempts)           # percentage of attempts that were rejected
     rejection_rate = 0
 
-    evaluations = total_iterations * stages
+    evaluations = total_iterations
 
     return y_array, t_array, dt_array, evaluations, rejection_rate, finish
 
