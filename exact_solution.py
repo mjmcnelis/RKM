@@ -34,7 +34,7 @@ def y_prime(t, y):
     elif solution is 'gaussian':
         return - 2 * t * y
     elif solution is 'inverse_power':
-        return -2*(y**1.5)
+        return -2 * (y**1.5)
     elif solution is 'sine':
         return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
     elif solution is 'exponential':
@@ -44,19 +44,12 @@ def y_prime(t, y):
 def jacobian(t, y):
     if solution is 'logistic':
         return 1 - 2*(y + B)
-
-
-
-
-
-    # elif solution is 'gaussian':
-    #     return - 2 * t * y
-    # elif solution is 'inverse_power':
-    #     return -2*(y**1.5)
-    # elif solution is 'sine':
-    #     return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
-    # elif solution is 'exponential':
-    #     return 10*y
+    elif solution is 'gaussian':
+        return - 2 * t
+    elif solution is 'inverse_power':
+        return - 3 * (y**0.5)
+    elif solution is 'exponential':
+        return 10
 
 
 solution_dict = {'gaussian':        r"$y^{'} = -2ty$",

@@ -28,15 +28,15 @@ dt0 = dt_MAX
 solver = 'RKM'
 
 if solver is not 'ERK':
-    method = 'RK4'
+	method = 'RK4'
 
-    if solver is 'RKM':
-    	suffix = 'M'
-    else:
-    	suffix = 'SD'
+	if solver is 'RKM':
+		suffix = 'M'
+	else:
+		suffix = 'SD'
 else:
-    method = 'F45'
-    suffix = ''
+	method = 'F45'
+	suffix = ''
 
 y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, solver, method)
 
@@ -67,7 +67,7 @@ axes[0][1].set_ylim(0.8*min(dt), 1.2*max(dt))
 axes[0][1].set_xticks(np.round(np.linspace(t0, tf, 5), 2))
 axes[0][1].tick_params(labelsize = 10)
 fig.tight_layout()
-fig.savefig("test_exact.png", dpi = 200)
+# fig.savefig("test_explicit.png", dpi = 200)
 plt.show()
 
 

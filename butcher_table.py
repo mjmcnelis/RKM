@@ -610,10 +610,10 @@ qin_zhang_2 = np.array([
                 [3/4, 1/2, 1/4],
                 [1, 1/2, 1/2]], dtype = myfloat)  # symplectic 
 
-kraaijevanger_spijker_2 = np.array([
-                [1/2, 1/2, 0],
-                [3/2, -1/2, 2],
-                [1, -1/2, 3/2]], dtype = myfloat)
+# kraaijevanger_spijker_2 = np.array([
+#                 [1/2, 1/2, 0],
+#                 [3/2, -1/2, 2],
+#                 [1, -1/2, 3/2]], dtype = myfloat)
 
 gamma = 1 - 1/(2**0.5)      # https://arxiv.org/pdf/1009.2757.pdf
 
@@ -718,7 +718,7 @@ standard_dict = {'E1':     ['euler_1',                 euler_1],                
                  'QZ2':    ['qin_zhang_2',             qin_zhang_2],
                  'PR2':    ['pareschi_russo_2',        pareschi_russo_2],
                  'PR3':    ['pareschi_russo_3',        pareschi_russo_3],
-                 'KS2':    ['kraaijevanger_spijker_2', kraaijevanger_spijker_2],
+                #  'KS2':    ['kraaijevanger_spijker_2', kraaijevanger_spijker_2],
                  'C3':     ['crouzeix_3',              crouzeix_3],
                  'N4':     ['norsett_4',               norsett_4],
                  'GL4':    ['gauss_legendre_4',        gauss_legendre_4]}

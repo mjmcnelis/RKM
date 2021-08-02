@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-from ode_solver import ode_implicit
+from ode_solver import ode_solver
 from explicit_runge_kutta import dt_MAX
 from precision import precision
 import exact_solution
@@ -21,17 +21,20 @@ elif solution is 'inverse_power':
 else:
 	t0 = -10
 	tf = 10
+
 y0 = exact_solution.y_exact(t0)
 y_prime = exact_solution.y_prime
 jacobian = exact_solution.jacobian
 
-dt0 = 0.01
+dt0 = dt_MAX
 
-solver = 'RKM'
-method = 'C3'
+adaptive = 'ERK'
+method = 'CN21'
 root = 'newton_fast'
 
-y, t, dt, evaluations, reject, finish = ode_implicit(y0, t0, tf, dt0, y_prime, jacobian, solver, method, root = root)  
+y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method, jacobian = jacobian, eps = 1.e-6, root = root)  
+
+print('rejection rate = %.1f %%' % reject)
 
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4), squeeze = False)
 axes[0][0].plot(t, y[:,0], 'blue', linewidth = 1.5)

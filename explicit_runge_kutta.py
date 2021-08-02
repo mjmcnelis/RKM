@@ -27,9 +27,17 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
     # butcher  = Butcher table
     # embedded = return primary/secondary solutions if True
 
-    if embedded:                                            # get number of stages from Butcher table
+    if embedded:                                            # get c_i, A_ij, b_i and number of stages from Butcher table
+        c = butcher[:-2, 0]
+        A = butcher[:-2, 1:] 
+        b = butcher[-2, 1:]
+        bhat = butcher[-1, 1:]
         stages = butcher.shape[0] - 2
+        
     else:
+        c = butcher[:-1, 0]
+        A = butcher[:-1, 1:] 
+        b = butcher[-1, 1:]
         stages = butcher.shape[0] - 1
 
     dy_array = [0] * stages
@@ -39,19 +47,20 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
         dy = 0
         
         for j in range(0, i):
-            dy += dy_array[j] * butcher[i,j+1]
+            dy += dy_array[j] * A[i,j]
 
-        dy_array[i] = dt * y_prime(t + dt*butcher[i,0], y + dy)
+        dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
 
     dy = 0
-    for i in range(0, stages):                              # primary RK iteration (Butcher notation)
-        dy += dy_array[i] * butcher[stages,i+1]
+
+    for j in range(0, stages):                              # primary RK iteration (Butcher notation)
+        dy += dy_array[j] * b[j]
 
     if embedded:                                            # secondary RK iteration (for embedded RK)
         dyhat = 0
 
-        for i in range(0, stages):
-            dyhat += dy_array[i] * butcher[stages+1,i+1]
+        for j in range(0, stages):
+            dyhat += dy_array[j] * bhat[j]
 
         return (y + dyhat), (y + dy)                        # updated ERK solutions (secondary, primary)
 
@@ -178,7 +187,7 @@ def ERK_step(y0, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
 def SDRK_step(y, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
               dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
 
-    # routine is very similar to ERK
+    # routine is very similar to ERK_step()
 
     order = int(method.split('_')[-1])                      # get order of method
     power = 1 / (1 + order)
