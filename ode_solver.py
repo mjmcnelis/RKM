@@ -120,9 +120,11 @@ def get_explicit_stages(butcher, adaptive):
 
 def rescale_epsilon(eps, adaptive, order):
 
-    if adaptive is 'RKM':                                       # todo: look into rescaling SDRK's eps by Richardson factor
-        eps = eps**(2/(1+order))
-        # eps = eps**(1/order)
+    # comment for implicit RKM runs for now
+    
+    # if adaptive is 'RKM':                                       # todo: look into rescaling SDRK's eps by Richardson factor
+    #     eps = eps**(2/(1+order))
+    #     # eps = eps**(1/order)
 
     return eps
 
@@ -232,8 +234,40 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
 
         elif solver is 'diagonal_implicit':                     # diagonal implicit RK routines
 
+            # RKM
+            if adaptive is 'RKM':
+
+                if n == 0:
+                    # method_SD = 'backward_euler_1'              # adjust initial step size w/ step-doubling
+                    # butcher_SD = get_butcher_table('SDRK', method_SD)
+                    # stage_explicit_SD = np.zeros(1)
+
+                    # todo: put in step-doubling implicit euler?
+                    # dt_next, evals = implicit_runge_kutta.estimate_step_size(y, t, dt_next, y_prime, jacobian, method_SD, butcher_SD,     
+                    #                                                          stage_explicit_SD, root = root, eps = eps/2, norm = norm) 
+                    # evaluations += evals
+
+                    # temp: use explicit version
+                    method_SD = 'euler_1'                       # adjust initial step size w/ step-doubling
+                    butcher_SD = get_butcher_table('SDRK', method_SD)
+                    dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, method_SD, butcher_SD, eps = eps/2, norm = norm)
+                    evaluations += 2 * tries_SD
+
+                    dt = dt_next
+
+                    y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
+                                                                  root = root, eps = eps, norm = norm)
+                    evaluations += evals
+
+                else:
+                    y, y_prev, dt, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
+                                                                              root = root, eps = eps, norm = norm,
+                                                                              adaptive = 'RKM', method = method, y_prev = y_prev)
+                    evaluations += evals
+                    total_attempts += 1
+
             # embedded
-            if adaptive is 'ERK':
+            elif adaptive is 'ERK':
                 y, dt, dt_next, tries, evals = implicit_runge_kutta.EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit, 
                                                                                root = root, eps = eps, norm = norm) 
                 evaluations += evals

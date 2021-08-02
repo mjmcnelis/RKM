@@ -25,12 +25,12 @@ y0 = exact_solution.y_exact(t0)
 y_prime = exact_solution.y_prime
 
 dt0 = dt_MAX
-solver = 'RKM'
+adaptive = 'RKM'
 
-if solver is not 'ERK':
+if adaptive is not 'ERK':
 	method = 'RK4'
 
-	if solver is 'RKM':
+	if adaptive is 'RKM':
 		suffix = 'M'
 	else:
 		suffix = 'SD'
@@ -38,7 +38,7 @@ else:
 	method = 'F45'
 	suffix = ''
 
-y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, solver, method)
+y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method)
 
 print('rejection rate = %.1f %%' % reject)
 

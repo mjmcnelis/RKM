@@ -4,24 +4,58 @@ import numpy as np
 from numpy.core.numeric import identity
 from scipy.optimize import fsolve
 from precision import precision
-from explicit_runge_kutta import dt_MAX, dt_MIN, HIGH, LOW		# todo: make a separate parameters file
+from explicit_runge_kutta import dt_MIN, dt_MAX, LOW, HIGH, HIGH_RKM	# todo: make a separate parameters file
 myfloat = type(precision(1))
 
 EPS_ROOT = 1.e-5
 ITER = 10
 
+# compute dt using RKM algorithm
+def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, 
+				   dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
+
+	# same subroutine in RKM_step()
+
+	order = int(method.split('_')[-1])                     
+
+	high = high**(1/order)
+
+	y_star = y + dt_prev*k1
+
+	C = 2 * (y_star - 2*y + y_prev) / dt_prev**2
+
+	C_norm = np.linalg.norm(C,  ord = norm)
+	y_norm = np.linalg.norm(y,  ord = norm)
+	f_norm = np.linalg.norm(k1, ord = norm)
+
+	if C_norm == 0:
+		dt = dt_prev
+	else:
+		if (C_norm * y_norm) > (2 * eps * f_norm**2):
+			dt = (2 * eps * y_norm / C_norm)**0.5
+		else:
+			dt = 2 * eps * f_norm / C_norm
+
+		dt = min(high*dt_prev, max(low*dt_prev, dt))
+
+	dt = min(dt_max, max(dt_min, dt))
+
+	return dt
+
 
 
 # diagonal implicit Runge Kutta step
 def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = False, 
-				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITER):
+				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITER, 
+				  adaptive = None, method = None, y_prev = None, eps = 1.e-8, norm = None):		
 
-	# should I default jacobian to 0?
+	# last five arguments are for RKM
 
-	# todo: i should pass standard_RK or standard_DIRK, etc (with non-common parameters as kargs)
+	# RKM note: should I always use forward Euler stage f(t,y) for RKM algorithm
+	#			because I probably need to recompute the first implicit stage anyway (since it depends on dt)
 
-	# so far, code supports diagonal implicit Runge Kutta
-	# todo: in standard_RK, account for implicit stages (make function called evaluate_stage(), put inside for loop?)
+	# RKM idea: if first stage is not explicit, then should I save new dt for the next Newton iteration?
+	
 
 	# print(y_prime(t, y), y_prime(t, y).shape)
 	# print()
@@ -54,7 +88,14 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 			for j in range(0, i):
 				dy += dy_array[j] * A[i,j]
 
-			dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
+			if i == 0 and adaptive is 'RKM':						# if first stage is explicit, then c[0] = dy = 0
+				k1 = y_prime(t, y)
+				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
+
+				dy_array[i] = k1 * dt
+
+			else:
+				dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
 
 			evaluations += 1
 		
@@ -95,7 +136,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 					evaluations += 1
 
-				delta   = np.linalg.norm(z - z_prev, ord = None)
+				delta   = np.linalg.norm(z - z_prev, ord = None)	# todo: pass the norm value
 				dy_norm = np.linalg.norm(z, ord = None)
 
 				tolerance = eps_root * dy_norm
@@ -112,7 +153,10 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 	for j in range(0, stages):										# primary RK update
 		dy += dy_array[j] * b[j]									
 
-	if embedded:
+	if adaptive is 'RKM':
+		return y + dy, y, dt, evaluations							# return variables for RKM step
+
+	elif embedded:
 		dyhat = 0
 
 		for j in range(0, stages):									# secondary RK update (for embedded schemes)
@@ -224,13 +268,13 @@ def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
         #     print('SDDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
         # full RK step
-		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root) 
+		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
 
         # two half RK steps
-		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root) 
+		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
 		t_mid = t + dt/2
 
-		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root) 
+		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
 
 		evaluations += (evals_1 + evals_mid + evals_2)
 
@@ -293,7 +337,7 @@ def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
         #     print('EDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
 		# propose updated solution (secondary, primary)
-		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = True, root = root) 
+		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = True, root = root, norm = norm) 
 
 		evaluations += evals
 

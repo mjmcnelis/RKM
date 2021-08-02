@@ -28,8 +28,10 @@ jacobian = exact_solution.jacobian
 
 dt0 = dt_MAX
 
-adaptive = 'ERK'
-method = 'CN21'
+adaptive = 'RKM'
+method = 'CN2'
+# adaptive = 'ERK'
+# method = 'CN21'
 root = 'newton_fast'
 
 y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method, jacobian = jacobian, eps = 1.e-6, root = root)  
