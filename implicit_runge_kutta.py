@@ -83,18 +83,19 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 	for i in range(0, stages):
 		
 		if stage_explicit[i]:										# if stage is explicit, can evaluate it directly (no iterations required)
-			dy = 0
-
-			for j in range(0, i):
-				dy += dy_array[j] * A[i,j]
-
 			if i == 0 and adaptive is 'RKM':						# if first stage is explicit, then c[0] = dy = 0
 				k1 = y_prime(t, y)
+
 				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
 
-				dy_array[i] = k1 * dt
+				dy_array[i] = dt * k1
 
 			else:
+				dy = 0
+
+				for j in range(0, i):
+					dy += dy_array[j] * A[i,j]
+
 				dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
 
 			evaluations += 1
@@ -109,6 +110,16 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 			z = dy_array[i]											# current stage dy^(i) that we need to iterate
 			z_prev = 0
 
+			if i == 0 and adaptive is 'RKM':					
+				k1 = y_prime(t + dt*c[i], y)
+
+				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
+				
+				if root is not 'fixed_point':
+					g = - dt * k1
+				else:
+					z = dt * k1
+
 			if root is 'newton_fast':
 				J = identity  -  Aii * dt * jacobian(t, y)			# only evaluate jacobian once
 
@@ -118,7 +129,8 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 				if root is not 'fixed_point':
 
-					g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)	# solve nonlinear system g(z) = 0 via Newton's method
+					if adaptive is None or n > 0 or i > 0:			# solve nonlinear system g(z) = 0 via Newton's method
+						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)	
 
 					evaluations += 1
 
@@ -126,18 +138,19 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 						J = identity  -  Aii * dt * jacobian(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += dimension
-
+					
 					dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))		
 
 					z += dz											# Newton iteration (linalg only supports float64)
 
 				else:
-					z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)	# solve nonlinear system g(z) = 0 via fixed point iteration
+					if adaptive is None or n > 0 or i > 0:			# solve nonlinear system g(z) = 0 via fixed point iteration
+						z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)	
 
 					evaluations += 1
 
-				delta   = np.linalg.norm(z - z_prev, ord = None)	# todo: pass the norm value
-				dy_norm = np.linalg.norm(z, ord = None)
+				delta   = np.linalg.norm(z - z_prev, ord = norm)	
+				dy_norm = np.linalg.norm(z, ord = norm)
 
 				tolerance = eps_root * dy_norm
 

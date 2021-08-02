@@ -29,7 +29,7 @@ jacobian = exact_solution.jacobian
 dt0 = dt_MAX
 
 adaptive = 'RKM'
-method = 'CN2'
+method = 'IM2'
 # adaptive = 'ERK'
 # method = 'CN21'
 root = 'newton_fast'
