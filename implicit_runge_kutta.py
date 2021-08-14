@@ -7,8 +7,13 @@ from precision import precision
 from explicit_runge_kutta import dt_MIN, dt_MAX, LOW, HIGH, HIGH_RKM	# todo: make a separate parameters file
 myfloat = type(precision(1))
 
-EPS_ROOT = 1.e-5
-ITER = 10
+# EPS_ROOT = 1.e-6
+# ITER = 2
+
+EPS_ROOT = 1.e-3
+ITER = 1
+
+RECOMPUTE_K1 = False
 
 # compute dt using RKM algorithm
 def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, 
@@ -16,7 +21,7 @@ def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None,
 
 	# same subroutine in RKM_step()
 
-	order = int(method.split('_')[-1])                     
+	order = int(method.split('_')[-1])                   
 
 	high = high**(1/order)
 
@@ -49,6 +54,10 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITER, 
 				  adaptive = None, method = None, y_prev = None, eps = 1.e-8, norm = None):		
 
+
+	# I feel like now there's a bug with adaptive = None (does fixed time step skip any calculations, evaluations?)
+
+
 	# last five arguments are for RKM
 
 	# RKM note: should I always use forward Euler stage f(t,y) for RKM algorithm
@@ -56,7 +65,6 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 	# RKM idea: if first stage is not explicit, then should I save new dt for the next Newton iteration?
 	
-
 	# print(y_prime(t, y), y_prime(t, y).shape)
 	# print()
 	# print(jacobian(t, y), jacobian(t, y).shape)
@@ -113,8 +121,14 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 			if i == 0 and adaptive is 'RKM':					
 				k1 = y_prime(t + dt*c[i], y)
 
+				evaluations += 1
+
 				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
 				
+				if RECOMPUTE_K1:
+					k1 = y_prime(t + dt*c[i], y)				     # should I re-evaluate it?
+					evaluations += 1                                 # I don't see much impact (just more evals)
+
 				if root is not 'fixed_point':
 					g = - dt * k1
 				else:
@@ -129,10 +143,10 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 				if root is not 'fixed_point':
 
-					if adaptive is None or n > 0 or i > 0:			# solve nonlinear system g(z) = 0 via Newton's method
+					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via Newton's method
 						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)	
 
-					evaluations += 1
+						evaluations += 1
 
 					if root is 'newton':							# evaluate jacobian for every iteration
 						J = identity  -  Aii * dt * jacobian(t + dt*c[i], y + dy + z*Aii)
@@ -143,21 +157,31 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 					z += dz											# Newton iteration (linalg only supports float64)
 
+					delta = np.linalg.norm(g, ord = norm)
+					tolerance = eps_root
+
+					# should I also consider dz = z - z_prev being stuck, i.e. smaller than g(z)?
+
+					# like, if either g(z) ~ 0 or dz ~ 0.01*z then break
+
+					if delta <= tolerance:							# check for convergence of solution g(z) = 0
+						break
+
 				else:
-					if adaptive is None or n > 0 or i > 0:			# solve nonlinear system g(z) = 0 via fixed point iteration
+					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via fixed point iteration
 						z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)	
 
-					evaluations += 1
+						evaluations += 1
 
-				delta   = np.linalg.norm(z - z_prev, ord = norm)	
-				dy_norm = np.linalg.norm(z, ord = norm)
+						delta   = np.linalg.norm(z - z_prev, ord = norm)	
+						dy_norm = np.linalg.norm(z, ord = norm)
+						
+						tolerance = eps_root * dy_norm
 
-				tolerance = eps_root * dy_norm
+						if delta <= tolerance:						# check for convergence of solution dz = 0
+							break
 
-				if delta <= tolerance:								# check for convergence of solution
-					break
-					
-				z_prev = z											# get previous value for next iteration
+						z_prev = z.copy()							# get previous value for next iteration				
 
 			dy_array[i] = z
 

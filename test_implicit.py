@@ -28,13 +28,14 @@ jacobian = exact_solution.jacobian
 
 dt0 = dt_MAX
 
-adaptive = 'RKM'
-method = 'IM2'
+# adaptive = 'RKM'
+adaptive = None
+method = 'CN2'
 # adaptive = 'ERK'
 # method = 'CN21'
 root = 'newton_fast'
 
-y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method, jacobian = jacobian, eps = 1.e-6, root = root)  
+y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, method, adaptive = adaptive, jacobian = jacobian, eps = 1.e-3, root = root) 
 
 print('rejection rate = %.1f %%' % reject)
 

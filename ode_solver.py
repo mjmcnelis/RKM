@@ -42,9 +42,9 @@ def method_is_FSAL(butcher):
 
 
 
-def get_stages(butcher, adaptive, method):
+def get_stages(butcher, adaptive):
 
-    stages = butcher.shape[0] - 1                               # stages in RKM
+    stages = butcher.shape[0] - 1                               # stages in RKM or standard RK (fixed dt)
 
     if adaptive is 'SDRK':
         return (3*stages - 1)                                   # stages in SDRK
@@ -131,7 +131,7 @@ def rescale_epsilon(eps, adaptive, order):
 
 
 # ODE solver
-def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None, root = 'newton_fast', norm = None, eps = 1.e-8, n_max = 10000):
+def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, eps = 1.e-8, n_max = 10000):
 
     # y0           = initial solution
     # t0           = initial time
@@ -160,19 +160,24 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
     method  = get_method_fname(method_label)                    # filename corresponding to code label
     butcher = get_butcher_table(adaptive, method)               # read in butcher table from file
     order   = get_order(adaptive, method)                       # get order of method
-    stages  = get_stages(butcher, adaptive, method)             # get number of stages
+    stages  = get_stages(butcher, adaptive)                     # get number of stages
     solver  = get_solver(butcher, adaptive)                     # get RK solver (i.e. explicit/implicit)
-    stage_explicit = get_explicit_stages(butcher, solver)       # mark explicit stages (for DIRK_standard)
+    stage_explicit = get_explicit_stages(butcher, adaptive)     # mark explicit stages (for DIRK_standard)      
 
     if solver is not 'explicit' and jacobian is None:           # add: and root is not 'fixed_point'?
         print('ode_solver error: need to pass jacobian for implicit runge kutta routines that use Newton\'s method')
         quit()
 
-    eps = rescale_epsilon(eps, adaptive, order)                   # rescale epsilon_0
-
+    if adaptive is None:
+        dt *= eps                                               # rescale fixed time step by epsilon_0
+    else:
+        eps = rescale_epsilon(eps, adaptive, order)             # if use RKM, rescale epsilon_0 by order of method
+ 
     evaluations = 0
     total_attempts = 0
     finish = False
+
+    # should I count evaluations of first adaptive RK step?
 
     for n in range(0, n_max):                                   # start evolution loop
 
@@ -181,8 +186,12 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
 
         if solver is 'explicit':                                # explicit RK routines
 
+            if adaptive is None:
+                print('no fixed time step yet for explicit integrators')
+                quit()
+
             # RKM
-            if adaptive is 'RKM':
+            elif adaptive is 'RKM':
                 tries = 1
 
                 if n == 0:
@@ -234,6 +243,15 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
 
         elif solver is 'diagonal_implicit':                     # diagonal implicit RK routines
 
+            if adaptive is None:
+                y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, 
+                                                              root = root, norm = norm) 
+                if n > 0:
+                    evaluations += evals
+
+                if n > 0:
+                    total_attempts += 1
+
             # RKM
             if adaptive is 'RKM':
 
@@ -251,13 +269,13 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
                     method_SD = 'euler_1'                       # adjust initial step size w/ step-doubling
                     butcher_SD = get_butcher_table('SDRK', method_SD)
                     dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, method_SD, butcher_SD, eps = eps/2, norm = norm)
-                    evaluations += 2 * tries_SD
+                    # evaluations += 2 * tries_SD
 
                     dt = dt_next
 
                     y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
                                                                   root = root, eps = eps, norm = norm)
-                    evaluations += evals
+                    # evaluations += evals
 
                 else:
                     y, y_prev, dt, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
@@ -270,7 +288,9 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
             elif adaptive is 'ERK':
                 y, dt, dt_next, tries, evals = implicit_runge_kutta.EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit, 
                                                                                root = root, eps = eps, norm = norm) 
-                evaluations += evals
+                
+                if n > 0:
+                    evaluations += evals
 
                 if n > 0:
                     total_attempts += tries
@@ -305,18 +325,18 @@ def ode_solver(y0, t0, tf, dt0, y_prime, adaptive, method_label, jacobian = None
 
 
 # compute average error vs function evaluations
-def method_efficiency(y0, t0, tf, dt0, y_prime, solver, method, eps_array, error_type, norm = None, average = True, high = 1.5, n_max = 10000):
+def method_efficiency(y0, t0, tf, dt0, y_prime, method_label, eps_array, error_type, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, average = True, high = 1.5, n_max = 10000):
 
     error_array = np.zeros(len(eps_array)).reshape(-1,1)
     evaluations_array = np.zeros(len(eps_array)).reshape(-1,1)
 
-    print('Testing efficiency of %s %s' % (solver, method))
+    print('Testing efficiency of %s %s' % (adaptive, method_label))
 
     for i in range(0, len(eps_array)):
 
         eps = eps_array[i]
 
-        y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, solver, method, norm = norm, eps = eps, n_max = n_max)
+        y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = adaptive, jacobian = jacobian, root = root, norm = norm, eps = eps, n_max = n_max)
 
         y_exact = exact.y_exact
         error = exact.compute_error_of_exact_solution(t, y, y_exact, error_type = error_type, average = average, norm = norm)
