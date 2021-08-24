@@ -56,7 +56,10 @@ root = 'newton_fast'
 if order == 0 or order == 2:
 
     if solution is 'logistic':
-        eps_0 = 10**np.arange(0., -3., -0.5)      # fixed time step
+
+        eps_0 = 10**np.arange(0., -3., -0.5)      # fixed time step (todo: pass different dt0 values instead)
+
+
         eps_1 = 10**np.arange(-2.8, -7., -1)
         eps_2 = 10**np.arange(-3.1, -8.1, -1)
         eps_3 = 10**np.arange(-1.8, -7., -1)
@@ -132,7 +135,7 @@ plt.plot(evals_RK2_0, error_RK2_0, 'red',         label = method_RK2_1,        l
 plt.plot(evals_RK2_1, error_RK2_1, 'red',         label = method_RK2_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK2_2, error_RK2_2, 'red',         label = method_RK2_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK2_3, error_RK2_3, 'red',         label = method_RK2_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
-# 
+#
 # plt.plot(evals_RK3_1, error_RK3_1, 'darkorange',  label = method_RK3_1 + 'M',  linewidth = 1.5)
 # plt.plot(evals_RK3_2, error_RK3_2, 'darkorange',  label = method_RK3_2,        linestyle = 'dashed', linewidth = 1.5)
 # plt.plot(evals_RK3_3, error_RK3_3, 'darkorange',  label = method_RK3_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)

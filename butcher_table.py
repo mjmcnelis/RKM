@@ -89,7 +89,7 @@ ralston_4 = np.array([
                 [1, 0.21810038822592054, -3.050965148692931, 3.8328647604670123, 0],
                 [1, 0.1747602822626904, -0.551480662878733, 1.2055355993965235, 0.17118478121951902]], dtype = myfloat)
 
-ssp_runge_kutta_4 = np.array([
+ssp_ketcheson_4 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1/6, 1/6, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1/3, 1/6, 1/6, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -608,7 +608,7 @@ crank_nicolson_2 = np.array([
 qin_zhang_2 = np.array([
                 [1/4, 1/4, 0],
                 [3/4, 1/2, 1/4],
-                [1, 1/2, 1/2]], dtype = myfloat)  # symplectic 
+                [1, 1/2, 1/2]], dtype = myfloat)  # symplectic
 
 kraaijevanger_spijker_2 = np.array([
                 [1/2, 1/2, 0],
@@ -625,12 +625,12 @@ pareschi_russo_2 = np.array([
 lobatto_IIIB_2 = np.array([
                 [1/2, 1/2, 0],
                 [1/2, 1/2, 0],
-                [1, 1/2, 1/2]], dtype = myfloat)    
+                [1, 1/2, 1/2]], dtype = myfloat)
 
 lobatto_IIIC_2 = np.array([
                 [0, 1/2, -1/2],
                 [1, 1/2, 1/2],
-                [1, 1/2, 1/2]], dtype = myfloat)             
+                [1, 1/2, 1/2]], dtype = myfloat)
 
 pareschi_russo_3 = np.array([
                 [gamma, gamma, 0, 0],
@@ -646,18 +646,18 @@ crouzeix_3 = np.array([
 radau_IA_3 = np.array([
                 [0, 1/4, -1/4],
                 [2/3, 1/4, 5/12],
-                [1, 1/4, 3/4]], dtype = myfloat)            
+                [1, 1/4, 3/4]], dtype = myfloat)
 
 radau_IIA_3 = np.array([
                 [1/3, 5/12, -1/12],
                 [1, 3/4, 1/4],
-                [1, 3/4, 1/4]], dtype = myfloat)  
+                [1, 3/4, 1/4]], dtype = myfloat)
 
 # 3rd order DIRK L Stable (wiki)
 DIRK_L_3 = np.array([
                 [1/2, 1/2, 0, 0, 0],
                 [2/3, 1/6, 1/2, 0, 0],
-                [1/2, -1/2, 1/2, 1/2, 0], 
+                [1/2, -1/2, 1/2, 1/2, 0],
                 [1, 3/2, -3/2, 1/2, 1/2],
                 [1, 3/2, -3/2, 1/2, 1/2]], dtype = myfloat)
 
@@ -702,14 +702,14 @@ lobatto_IIICS_4 = np.array([
                 [0, 0, 0, 0],
                 [1/2, 1/4, 1/4, 0],
                 [1, 0, 1, 0],
-                [1, 1/6, 2/3, 1/6]], dtype = myfloat) 
+                [1, 1/6, 2/3, 1/6]], dtype = myfloat)
 
 lobatto_IIID_4 = np.array([
                 [0, 1/6, 0, -1/6],
                 [1/2, 1/12, 5/12, 0],
                 [1, 1/2, 1/3, 1/6],
                 [1, 1/6, 2/3, 1/6]], dtype = myfloat)
-                
+
 sqrt_3 = 3**0.5
 
 gauss_legendre_4 = np.array([
@@ -718,7 +718,7 @@ gauss_legendre_4 = np.array([
                 [1, 1/2, 1/2]], dtype = myfloat)
 
 sqrt_6 = 6**0.5
- 
+
 radau_IA_5 = np.array([
                 [0, 1/9, -(1 + sqrt_6)/18, (-1 + sqrt_6)/18],
                 [3/5 - sqrt_6/10, 1/9, 11/45 + 7*sqrt_6/360, 11/45 - 43*sqrt_6/360],
@@ -734,7 +734,7 @@ radau_IIA_5 = np.array([
 sqrt_15 = 15**0.5
 
 gauss_legendre_6 = np.array([
-                [1/2 - sqrt_15/10, 5/36, 2/9 - sqrt_15/15, 5/36 - sqrt_15/30], 
+                [1/2 - sqrt_15/10, 5/36, 2/9 - sqrt_15/15, 5/36 - sqrt_15/30],
                 [1/2, 5/36 + sqrt_15/24, 2/9, 5/36 - sqrt_15/24],
                 [1/2 + sqrt_15/10, 5/36 + sqrt_15/30, 2/9 + sqrt_15/15, 5/36],
                 [1, 5/18, 4/9, 5/18]], dtype = myfloat)
@@ -756,13 +756,13 @@ lobatto_IIIB_2_1 = np.array([
                 [1/2, 1/2, 0],
                 [1/2, 1/2, 0],
                 [1, 1/2, 1/2],
-                [1, 1, 0]], dtype = myfloat)  
+                [1, 1, 0]], dtype = myfloat)
 
 lobatto_IIIC_2_1 = np.array([
                 [0, 1/2, -1/2],
                 [1, 1/2, 1/2],
                 [1, 1/2, 1/2],
-                [1, 1, 0]], dtype = myfloat)    
+                [1, 1, 0]], dtype = myfloat)
 
 
 # mid order (4-6)
@@ -798,7 +798,7 @@ lobatto_IIICS_4_2 = np.array([
                 [1/2, 1/4, 1/4, 0],
                 [1, 0, 1, 0],
                 [1, 1/6, 2/3, 1/6],
-                [1, -1/2, 2, -1/2]], dtype = myfloat) 
+                [1, -1/2, 2, -1/2]], dtype = myfloat)
 
 lobatto_IIID_4_2 = np.array([
                 [0, 1/6, 0, -1/6],
@@ -812,7 +812,7 @@ lobatto_IIID_4_2 = np.array([
 gauss_legendre_4_2 = np.array([
                 [1/2 - sqrt_3/6, 1/4, 1/4 - sqrt_3/6],
                 [1/2 + sqrt_3/6, 1/4 + sqrt_3/6, 1/4],
-                [1, 1/2, 1/2], 
+                [1, 1/2, 1/2],
                 [1, 1/2 + sqrt_3/2, 1/2 - sqrt_3/2]], dtype = myfloat)
 
 radau_IIA_5_2 = np.array([
@@ -822,9 +822,9 @@ radau_IIA_5_2 = np.array([
                 [1, 4/9 - sqrt_6/36, 4/9 + sqrt_6/36, 1/9],
                 [1, 1 - 7*sqrt_6/12, 1 + 7*sqrt_6/12, -1]], dtype = myfloat)
 
-# not sure is 6(4) is correct 
+# not sure is 6(4) is correct
 gauss_legendre_6_4 = np.array([
-                [1/2 - sqrt_15/10, 5/36, 2/9 - sqrt_15/15, 5/36 - sqrt_15/30], 
+                [1/2 - sqrt_15/10, 5/36, 2/9 - sqrt_15/15, 5/36 - sqrt_15/30],
                 [1/2, 5/36 + sqrt_15/24, 2/9, 5/36 - sqrt_15/24],
                 [1/2 + sqrt_15/10, 5/36 + sqrt_15/30, 2/9 + sqrt_15/15, 5/36],
                 [1, 5/18, 4/9, 5/18],
@@ -841,12 +841,12 @@ standard_dict = {'E1':       ['euler_1',                 euler_1],              
                  'H3':       ['heun_3',                  heun_3],
                  'R3':       ['ralston_3',               ralston_3],
                  'RK3':      ['runge_kutta_3',           runge_kutta_3],
-                 'SSPSO3':   ['ssp_shu_osher_3',         ssp_shu_osher_3],           
-                 'SSPSR3':   ['ssp_spiteri_ruuth_3',     ssp_spiteri_ruuth_3],       
+                 'SSPSO3':   ['ssp_shu_osher_3',         ssp_shu_osher_3],
+                 'SSPSR3':   ['ssp_spiteri_ruuth_3',     ssp_spiteri_ruuth_3],
                  'RK4':      ['runge_kutta_4',           runge_kutta_4],
                  'TER4':     ['three_eights_rule_4',     three_eights_rule_4],
                  'R4':       ['ralston_4',               ralston_4],
-                 'SSPRK4':   ['ssp_runge_kutta_4',       ssp_runge_kutta_4],     
+                 'SSPK4':    ['ssp_ketcheson_4',         ssp_ketcheson_4],
                  'F4':       ['fehlberg_4',              fehlberg_4],
                  'B5':       ['butcher_5',               butcher_5],
                  'CK5':      ['cash_karp_5',             cash_karp_5],
@@ -862,7 +862,7 @@ standard_dict = {'E1':       ['euler_1',                 euler_1],              
                  'SP8':      ['shanks_pseudo_8',         shanks_pseudo_8],
                  'DP8':      ['dormand_prince_8',        dormand_prince_8],
                  'F10':      ['feagin_10',               feagin_10],
-                 'F14':      ['feagin_14',               feagin_14], 
+                 'F14':      ['feagin_14',               feagin_14],
 
                  'BE1':      ['backward_euler_1',        backward_euler_1],       # implicit
                  'IM2':      ['implicit_midpoint_2',     implicit_midpoint_2],
@@ -943,11 +943,11 @@ def symplectic_method(butcher, embedded = False):
         A = butcher[:-2, 1:]
         b = butcher[-2, 1:]
     else:
-        A = butcher[:-1, 1:]  
+        A = butcher[:-1, 1:]
         b = butcher[-1, 1:]
 
     stages = len(b)
-    matrix = np.zeros((stages,stages))   
+    matrix = np.zeros((stages,stages))
 
     for i in range(0, stages):
         for j in range(0, stages):
@@ -994,7 +994,7 @@ def main():
 
                 debug_table(method, table)
 
-                np.savetxt('butcher_tables/standard/' + method + '.dat', table)
+                np.savetxt('tables/butcher/standard/' + method + '.dat', table)
 
         print()
 
@@ -1007,7 +1007,7 @@ def main():
 
                 debug_table(method, table)
 
-                np.savetxt('butcher_tables/embedded/' + method + '.dat', table)
+                np.savetxt('tables/butcher/embedded/' + method + '.dat', table)
 
 
 if __name__ == "__main__":

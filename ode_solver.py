@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import math
+import time
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.core.defchararray import upper
-from numpy.lib.twodim_base import triu_indices_from
 
 from precision import precision     # for myfloat
 from butcher_table import standard_dict, embedded_dict
+from multistep_table import (adams_explicit_dict, adams_implicit_dict, adams_predictor_corrector_dict,
+                            backward_differentiation_formula_dict, numerical_differentiation_formula_dict)
 import explicit_runge_kutta
 import implicit_runge_kutta
+import linear_multistep
 import exact_solution as exact
 
 myfloat = type(precision(1))
@@ -16,25 +18,87 @@ myfloat = type(precision(1))
 # combine dictionaries
 total_dict = standard_dict.copy()
 total_dict.update(embedded_dict)
+total_dict.update(adams_explicit_dict)
+total_dict.update(adams_implicit_dict)
+total_dict.update(adams_predictor_corrector_dict)
+total_dict.update(backward_differentiation_formula_dict)
+total_dict.update(numerical_differentiation_formula_dict)       # todo: make a file?
 
 
-def get_method_fname(method_label):
-    return total_dict[method_label][0]
+def get_method_name(method_label):
+    return total_dict[method_label][0]                          # get filename from dictionary
 
 
 
 def get_butcher_table(adaptive, method):
 
     if adaptive is 'ERK':                                       # table directory
-        table_dir = 'butcher_tables/embedded/'
+        table_dir = 'tables/butcher/embedded/'
+
     else:
-        table_dir = 'butcher_tables/standard/'
+        table_dir = 'tables/butcher/standard/'
 
     return np.loadtxt(table_dir + method + '.dat')              # read butcher table
 
 
 
+def get_multistep_table(solver, method):
+
+    if solver == 'adams_bashforth':
+        table_dir = 'tables/multistep/adams/adams_bashforth/'
+
+    elif solver == 'adams_moulton':
+        table_dir = 'tables/multistep/adams/adams_moulton/'
+
+    elif solver == 'adams_bashforth_moulton':
+        table_dir = 'tables/multistep/adams/adams_bashforth_moulton/'
+
+    elif solver == 'backward_differentiation_formula':
+        table_dir = 'tables/multistep/backward_differentiation_formula/'
+
+    elif solver == 'numerical_differentiation_formula':
+        table_dir = 'tables/multistep/numerical_differentiation_formula/'
+
+    else:
+        print('get_multistep_table error: %s is not a multistep solver' % solver)
+        quit()
+
+    table = np.loadtxt(table_dir + method + '.dat')             # read multistep table
+
+    if method in ['adams_bashforth_1', 'adams_moulton_1']:      # for some reason, they have no shape when filed opened
+        table = table.reshape(1)
+
+    elif method is 'adams_bashforth_moulton_1':
+        table = table.reshape(2,1)
+
+    return table
+
+
+
+def get_multistep_past_steps(table, solver):
+
+    if solver in ['adams_bashforth', 'adams_moulton']:
+        return table.shape[0] - 1
+
+    if solver == 'adams_bashforth_moulton':
+        return table.shape[1] - 1
+
+    else:
+        return table.shape[1] - 2
+
+
+
+def solver_is_multistep(method_label):
+
+    if method_label[:-1] in ['AB', 'AM', 'ABM', 'BDF', 'NDF']:
+        return True
+    else:
+        return False
+
+
+
 def method_is_FSAL(butcher):
+
     if np.array_equal(butcher[-3,1:], butcher[-2,1:]):          # check second and third to last rows
         return True
     else:
@@ -54,7 +118,7 @@ def get_stages(butcher, adaptive):
         else:
             return (stages - 1)                                 # note: do not use FSAL to save time yet
 
-    return stages                                       
+    return stages
 
 
 
@@ -69,12 +133,12 @@ def get_order(adaptive, method):
 
 
 
-def get_solver(butcher, adaptive):
+def get_runge_kutta_solver(butcher, adaptive):
 
-    if adaptive is 'ERK':
+    if adaptive == 'ERK':
         A = butcher[:-2, 1:]                                    # get A_ij block of butcher table
     else:
-        A = butcher[:-1, 1:]                                           
+        A = butcher[:-1, 1:]
 
     lower_triangular = np.allclose(A, np.tril(A))               # check whether matrix is lower triangular
 
@@ -82,14 +146,14 @@ def get_solver(butcher, adaptive):
 
         diag_A = np.diag(A)                                     # diagonal of A_ij
 
-        zero_diagonal = np.array_equal(diag_A, np.zeros(len(diag_A)))   
+        zero_diagonal = np.array_equal(diag_A, np.zeros(len(diag_A)))
 
         if zero_diagonal:                                       # check whether diagonal elements are all zero
-            solver = 'explicit'
+            solver = 'explicit_runge_kutta'
         else:
-            solver = 'diagonal_implicit'
+            solver = 'diagonal_implicit_runge_kutta'
     else:
-        solver = 'fully_implicit'
+        solver = 'fully_implicit_runge_kutta'
 
     return solver
 
@@ -112,7 +176,7 @@ def get_explicit_stages(butcher, adaptive):
         upper_right_row_zero = np.array_equal(upper_right_row, np.zeros(len(upper_right_row)))
 
         if upper_right_row_zero:
-            explicit_stages[i] = 1                              # mark stage as explicit 
+            explicit_stages[i] = 1                              # mark stage as explicit
 
     return explicit_stages
 
@@ -120,102 +184,120 @@ def get_explicit_stages(butcher, adaptive):
 
 def rescale_epsilon(eps, adaptive, order):
 
-    # comment for implicit RKM runs for now
-    
-    # if adaptive is 'RKM':                                       # todo: look into rescaling SDRK's eps by Richardson factor
-    #     eps = eps**(2/(1+order))
-    #     # eps = eps**(1/order)
+    # comment for implicit RKM runs (testing)
+    if adaptive == 'RKM':                                       # todo: look into rescaling SDRK's eps by Richardson factor
+        eps = eps**(2/(1+order))
+        # eps = eps**(1/order)
 
-    return eps
-
+    return eps                                                # use for implicit routines (testing)
 
 
-# ODE solver
+
+# main function
 def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, eps = 1.e-8, n_max = 10000):
 
     # y0           = initial solution
     # t0           = initial time
     # tf           = final time
-    # dt0          = proposed initial step size 
+    # dt0          = proposed initial step size
     # y_prime      = source function f
-    # adaptive     = adaptive scheme
-    # method_label = Runge-Kutta method's code label
-    # jacobian     = jacobian of source function df/dy 
-    # root         = root solver for implicit RK routines
+    # adaptive     = adaptive stepsize scheme (currently not applicable to multistep solvers)
+    # method_label = code label of runge-kutta or multistep method
+    # jacobian     = jacobian of source function df/dy
+    # root         = root solver for implicit routines
     # norm         = value of l in the l-norm
     # eps          = error tolerance parameter
     # n_max        = max number of evolution steps
 
-    y = y0                                                      # set initial conditions
+    start = time.time()                                         # start timer
+
+    y = y0.copy()                                               # set initial conditions
     t = t0
     dt = dt0
 
-    y_prev = y0                                                 # for RKM
+    y_prev = y0.copy()                                          # for RKM
     dt_next = dt                                                # for ERK/SDRK
 
     y_array  = np.empty(shape = [0], dtype = myfloat)           # construct arrays for (y, t, dt)
     t_array  = np.empty(shape = [0], dtype = myfloat)
     dt_array = np.empty(shape = [0], dtype = myfloat)
 
-    method  = get_method_fname(method_label)                    # filename corresponding to code label
-    butcher = get_butcher_table(adaptive, method)               # read in butcher table from file
-    order   = get_order(adaptive, method)                       # get order of method
-    stages  = get_stages(butcher, adaptive)                     # get number of stages
-    solver  = get_solver(butcher, adaptive)                     # get RK solver (i.e. explicit/implicit)
-    stage_explicit = get_explicit_stages(butcher, adaptive)     # mark explicit stages (for DIRK_standard)      
+    method = get_method_name(method_label)                      # filename corresponding to code label
 
-    if solver is not 'explicit' and jacobian is None:           # add: and root is not 'fixed_point'?
-        print('ode_solver error: need to pass jacobian for implicit runge kutta routines that use Newton\'s method')
+    if solver_is_multistep(method_label):                       # solver is multistep
+
+        solver     = method[:-2]
+        multistep  = get_multistep_table(solver, method)
+        past_steps = get_multistep_past_steps(multistep, solver)
+
+        method_RK = 'ssp_ketcheson_4'                           # any way to un-hardcode this?
+        butcher_RK = get_butcher_table('', method_RK)
+        stages_RK = get_stages(butcher_RK, '')
+
+        f_list = []                                             # for (AB, AM, ABM) routines
+        y_list = []                                             # for (BDF, NDF) routines
+        dy_0 = 0
+
+        if adaptive != None:
+            print('ode_solver flag: multistep routines currently use a fixed stepsize')
+
+    else:                                                       # solver is runge kutta
+
+        butcher = get_butcher_table(adaptive, method)           # read in butcher table from file
+        order   = get_order(adaptive, method)                   # get order of method
+        stages  = get_stages(butcher, adaptive)                 # get number of stages
+        solver  = get_runge_kutta_solver(butcher, adaptive)     # get runge-kutta solver (explicit, diagonal implicit, fully implicit)
+        stage_explicit = get_explicit_stages(butcher, adaptive) # mark explicit stages (for DIRK_standard)
+
+        if adaptive != None:
+            eps = rescale_epsilon(eps, adaptive, order)         # if use adaptive RKM, rescale epsilon_0 by order of method
+
+    if solver not in ['explicit_runge_kutta', 'adams_bashforth'] and root != 'fixed_point' and jacobian == None:
+        print('ode_solver error: need to pass jacobian for implicit routines using \'%s\' root finder' % root)
         quit()
 
-    if adaptive is None:
-        dt *= eps                                               # rescale fixed time step by epsilon_0
-    else:
-        eps = rescale_epsilon(eps, adaptive, order)             # if use RKM, rescale epsilon_0 by order of method
- 
     evaluations = 0
     total_attempts = 0
     finish = False
 
-    # should I count evaluations of first adaptive RK step?
-
     for n in range(0, n_max):                                   # start evolution loop
 
-        y_array = np.append(y_array, y).reshape(-1, y.shape[0]) # append arrays
+        y_array = np.append(y_array, y).reshape(-1, y.shape[0]) # append (y,t) arrays
         t_array = np.append(t_array, t)
 
-        if solver is 'explicit':                                # explicit RK routines
+        if solver == 'explicit_runge_kutta':                    # explicit runge-kutta routines
 
-            if adaptive is None:
-                print('no fixed time step yet for explicit integrators')
-                quit()
+            if adaptive == None:                                # use a fixed step size
 
-            # RKM
-            elif adaptive is 'RKM':
-                tries = 1
+                dy1 = dt * y_prime(t, y)
+                y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
+
+                evaluations += stages
+                total_attempts += 1
+
+            elif adaptive == 'RKM':                             # new adaptive step size algorithm
 
                 if n == 0:
+
                     method_SD = 'euler_1'                       # adjust initial step size w/ step-doubling
                     butcher_SD = get_butcher_table('SDRK', method_SD)
                     dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, method_SD, butcher_SD, eps = eps/2, norm = norm)
 
                     evaluations += 2 * tries_SD
 
-                    # print('RKM: dt = %.2g after %d attempts at n = 0' % (dt_next, tries_SD))
-
                     dt = dt_next                                # then use standard RK
                     dy1 = dt * y_prime(t, y)
                     y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
 
-                    evaluations += stages
-                else:
+                else:                                           # use RKM for remainder
+
                     y, y_prev, dt = explicit_runge_kutta.RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps = eps, norm = norm)
 
-                    evaluations += stages
-                    total_attempts += tries
+                evaluations += stages
+                total_attempts += 1
 
-            # embedded
-            elif adaptive is 'ERK':
+            elif adaptive == 'ERK':                             # embedded runge-kutta algorithm
+
                 y, dt, dt_next, tries = explicit_runge_kutta.ERK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
 
                 if method_is_FSAL(butcher) and tries > 1:
@@ -223,46 +305,38 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
                 else:
                     evaluations += (tries * stages)
 
-                if n > 0:
-                    total_attempts += tries
+                total_attempts += tries
 
-                # if tries > 1:
-                #     print('ERK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
+            elif adaptive == 'SDRK':                            # step doubling runge-kutta algorithm
 
-            # step-doubling
-            elif adaptive is 'SDRK':
                 y, dt, dt_next, tries = explicit_runge_kutta.SDRK_step(y, t, dt_next, y_prime, method, butcher, eps = eps, norm = norm)
 
                 evaluations += (tries * stages)
+                total_attempts += tries
 
-                if n > 0:
-                    total_attempts += tries
 
-                # if tries > 1:
-                #     print('SDRK: dt = %.2g after %d attempts at t = %.2g ' % (dt, tries, t))
+        elif solver == 'diagonal_implicit_runge_kutta':         # diagonal implicit runge-kutta routines
 
-        elif solver is 'diagonal_implicit':                     # diagonal implicit RK routines
+            if adaptive == None:                                # use a fixed step size
 
-            if adaptive is None:
-                y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, 
-                                                              root = root, norm = norm) 
-                if n > 0:
-                    evaluations += evals
+                y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
 
-                if n > 0:
-                    total_attempts += 1
+                evaluations += evals
+                total_attempts += 1
 
-            # RKM
-            if adaptive is 'RKM':
+            if adaptive == 'RKM':                               # new adaptive step size algorithm
 
                 if n == 0:
+
+                    # todo: clear this up
+
                     # method_SD = 'backward_euler_1'              # adjust initial step size w/ step-doubling
                     # butcher_SD = get_butcher_table('SDRK', method_SD)
                     # stage_explicit_SD = np.zeros(1)
 
                     # todo: put in step-doubling implicit euler?
-                    # dt_next, evals = implicit_runge_kutta.estimate_step_size(y, t, dt_next, y_prime, jacobian, method_SD, butcher_SD,     
-                    #                                                          stage_explicit_SD, root = root, eps = eps/2, norm = norm) 
+                    # dt_next, evals = implicit_runge_kutta.estimate_step_size(y, t, dt_next, y_prime, jacobian, method_SD, butcher_SD,
+                    #                                                          stage_explicit_SD, root = root, eps = eps/2, norm = norm)
                     # evaluations += evals
 
                     # temp: use explicit version
@@ -273,40 +347,101 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
 
                     dt = dt_next
 
-                    y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
-                                                                  root = root, eps = eps, norm = norm)
-                    # evaluations += evals
+                    y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, eps = eps, norm = norm)
 
                 else:
+
                     y, y_prev, dt, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit,
                                                                               root = root, eps = eps, norm = norm,
                                                                               adaptive = 'RKM', method = method, y_prev = y_prev)
-                    evaluations += evals
-                    total_attempts += 1
 
-            # embedded
-            elif adaptive is 'ERK':
-                y, dt, dt_next, tries, evals = implicit_runge_kutta.EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit, 
-                                                                               root = root, eps = eps, norm = norm) 
-                
-                if n > 0:
-                    evaluations += evals
-
-                if n > 0:
-                    total_attempts += tries
-
-            # step doubling
-            elif adaptive is 'SDRK':
-                y, dt, dt_next, tries, evals = implicit_runge_kutta.SDDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit, 
-                                                                                root = root, eps = eps, norm = norm) 
                 evaluations += evals
+                total_attempts += 1
 
-                if n > 0:
-                    total_attempts += tries
+            elif adaptive == 'ERK':                             # embedded runge-kutta algorithm
 
-        elif solver is 'fully_implicit':                        # fully implicit RK routines
+                y, dt, dt_next, tries, evals = implicit_runge_kutta.EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
+                                                                               root = root, eps = eps, norm = norm)
+
+                evaluations += evals
+                total_attempts += tries
+
+            elif adaptive == 'SDRK':                            # step doubling runge-kutta algorithm
+
+                y, dt, dt_next, tries, evals = implicit_runge_kutta.SDDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
+                                                                                root = root, eps = eps, norm = norm)
+
+                evaluations += evals
+                total_attempts += tries
+
+        elif solver == 'fully_implicit_runge_kutta':            # fully implicit runge-kutta routines
+
             print('ode_solver error: no fully implicit routine yet')
             quit()
+
+        else:                                                   # linear multistep routines
+
+            if n < past_steps:                                  # use runge-kutta routine for first few steps
+
+                f = y_prime(t, y)
+                dy1 = f * dt
+
+                f_list.insert(0, f)
+                y_list.insert(0, y)
+
+                y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher_RK)
+
+                total_attempts += 1
+                evaluations += stages_RK
+
+            else:                                               # use multistep routine for remainder
+
+                if solver == 'adams_bashforth':                 # adams-bashforth (explicit)
+
+                    y, f, evals = linear_multistep.adams_bashforth(y, t, dt, f_list, y_prime, multistep, past_steps)
+
+                    f_list.insert(0, f)
+                    f_list.pop()
+
+                    total_attempts += 1
+                    evaluations += evals
+
+                elif solver == 'adams_moulton':                 # adams-moulton (implicit)
+
+                    y, f, evals = linear_multistep.adams_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, root)
+
+                    f_list.insert(0, f)
+                    f_list.pop()
+
+                    total_attempts += 1
+                    evaluations += evals
+
+                elif solver == 'adams_bashforth_moulton':       # adams-bashforth-moulton (predictor-corrector, implicit)
+
+                    y, f, evals = linear_multistep.adams_bashforth_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, root)
+
+                    f_list.insert(0, f)
+                    f_list.pop()
+
+                    total_attempts += 1
+                    evaluations += evals
+
+                else:                                           # backward/numerical differentiation formula (predictor-corrector, implicit)
+
+                    y, y_prev, evals = linear_multistep.differentiation_formula(y, t, dt, y_list, y_prime, jacobian, multistep, past_steps, root, dy_0 = dy_0)
+
+                    y_list.insert(0, y_prev)
+
+                    if solver == 'backward_differentiation_formula':
+                        dy_0 = linear_multistep.compute_DF_predictor(y, y_list, multistep)
+                    else:
+                        dy_0 = linear_multistep.compute_DF_predictor(y, y_list, multistep[:,1:])    # todo: can I compute before update?
+
+                    y_list.pop()
+
+                    total_attempts += 1
+                    evaluations += evals
+
 
         dt_array = np.append(dt_array, dt)
 
@@ -316,16 +451,21 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
 
         t += dt
 
-    steps = n
-
-    rejection_rate = 100 * (1 - steps/total_attempts)           # percentage of attempts that were rejected
-
-    return y_array, t_array, dt_array, evaluations, rejection_rate, finish
-
+    if finish:
+        print('\node_solver took %.3g seconds to finish\n' % (time.time() - start))
+    else:
+        print('\node_solver flag: evolution stopped at t = %.3g seconds' % t)
 
 
-# compute average error vs function evaluations
-def method_efficiency(y0, t0, tf, dt0, y_prime, method_label, eps_array, error_type, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, average = True, high = 1.5, n_max = 10000):
+    rejection_rate = 100 * (1 - (n+1)/total_attempts)           # percentage of attempts that were rejected
+
+    return y_array, t_array, dt_array, evaluations, rejection_rate
+
+
+
+# compute average error vs function evaluations (todo: move to exact solution?)
+def method_efficiency(y0, t0, tf, dt0, y_prime, method_label, eps_array, error_type,
+                      adaptive = None, jacobian = None, root = 'newton_fast', norm = None, average = True, high = 1.5, n_max = 10000):
 
     error_array = np.zeros(len(eps_array)).reshape(-1,1)
     evaluations_array = np.zeros(len(eps_array)).reshape(-1,1)
@@ -336,15 +476,11 @@ def method_efficiency(y0, t0, tf, dt0, y_prime, method_label, eps_array, error_t
 
         eps = eps_array[i]
 
-        y, t, dt, evaluations, reject, finish = ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = adaptive, jacobian = jacobian, root = root, norm = norm, eps = eps, n_max = n_max)
+        y, t, dt, evaluations, reject = ode_solver(y0, t0, tf, dt0, y_prime, method_label,
+                                                   adaptive = adaptive, jacobian = jacobian, root = root, norm = norm, eps = eps, n_max = n_max)
 
         y_exact = exact.y_exact
         error = exact.compute_error_of_exact_solution(t, y, y_exact, error_type = error_type, average = average, norm = norm)
-
-        if finish:
-            print('eps =', '{:.1e}'.format(eps), 'finished\t\t rejection rate = %.1f %%' % reject)
-        else:
-            print('eps =', '{:.1e}'.format(eps), 'did not finish\t\t rejection rate = %.1f %%' % reject)
 
         error_array[i] = error
         evaluations_array[i] = evaluations

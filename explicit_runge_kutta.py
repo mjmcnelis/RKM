@@ -29,14 +29,14 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
     if embedded:                                            # get c_i, A_ij, b_i and number of stages from Butcher table
         c = butcher[:-2, 0]
-        A = butcher[:-2, 1:] 
+        A = butcher[:-2, 1:]
         b = butcher[-2, 1:]
         bhat = butcher[-1, 1:]
         stages = butcher.shape[0] - 2
-        
+
     else:
         c = butcher[:-1, 0]
-        A = butcher[:-1, 1:] 
+        A = butcher[:-1, 1:]
         b = butcher[-1, 1:]
         stages = butcher.shape[0] - 1
 
@@ -45,7 +45,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
     for i in range(1, stages):                              # loop over remaining intermediate Euler steps
         dy = 0
-        
+
         for j in range(0, i):
             dy += dy_array[j] * A[i,j]
 
@@ -277,11 +277,13 @@ def estimate_step_size(y, t, y_prime, method, butcher, eps = 1.e-8, norm = None,
         y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher, embedded = False)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
-        yR = y2 + error                                     # propose updated solution (Richardson extrapolation)
+        # yR = y2 + error                                     # propose updated solution (Richardson extrapolation)
 
         error_norm = np.linalg.norm(error, ord = norm)      # error norm
-        y_norm = np.linalg.norm(yR, ord = norm)
-        dy_norm = np.linalg.norm(yR - y, ord = norm)
+        # y_norm = np.linalg.norm(yR, ord = norm)
+        # dy_norm = np.linalg.norm(yR - y, ord = norm)
+        y_norm = np.linalg.norm(y2, ord = norm)
+        dy_norm = np.linalg.norm(y2 - y, ord = norm)        # 8/23/21: use y2 instead (since not using extrapolation)
 
         tolerance = eps * max(y_norm, dy_norm)              # compute tolerance
 

@@ -7,21 +7,21 @@ from precision import precision
 from explicit_runge_kutta import dt_MIN, dt_MAX, LOW, HIGH, HIGH_RKM	# todo: make a separate parameters file
 myfloat = type(precision(1))
 
-# EPS_ROOT = 1.e-6
-# ITER = 2
+EPS_ROOT = 1.e-6
+ITERATIONS = 2
 
-EPS_ROOT = 1.e-3
-ITER = 1
+# EPS_ROOT = 1.e-3
+# ITERATIONS = 1
 
 RECOMPUTE_K1 = False
 
 # compute dt using RKM algorithm
-def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, 
+def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None,
 				   dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
 
 	# same subroutine in RKM_step()
 
-	order = int(method.split('_')[-1])                   
+	order = int(method.split('_')[-1])
 
 	high = high**(1/order)
 
@@ -50,9 +50,9 @@ def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None,
 
 
 # diagonal implicit Runge Kutta step
-def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = False, 
-				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITER, 
-				  adaptive = None, method = None, y_prev = None, eps = 1.e-8, norm = None):		
+def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = False,
+				  root = 'newton', eps_root = EPS_ROOT, max_iterations = ITERATIONS,
+				  adaptive = None, method = None, y_prev = None, eps = 1.e-8, norm = None):
 
 
 	# I feel like now there's a bug with adaptive = None (does fixed time step skip any calculations, evaluations?)
@@ -64,32 +64,32 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 	#			because I probably need to recompute the first implicit stage anyway (since it depends on dt)
 
 	# RKM idea: if first stage is not explicit, then should I save new dt for the next Newton iteration?
-	
+
 	# print(y_prime(t, y), y_prime(t, y).shape)
 	# print()
 	# print(jacobian(t, y), jacobian(t, y).shape)
 
 	if embedded:
 		c = butcher[:-2, 0]
-		A = butcher[:-2, 1:] 
+		A = butcher[:-2, 1:]
 		b = butcher[-2, 1:]
 		bhat = butcher[-1, 1:]
 		stages = butcher.shape[0] - 2
 	else:
 		c = butcher[:-1, 0]
-		A = butcher[:-1, 1:] 
+		A = butcher[:-1, 1:]
 		b = butcher[-1, 1:]
 		stages = butcher.shape[0] - 1
 
 	dimension = y.shape[0]
-	identity = np.identity(dimension)								
+	identity = np.identity(dimension)
 
 	dy_array = [0] * stages
 
-	evaluations = 0	
+	evaluations = 0
 
 	for i in range(0, stages):
-		
+
 		if stage_explicit[i]:										# if stage is explicit, can evaluate it directly (no iterations required)
 			if i == 0 and adaptive is 'RKM':						# if first stage is explicit, then c[0] = dy = 0
 				k1 = y_prime(t, y)
@@ -107,7 +107,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 				dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
 
 			evaluations += 1
-		
+
 		else:														# otherwise, need to iterate stage until convergence is reached
 			Aii = A[i,i]
 			dy = 0
@@ -118,13 +118,13 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 			z = dy_array[i]											# current stage dy^(i) that we need to iterate
 			z_prev = 0
 
-			if i == 0 and adaptive is 'RKM':					
+			if i == 0 and adaptive is 'RKM':
 				k1 = y_prime(t + dt*c[i], y)
 
 				evaluations += 1
 
 				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
-				
+
 				if RECOMPUTE_K1:
 					k1 = y_prime(t + dt*c[i], y)				     # should I re-evaluate it?
 					evaluations += 1                                 # I don't see much impact (just more evals)
@@ -134,7 +134,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 				else:
 					z = dt * k1
 
-			if root is 'newton_fast':
+			if root is 'newton':
 				J = identity  -  Aii * dt * jacobian(t, y)			# only evaluate jacobian once
 
 				evaluations += dimension
@@ -144,16 +144,16 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 				if root is not 'fixed_point':
 
 					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via Newton's method
-						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)	
+						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += 1
 
-					if root is 'newton':							# evaluate jacobian for every iteration
+					if root is 'newton_full':						# evaluate jacobian for every iteration
 						J = identity  -  Aii * dt * jacobian(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += dimension
-					
-					dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))		
+
+					dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))
 
 					z += dz											# Newton iteration (linalg only supports float64)
 
@@ -167,28 +167,31 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 					if delta <= tolerance:							# check for convergence of solution g(z) = 0
 						break
 
+					# maybe include this
+					# z_prev = z.copy()
+
 				else:
 					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via fixed point iteration
-						z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)	
+						z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += 1
 
-						delta   = np.linalg.norm(z - z_prev, ord = norm)	
+						delta   = np.linalg.norm(z - z_prev, ord = norm)
 						dy_norm = np.linalg.norm(z, ord = norm)
-						
+
 						tolerance = eps_root * dy_norm
 
 						if delta <= tolerance:						# check for convergence of solution dz = 0
 							break
 
-						z_prev = z.copy()							# get previous value for next iteration				
+						z_prev = z.copy()							# get previous value for next iteration
 
 			dy_array[i] = z
 
 	dy = 0
 
 	for j in range(0, stages):										# primary RK update
-		dy += dy_array[j] * b[j]									
+		dy += dy_array[j] * b[j]
 
 	if adaptive is 'RKM':
 		return y + dy, y, dt, evaluations							# return variables for RKM step
@@ -206,8 +209,8 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 
 # fully implicit Runge Kutta step
-def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False, 
-				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITER):
+def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
+				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITERATIONS):
 
 	if embedded:
 		c = butcher[:-2, 0]
@@ -217,16 +220,16 @@ def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
 		stages = butcher.shape[0] - 2
 	else:
 		c = butcher[:-1, 0]
-		A = butcher[:-1, 1:]  
+		A = butcher[:-1, 1:]
 		b = butcher[-1, 1:]
 		stages = butcher.shape[0] - 1
 
 	dimension = y.shape[0]
-	identity = np.identity(dimension * stages)								
+	identity = np.identity(dimension * stages)
 
 	dy_array = [0] * stages
 
-	iterations = 0	
+	iterations = 0
 
 	J = identity  -  dt * (A * jacobian(t,y)).reshape(identity.shape)
 
@@ -238,7 +241,7 @@ def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
 
 	for n in range(0, max_iterations):
 
-		for i in range(0, stages):		
+		for i in range(0, stages):
 			dy = 0
 
 			for j in range(0, stages):
@@ -258,7 +261,7 @@ def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
 
 	# 	full jacobian would go here (or be iterated in the ij loop)
 
-		# dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))		
+		# dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))
 		# z_reshape += dz											# Newton iteration (linalg only supports float64)
 
 
@@ -269,7 +272,7 @@ def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
 
 	# 	if delta <= tolerance:								# check for convergence of solution
 	# 		break
-					
+
 	# 	z_prev = z											# get previous value for next iteration
 
 	# 	dy_array[i] = z
@@ -305,13 +308,13 @@ def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
         #     print('SDDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
         # full RK step
-		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
+		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
 
         # two half RK steps
-		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
+		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
 		t_mid = t + dt/2
 
-		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm) 
+		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
 
 		evaluations += (evals_1 + evals_mid + evals_2)
 
@@ -374,7 +377,7 @@ def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
         #     print('EDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
 		# propose updated solution (secondary, primary)
-		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = True, root = root, norm = norm) 
+		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = True, root = root, norm = norm)
 
 		evaluations += evals
 
