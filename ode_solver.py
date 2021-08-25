@@ -12,7 +12,7 @@ from dictionaries import ode_method_dict
 from precision import precision                                 # for myfloat
 from explicit_runge_kutta import dt_MIN
 
-COLLISION_DETECTION = True                                      # for playing with collision detection
+COLLISION_DETECTION = False                                     # for playing with collision detection
 
 myfloat = type(precision(1))
 
@@ -182,7 +182,7 @@ def rescale_epsilon(eps, adaptive, order):
         eps = eps**(2/(1+order))
         # eps = eps**(1/order)
 
-    return eps                                                # use for implicit routines (testing)
+    return eps                                                  # use for implicit routines (testing)
 
 
 
@@ -469,7 +469,7 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
                     evaluations += evals
 
 
-
+        # for game physics sample
         if COLLISION_DETECTION and exact.solution in ['projectile', 'projectile_damped']:
             y, dt, collision = simple_collision_detection(y, y_prev, t, dt, y_prime, butcher)
 
