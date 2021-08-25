@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from precision import precision 
+from precision import precision
 myfloat = type(precision(1))
 
 
@@ -129,16 +129,16 @@ backward_differentiation_formula_6 = np.array([
 #--------------------------------------------------------------------------------------------------
 # kappa_k = [-37/200, -1/9, -0.0823, -0.0415]
 # gamma_k = sum^k_{n=1} 1/n = [1, 3/2, 11/6, 25/12]
-kg1 = -37/200                                                                 
+kg1 = -37/200
 kg2 = -1/9 * 3/2
 kg3 = -0.0823 * 11/6
-kg4 = -0.0415 * 25/12             
+kg4 = -0.0415 * 25/12
 
-# note: ode solver does not access zero element in second row 
+# note: ode solver does not access zero element in second row
 
 numerical_differentiation_formula_1 = np.array([
         [1/(1 - kg1), (1 - 2*kg1)/(1 - kg1), kg1/(1 - kg1)],
-        [0, 1, -1]], dtype = myfloat)  
+        [0, 1, -1]], dtype = myfloat)
 
 numerical_differentiation_formula_2 = np.array([
         [(2/3)/(1 - kg2), (4/3 - 3*kg2)/(1 - kg2), -(1/3 - 3*kg2)/(1 - kg2), -kg2/(1 - kg2)],
@@ -164,7 +164,7 @@ adams_explicit_dict = {'AB1':  ['adams_bashforth_1', adams_bashforth_1],        
                        'AB8':  ['adams_bashforth_8', adams_bashforth_8]}        # todo: having trouble finding other tables
 
 adams_implicit_dict = {'AM1':  ['adams_moulton_1', adams_moulton_1],            # implicit euler
-                       'AM2':  ['adams_moulton_2', adams_moulton_2],            # implicit trapezoid 
+                       'AM2':  ['adams_moulton_2', adams_moulton_2],            # implicit trapezoid
                        'AM3':  ['adams_moulton_3', adams_moulton_3],
                        'AM4':  ['adams_moulton_4', adams_moulton_4],
                        'AM5':  ['adams_moulton_5', adams_moulton_5],
@@ -178,28 +178,28 @@ adams_predictor_corrector_dict = {
                        'ABM4': ['adams_bashforth_moulton_4', adams_bashforth_moulton_4],
                        'ABM5': ['adams_bashforth_moulton_5', adams_bashforth_moulton_5],
                        'ABM6': ['adams_bashforth_moulton_6', adams_bashforth_moulton_6],
-                       'ABM8': ['adams_bashforth_moulton_8', adams_bashforth_moulton_8]}   
+                       'ABM8': ['adams_bashforth_moulton_8', adams_bashforth_moulton_8]}
 
 backward_differentiation_formula_dict = {
-        'BDF1': ['backward_differentiation_formula_1', backward_differentiation_formula_1],     # implicit euler
-        'BDF2': ['backward_differentiation_formula_2', backward_differentiation_formula_2],
-        'BDF3': ['backward_differentiation_formula_3', backward_differentiation_formula_3],
-        'BDF4': ['backward_differentiation_formula_4', backward_differentiation_formula_4],
-        'BDF5': ['backward_differentiation_formula_5', backward_differentiation_formula_5],
-        'BDF6': ['backward_differentiation_formula_6', backward_differentiation_formula_6]}   
+                       'BDF1': ['backward_differentiation_formula_1', backward_differentiation_formula_1],     # implicit euler
+                       'BDF2': ['backward_differentiation_formula_2', backward_differentiation_formula_2],
+                       'BDF3': ['backward_differentiation_formula_3', backward_differentiation_formula_3],
+                       'BDF4': ['backward_differentiation_formula_4', backward_differentiation_formula_4],
+                       'BDF5': ['backward_differentiation_formula_5', backward_differentiation_formula_5],
+                       'BDF6': ['backward_differentiation_formula_6', backward_differentiation_formula_6]}
 
 numerical_differentiation_formula_dict = {
-        'NDF1': ['numerical_differentiation_formula_1', numerical_differentiation_formula_1],
-        'NDF2': ['numerical_differentiation_formula_2', numerical_differentiation_formula_2],
-        'NDF3': ['numerical_differentiation_formula_3', numerical_differentiation_formula_3],
-        'NDF4': ['numerical_differentiation_formula_4', numerical_differentiation_formula_4]}        
+                       'NDF1': ['numerical_differentiation_formula_1', numerical_differentiation_formula_1],
+                       'NDF2': ['numerical_differentiation_formula_2', numerical_differentiation_formula_2],
+                       'NDF3': ['numerical_differentiation_formula_3', numerical_differentiation_formula_3],
+                       'NDF4': ['numerical_differentiation_formula_4', numerical_differentiation_formula_4]}
 
 
 def debug_table(method, table):
-   
+
     # todo: need to analyze error by row to account for ABM tables (something like in butcher)
 
-    error = abs(np.sum(table)) - 1           
+    error = abs(np.sum(table)) - 1
 
     if error > 1.e-14:
         print('\ndebug_table warning:', method, 'table does not satisfy usual conditions, error = %.3e (may need to debug table)\n' % error)
@@ -218,7 +218,7 @@ def main():
 
                 print(method)
 
-        for label in adams_implicit_dict:                      
+        for label in adams_implicit_dict:
 
                 method = adams_implicit_dict[label][0]
                 table  = adams_implicit_dict[label][1]
@@ -229,7 +229,7 @@ def main():
 
                 print(method)
 
-        for label in adams_predictor_corrector_dict:                     
+        for label in adams_predictor_corrector_dict:
 
                 method = adams_predictor_corrector_dict[label][0]
                 table  = adams_predictor_corrector_dict[label][1]
@@ -241,7 +241,7 @@ def main():
 
                 print(method)
 
-        for label in backward_differentiation_formula_dict:             
+        for label in backward_differentiation_formula_dict:
 
                 method = backward_differentiation_formula_dict[label][0]
                 table  = backward_differentiation_formula_dict[label][1]
@@ -252,7 +252,7 @@ def main():
 
                 print(method)
 
-        for label in numerical_differentiation_formula_dict:             
+        for label in numerical_differentiation_formula_dict:
 
                 method = numerical_differentiation_formula_dict[label][0]
                 table  = numerical_differentiation_formula_dict[label][1]

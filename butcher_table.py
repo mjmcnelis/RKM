@@ -834,88 +834,88 @@ gauss_legendre_6_4 = np.array([
 
 # dictionaries
 #--------------------------------------------------------------------------------------------------
-standard_dict = {'E1':       ['euler_1',                 euler_1],                # explicit
-                 'H2':       ['heun_2',                  heun_2],                 # SSP (strong stability preserving)
-                 'M2':       ['midpoint_2',              midpoint_2],
-                 'R2':       ['ralston_2',               ralston_2],
-                 'H3':       ['heun_3',                  heun_3],
-                 'R3':       ['ralston_3',               ralston_3],
-                 'RK3':      ['runge_kutta_3',           runge_kutta_3],
-                 'SSPSO3':   ['ssp_shu_osher_3',         ssp_shu_osher_3],
-                 'SSPSR3':   ['ssp_spiteri_ruuth_3',     ssp_spiteri_ruuth_3],
-                 'RK4':      ['runge_kutta_4',           runge_kutta_4],
-                 'TER4':     ['three_eights_rule_4',     three_eights_rule_4],
-                 'R4':       ['ralston_4',               ralston_4],
-                 'SSPK4':    ['ssp_ketcheson_4',         ssp_ketcheson_4],
-                 'F4':       ['fehlberg_4',              fehlberg_4],
-                 'B5':       ['butcher_5',               butcher_5],
-                 'CK5':      ['cash_karp_5',             cash_karp_5],
-                 'DP5':      ['dormand_prince_5',        dormand_prince_5],
-                 'BS5':      ['bogacki_shampine_5',      bogacki_shampine_5],
-                 'T5':       ['tsitouras_5',             tsitouras_5],
-                 'V5':       ['verner_5',                verner_5],
-                 'B6':       ['butcher_6',               butcher_6],
-                 'V6':       ['verner_6',                verner_6],
-                 'F7':       ['fehlberg_7',              fehlberg_7],
-                 'C8':       ['curtis_8',                curtis_8],
-                 'S8':       ['shanks_8',                shanks_8],
-                 'SP8':      ['shanks_pseudo_8',         shanks_pseudo_8],
-                 'DP8':      ['dormand_prince_8',        dormand_prince_8],
-                 'F10':      ['feagin_10',               feagin_10],
-                 'F14':      ['feagin_14',               feagin_14],
+standard_runge_kutta_dict = {'E1':       ['euler_1',                 euler_1],                # explicit
+                             'H2':       ['heun_2',                  heun_2],                 # SSP (strong stability preserving)
+                             'M2':       ['midpoint_2',              midpoint_2],
+                             'R2':       ['ralston_2',               ralston_2],
+                             'H3':       ['heun_3',                  heun_3],
+                             'R3':       ['ralston_3',               ralston_3],
+                             'RK3':      ['runge_kutta_3',           runge_kutta_3],
+                             'SSPSO3':   ['ssp_shu_osher_3',         ssp_shu_osher_3],
+                             'SSPSR3':   ['ssp_spiteri_ruuth_3',     ssp_spiteri_ruuth_3],
+                             'RK4':      ['runge_kutta_4',           runge_kutta_4],
+                             'TER4':     ['three_eights_rule_4',     three_eights_rule_4],
+                             'R4':       ['ralston_4',               ralston_4],
+                             'SSPK4':    ['ssp_ketcheson_4',         ssp_ketcheson_4],
+                             'F4':       ['fehlberg_4',              fehlberg_4],
+                             'B5':       ['butcher_5',               butcher_5],
+                             'CK5':      ['cash_karp_5',             cash_karp_5],
+                             'DP5':      ['dormand_prince_5',        dormand_prince_5],
+                             'BS5':      ['bogacki_shampine_5',      bogacki_shampine_5],
+                             'T5':       ['tsitouras_5',             tsitouras_5],
+                             'V5':       ['verner_5',                verner_5],
+                             'B6':       ['butcher_6',               butcher_6],
+                             'V6':       ['verner_6',                verner_6],
+                             'F7':       ['fehlberg_7',              fehlberg_7],
+                             'C8':       ['curtis_8',                curtis_8],
+                             'S8':       ['shanks_8',                shanks_8],
+                             'SP8':      ['shanks_pseudo_8',         shanks_pseudo_8],
+                             'DP8':      ['dormand_prince_8',        dormand_prince_8],
+                             'F10':      ['feagin_10',               feagin_10],
+                             'F14':      ['feagin_14',               feagin_14],
 
-                 'BE1':      ['backward_euler_1',        backward_euler_1],       # implicit
-                 'IM2':      ['implicit_midpoint_2',     implicit_midpoint_2],
-                 'CN2':      ['crank_nicolson_2',        crank_nicolson_2],
-                 'QZ2':      ['qin_zhang_2',             qin_zhang_2],
-                 'PR2':      ['pareschi_russo_2',        pareschi_russo_2],
-                 'LIIIB2':   ['lobatto_IIIB_2',          lobatto_IIIB_2],
-                 'LIIIC2':   ['lobatto_IIIC_2',          lobatto_IIIC_2],
-                 'KS2':      ['kraaijevanger_spijker_2', kraaijevanger_spijker_2],
-                 'DIRKL3':   ['DIRK_L_3',                DIRK_L_3],
-                 'PR3':      ['pareschi_russo_3',        pareschi_russo_3],
-                 'C3':       ['crouzeix_3',              crouzeix_3],
-                 'RIA3':     ['radau_IA_3',              radau_IA_3],
-                 'RIIA3':    ['radau_IIA_3',             radau_IIA_3],
-                 'N4':       ['norsett_4',               norsett_4],
-                 'GL4':      ['gauss_legendre_4',        gauss_legendre_4],
-                 'LIIIA4':   ['lobatto_IIIA_4',          lobatto_IIIA_4],
-                 'LIIIB4':   ['lobatto_IIIB_4',          lobatto_IIIB_4],
-                 'LIIIC4':   ['lobatto_IIIC_4',          lobatto_IIIC_4],
-                 'LIIICS4':  ['lobatto_IIICS_4',         lobatto_IIICS_4],
-                 'LIIID4':   ['lobatto_IIID_4',          lobatto_IIID_4],
-                 'RIA5':     ['radau_IA_5',              radau_IA_5],
-                 'RIIA5':    ['radau_IIA_5',             radau_IIA_5],
-                 'GL6':      ['gauss_legendre_6',        gauss_legendre_6],
-                 }
+                             'BE1':      ['backward_euler_1',        backward_euler_1],       # implicit
+                             'IM2':      ['implicit_midpoint_2',     implicit_midpoint_2],
+                             'CN2':      ['crank_nicolson_2',        crank_nicolson_2],
+                             'QZ2':      ['qin_zhang_2',             qin_zhang_2],
+                             'PR2':      ['pareschi_russo_2',        pareschi_russo_2],
+                             'LIIIB2':   ['lobatto_IIIB_2',          lobatto_IIIB_2],
+                             'LIIIC2':   ['lobatto_IIIC_2',          lobatto_IIIC_2],
+                             'KS2':      ['kraaijevanger_spijker_2', kraaijevanger_spijker_2],
+                             'DIRKL3':   ['DIRK_L_3',                DIRK_L_3],
+                             'PR3':      ['pareschi_russo_3',        pareschi_russo_3],
+                             'C3':       ['crouzeix_3',              crouzeix_3],
+                             'RIA3':     ['radau_IA_3',              radau_IA_3],
+                             'RIIA3':    ['radau_IIA_3',             radau_IIA_3],
+                             'N4':       ['norsett_4',               norsett_4],
+                             'GL4':      ['gauss_legendre_4',        gauss_legendre_4],
+                             'LIIIA4':   ['lobatto_IIIA_4',          lobatto_IIIA_4],
+                             'LIIIB4':   ['lobatto_IIIB_4',          lobatto_IIIB_4],
+                             'LIIIC4':   ['lobatto_IIIC_4',          lobatto_IIIC_4],
+                             'LIIICS4':  ['lobatto_IIICS_4',         lobatto_IIICS_4],
+                             'LIIID4':   ['lobatto_IIID_4',          lobatto_IIID_4],
+                             'RIA5':     ['radau_IA_5',              radau_IA_5],
+                             'RIIA5':    ['radau_IIA_5',             radau_IIA_5],
+                             'GL6':      ['gauss_legendre_6',        gauss_legendre_6]
+                            }
 
 
-embedded_dict = {'F12':      ['fehlberg_1_2',            fehlberg_1_2],           # explicit
-                 'HE21':     ['heun_euler_2_1',          heun_euler_2_1],
-                 'BS32':     ['bogacki_shampine_3_2',    bogacki_shampine_3_2],
-                 'F45':      ['fehlberg_4_5',            fehlberg_4_5],
-                 'CK54':     ['cash_karp_5_4',           cash_karp_5_4],
-                 'DP54':     ['dormand_prince_5_4',      dormand_prince_5_4],
-                 'BS54':     ['bogacki_shampine_5_4',    bogacki_shampine_5_4],
-                 'T54':      ['tsitouras_5_4',           tsitouras_5_4],
-                 'V56':      ['verner_5_6',              verner_5_6],
-                 'V65':      ['verner_6_5',              verner_6_5],
-                 'F78':      ['fehlberg_7_8',            fehlberg_7_8],
-                 'DP87':     ['dormand_prince_8_7',      dormand_prince_8_7],
-                 'F108':     ['feagin_10_8',             feagin_10_8],
-                 'F1412':    ['feagin_14_12',            feagin_14_12],
+embedded_runge_kutta_dict = {'F12':      ['fehlberg_1_2',            fehlberg_1_2],           # explicit
+                             'HE21':     ['heun_euler_2_1',          heun_euler_2_1],
+                             'BS32':     ['bogacki_shampine_3_2',    bogacki_shampine_3_2],
+                             'F45':      ['fehlberg_4_5',            fehlberg_4_5],
+                             'CK54':     ['cash_karp_5_4',           cash_karp_5_4],
+                             'DP54':     ['dormand_prince_5_4',      dormand_prince_5_4],
+                             'BS54':     ['bogacki_shampine_5_4',    bogacki_shampine_5_4],
+                             'T54':      ['tsitouras_5_4',           tsitouras_5_4],
+                             'V56':      ['verner_5_6',              verner_5_6],
+                             'V65':      ['verner_6_5',              verner_6_5],
+                             'F78':      ['fehlberg_7_8',            fehlberg_7_8],
+                             'DP87':     ['dormand_prince_8_7',      dormand_prince_8_7],
+                             'F108':     ['feagin_10_8',             feagin_10_8],
+                             'F1412':    ['feagin_14_12',            feagin_14_12],
 
-                 'CN21':     ['crank_nicolson_2_1',      crank_nicolson_2_1],     # implicit
-                 'LIIIB21':  ['lobatto_IIIB_2_1',        lobatto_IIIB_2_1],
-                 'LIIIC21':  ['lobatto_IIIC_2_1',        lobatto_IIIC_2_1],
-                 'GL42':     ['gauss_legendre_4_2',      gauss_legendre_4_2],
-                 'LIIIA42':  ['lobatto_IIIA_4_2',        lobatto_IIIA_4_2],
-                 'LIIIB42':  ['lobatto_IIIB_4_2',        lobatto_IIIB_4_2],
-                 'LIIIC42':  ['lobatto_IIIC_4_2',        lobatto_IIIC_4_2],
-                 'LIIICS42': ['lobatto_IIICS_4_2',       lobatto_IIICS_4_2],
-                 'RIIA52':   ['radau_IIA_5_2',           radau_IIA_5_2],
-                 'GL64':     ['gauss_legendre_6_4',      gauss_legendre_6_4]
-                 }
+                             'CN21':     ['crank_nicolson_2_1',      crank_nicolson_2_1],     # implicit
+                             'LIIIB21':  ['lobatto_IIIB_2_1',        lobatto_IIIB_2_1],
+                             'LIIIC21':  ['lobatto_IIIC_2_1',        lobatto_IIIC_2_1],
+                             'GL42':     ['gauss_legendre_4_2',      gauss_legendre_4_2],
+                             'LIIIA42':  ['lobatto_IIIA_4_2',        lobatto_IIIA_4_2],
+                             'LIIIB42':  ['lobatto_IIIB_4_2',        lobatto_IIIB_4_2],
+                             'LIIIC42':  ['lobatto_IIIC_4_2',        lobatto_IIIC_4_2],
+                             'LIIICS42': ['lobatto_IIICS_4_2',       lobatto_IIICS_4_2],
+                             'RIIA52':   ['radau_IIA_5_2',           radau_IIA_5_2],
+                             'GL64':     ['gauss_legendre_6_4',      gauss_legendre_6_4]
+                            }
 
 
 
@@ -985,10 +985,10 @@ def explicit_or_implicit_method(butcher, embedded = False):
 
 
 def main():
-        for label in standard_dict:                                     # write butcher tables to file
+        for label in standard_runge_kutta_dict:                         # write butcher tables to file
 
-                method = standard_dict[label][0]
-                table  = standard_dict[label][1]
+                method = standard_runge_kutta_dict[label][0]
+                table  = standard_runge_kutta_dict[label][1]
 
                 print(method, '\t\t', explicit_or_implicit_method(table), '\t\t', symplectic_method(table))
 
@@ -998,10 +998,10 @@ def main():
 
         print()
 
-        for label in embedded_dict:
+        for label in embedded_runge_kutta_dict:
 
-                method = embedded_dict[label][0]
-                table  = embedded_dict[label][1]
+                method = embedded_runge_kutta_dict[label][0]
+                table  = embedded_runge_kutta_dict[label][1]
 
                 print(method, '\t\t', explicit_or_implicit_method(table, embedded = True), '\t\t', symplectic_method(table, embedded = True))
 

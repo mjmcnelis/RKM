@@ -6,7 +6,7 @@ from scipy import integrate
 
 myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
-solution = 'projectile_damped'                                   # solution type
+solution = 'projectile_damped'                             # solution type
 
 A = 100                                             # for sine function
 cycles = 20
@@ -16,7 +16,7 @@ B = 0.5                                             # for logistic function
 h = 0                                               # for projectile motion (y-direction)
 v = 100                                             # h = initial position, v = initial velocity
 g = 10                                              # g = gravitational acceleration, k = damping constant
-k = 1
+k = 0.5
 
 t0 = -10                                            # initial and final times
 tf = 10
@@ -26,7 +26,9 @@ if solution == 'sine':
     tf = 2*math.pi/A * cycles
 elif solution == 'inverse_power':
     t0 = 0.0001
-    tf = 10
+elif solution in ['projectile', 'projectile_damped']:
+    t0 = 0
+    tf = 20
 
 
 
@@ -54,11 +56,11 @@ def y_exact(t):
 
     elif solution == 'projectile':
 
-        return np.array([h + v*(t+10) - 0.5*g*(t+10)**2 , v - g*(t+10)], dtype = myfloat).reshape(-1,1)
+        return np.array([h + v*(t-t0) - 0.5*g*(t-t0)**2 , v - g*(t-t0)], dtype = myfloat).reshape(-1,1)
 
     elif solution == 'projectile_damped':
 
-        return np.array([h - g*(t+10)/k + (v + g/k)/k*(1 - math.exp(-k*(t+10))), -g/k + (v + g/k)*math.exp(-k*(t+10))], dtype = myfloat).reshape(-1,1)
+        return np.array([h - g*(t-t0)/k + (v + g/k)/k*(1 - math.exp(-k*(t-t0))), -g/k + (v + g/k)*math.exp(-k*(t-t0))], dtype = myfloat).reshape(-1,1)
 
 
 
@@ -123,7 +125,7 @@ solution_dict = {'gaussian':            r"$y^{'} = -2ty$",
                  'sine':                r"$y^{''} = -%s^{2}y$" % A,
                  'exponential':         r"$y^{'} = 10y$",
                  'projectile':          r"$y^{''} = -10$",
-                 'projectile_damped':   r"$y^{''} = -10 - y'$"}
+                 'projectile_damped':   r"$y^{''} = -10 - y'/2$"}
 
 
 

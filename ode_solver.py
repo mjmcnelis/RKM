@@ -4,29 +4,22 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from precision import precision     # for myfloat
-from butcher_table import standard_dict, embedded_dict
-from multistep_table import (adams_explicit_dict, adams_implicit_dict, adams_predictor_corrector_dict,
-                            backward_differentiation_formula_dict, numerical_differentiation_formula_dict)
 import explicit_runge_kutta
 import implicit_runge_kutta
 import linear_multistep
 import exact_solution as exact
+from dictionaries import ode_method_dict
+from precision import precision                                 # for myfloat
+from explicit_runge_kutta import dt_MIN
+
+COLLISION_DETECTION = True                                      # for playing with collision detection
 
 myfloat = type(precision(1))
 
-# combine dictionaries
-total_dict = standard_dict.copy()
-total_dict.update(embedded_dict)
-total_dict.update(adams_explicit_dict)
-total_dict.update(adams_implicit_dict)
-total_dict.update(adams_predictor_corrector_dict)
-total_dict.update(backward_differentiation_formula_dict)
-total_dict.update(numerical_differentiation_formula_dict)       # todo: make a file?
 
 
 def get_method_name(method_label):
-    return total_dict[method_label][0]                          # get filename from dictionary
+    return ode_method_dict[method_label][0]                     # get filename from dictionary
 
 
 
@@ -193,6 +186,38 @@ def rescale_epsilon(eps, adaptive, order):
 
 
 
+def simple_collision_detection(y, y_prev, t, dt, y_prime, butcher):
+
+    last_position = y_prev[0,0]
+    position = y[0,0]
+
+    collision = False
+
+    if position <= 0:                                           # check if projectile hit flat ground (height = 0)
+
+        collision = True
+
+        dt *= last_position / (last_position - position)        # estimate collision time t + dt
+
+        y[0] = 0                                                # adjust coordinates via elastic collision
+        y[1] *= -1
+
+        print("hit ground at t = %.3f (dt' = %.3f)" % ((t + dt), dt))
+
+        if dt < dt_MIN:                                         # briefly continue after collision
+
+            y[0] += (dt - dt_MIN) * y[1]                        # assume velocity constant in remainder dt interval
+
+            # dt_remainder = dt - dt_MIN                        # more sophisticated version
+            # dy1 = dt_remainder * y_prime(t,y)
+            # y = explicit_runge_kutta.RK_standard(y, dy1, t + dt, dt_remainder, y_prime, butcher)
+
+            dt = dt_MIN
+
+    return y, dt, collision
+
+
+
 # main function
 def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, eps = 1.e-8, n_max = 10000):
 
@@ -269,6 +294,8 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
 
             if adaptive == None:                                # use a fixed step size
 
+                y_prev = y.copy()
+
                 dy1 = dt * y_prime(t, y)
                 y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
 
@@ -313,7 +340,6 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
 
                 evaluations += (tries * stages)
                 total_attempts += tries
-
 
         elif solver == 'diagonal_implicit_runge_kutta':         # diagonal implicit runge-kutta routines
 
@@ -443,6 +469,12 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
                     evaluations += evals
 
 
+
+        if COLLISION_DETECTION and exact.solution in ['projectile', 'projectile_damped']:
+            y, dt, collision = simple_collision_detection(y, y_prev, t, dt, y_prime, butcher)
+
+
+
         dt_array = np.append(dt_array, dt)
 
         if t >= tf:                                             # stop evolution
@@ -450,6 +482,7 @@ def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian
             break
 
         t += dt
+
 
     if finish:
         print('\node_solver took %.3g seconds to finish\n' % (time.time() - start))

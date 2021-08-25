@@ -3,8 +3,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-dt_MIN = 1.e-7
-dt_MAX = 1
+# dt_MIN = 1.e-7
+dt_MIN = 1/60
+dt_MAX = 10/60
 
 LOW = 0.2
 HIGH = 5
