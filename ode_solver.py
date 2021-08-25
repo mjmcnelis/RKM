@@ -206,9 +206,9 @@ def simple_collision_detection(y, y_prev, t, dt, y_prime, butcher):
 
         if dt < dt_MIN:                                         # briefly continue after collision
 
-            y[0] += (dt - dt_MIN) * y[1]                        # assume velocity constant in remainder dt interval
+            y[0] += (dt_MIN - dt) * y[1]                        # assume velocity constant in remainder dt interval
 
-            # dt_remainder = dt - dt_MIN                        # more sophisticated version
+            # dt_remainder = dt_MIN - dt                        # more sophisticated version
             # dy1 = dt_remainder * y_prime(t,y)
             # y = explicit_runge_kutta.RK_standard(y, dy1, t + dt, dt_remainder, y_prime, butcher)
 
