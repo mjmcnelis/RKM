@@ -36,9 +36,6 @@ def adams_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, root,
     dimension = y.shape[0]
     identity = np.identity(dimension)	
 
-
-    # check again if f_list is correct or not
-
     if steps > 0:                                           # compute z0, which is the fixed part of z = dy
         f = y_prime(t, y) 
         z0 += adams[1] * dt * f
@@ -51,7 +48,7 @@ def adams_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, root,
     z_prev = 0
 
     if root is 'newton_fast':
-        J = identity  -  adams[0] * dt * jacobian(t, y)		# only evaluate jacobian once
+        J = identity  -  adams[0] * dt * jacobian(t, y)     # only evaluate jacobian once
         evaluations += dimension
 
     for n in range(0, max_iterations):                         
@@ -61,24 +58,20 @@ def adams_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, root,
 
             evaluations += 1
 
-            if root is 'newton':							# evaluate jacobian for every iteration
+            if root is 'newton':                            # evaluate jacobian for every iteration
                 J = identity  -  adams[0] * dt * jacobian(t + dt, y + z)
 
                 evaluations += dimension
             
-
-
             # todo: compute inverse jacobian if newton_fast	
             dz = np.linalg.solve(J.astype('float64'), -g.astype('float64'))	
 
-
-
-            z += dz											# newton iteration dz = -J^{-1}.g (linalg only supports float64)
+            z += dz                                         # newton iteration dz = -J^{-1}.g (linalg only supports float64)
 
             delta = np.linalg.norm(g, ord = norm)
             tolerance = eps_root
 
-            if delta <= tolerance:							# check for convergence of solution g(z) = 0
+            if delta <= tolerance:                          # check for convergence of solution g(z) = 0
                 break
 
         else:                                               # fixed-point iteration 
@@ -91,7 +84,7 @@ def adams_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, root,
         
             tolerance = eps_root * dy_norm
 
-            if delta <= tolerance:						    # check for convergence of solution
+            if delta <= tolerance:                          # check for convergence of solution
                 break
             
             z_prev = z.copy()
@@ -146,12 +139,8 @@ def adams_bashforth_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, r
 
                 evaluations += dimension
             
-
-
             # todo: compute inverse jacobian if newton_fast	
             dz = np.linalg.solve(J.astype('float64'), -g.astype('float64')) 
-
-
 
             z += dz											# newton iteration dz = -J^{-1}.g (linalg only supports float64)
 
