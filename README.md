@@ -38,5 +38,7 @@ Note: currently, the multistep methods only use a fixed step size
 
 We have started adding implicit Runge-Kutta methods, linear multistep methods, and interpolators for dense output. 
 
+Note: fully implicit Runge-Kutta is not usuable right now
+
 
 
