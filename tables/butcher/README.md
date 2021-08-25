@@ -29,21 +29,29 @@ These are all of the Runge-Kutta methods I have compiled so far:
 <table>
 <tr valign="top"><td>
   
-  |   Standard Implicit   |      |
-  |:---------------------:|:----:|
-  | Backward Euler 1      | BE1  |
-  | Implicit Midpoint 2   | IM2  |
-  | Crank Nicolson 2      | CN2  |
-  | Qin Zhang 2           | QZ2  |
-  | Pareschi Russo 2      | PR2  |
-  | Pareschi Russo 3      | PR3  |
-  | Crouzeix 3            | C3   |
-
+  |   Standard Implicit     |        |
+  |:-----------------------:|:------:|
+  | Backward Euler 1        | BE1    |
+  | Implicit Midpoint 2     | IM2    |
+  | Crank Nicolson 2        | CN2    |
+  | Qin Zhang 2             | QZ2    |
+  | Pareschi Russo 2        | PR2    |
+  | Lobatto IIIB 2          | LIIIB2 |
+  | Lobatto IIIC 2          | LIIIC2 |
+  | Kraaijevanger Spijker 2 | KS2    |
+  | Pareschi Russo 3        | PR3    |
+  | Crouzeix 3              | C3     |
+  | Radau IA 3              | RIA3   |
+  | Radau IIA 3             | RIIA3  |
+  | DIRK L-Stable 3         | DIRKL3 |
+  
 </td><td valign="top">
 
-  |   Embedded Implicit   |      |
-  |:---------------------:|:----:|
-  | Crank Nicolson 2(1)   | CN21 |
+  |   Embedded Implicit   |         |
+  |:---------------------:|:-------:|
+  | Crank Nicolson 2(1)   | CN21    |
+  | Lobatto IIIB 2(1)     | LIIIB21 |
+  | Lobatto IIIC 2(1)     | LIIIC21 |
   
 </td></tr> </table>
 
@@ -58,7 +66,7 @@ Note: SSP = strong stability preserving
 | Runge Kutta 4       | RK4    |
 | Three Eights Rule 4 | TER4   |
 | Ralston 4           | R4     |
-| SSP Runge Kutta 4   | SSPRK4 |
+| SSP Ketcheson 4     | SSPK4  |
 | Fehlberg 4          | F4     |
 | Butcher 5           | B5     |
 | Cash Karp 5         | CK5    |
@@ -71,7 +79,7 @@ Note: SSP = strong stability preserving
   
 </td><td valign="top">
  
-|      Embedded         |      |
+|    Embedded Explicit  |      |
 |:---------------------:|:----:|
 | Fehlberg 4(5)         | F45  |
 | Cash Karp 5(4)        | CK54 |
@@ -86,11 +94,31 @@ Note: SSP = strong stability preserving
 <table>
 <tr valign="top"><td>
 
-| Standard Implicit   |        |
-|:-------------------:|:------:|
-| Norsett 4             | N4   |
-| Gauss Legendre 4      | GL4  |
+| Standard Implicit     |         |
+|:---------------------:|:-------:|
+| Norsett 4             | N4      |
+| Gauss Legendre 4      | GL4     |
+| Lobatto IIIA 4        | LIIIA4  |
+| Lobatto IIIB 4        | LIIIB4  | 
+| Lobatto IIIC 4        | LIIIC4  | 
+| Lobatto IIICS 4       | LIIICS4 | 
+| Lobatto IIID 4        | LIIID4  | 
+| Radau IA 5            | RIA5    |
+| Radau IIA 5           | RIIA5   |
+| Gauss Legendre 6      | GL6     |
 
+</td><td valign="top">
+  
+| Embedded Implicit     |          |
+|:---------------------:|:--------:|
+| Gauss Legendre 4(2)   | GL42     |
+| Lobatto IIIA 4(2)     | LIIIA42  |
+| Lobatto IIIB 4(2)     | LIIIB42  | 
+| Lobatto IIIC 4(2)     | LIIIC42  | 
+| Lobatto IIICS 4(2)    | LIIICS42 |
+| Radau IIA 5(2)        | RIIA52   |
+| Gauss Legendre 6(4)   | GL64     |
+  
 </td></tr> </table>
 
 Note: the embedded schemes in `standard` have their secondary method removed, along with extraneous stages. 
