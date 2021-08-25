@@ -20,6 +20,8 @@ The RKM algorithm was first used in one of my papers to solve fluid dynamic equa
 
 This repository is currently under development, but you can run `test_ode_solver.py` to generate an example plot (also edit `solution` in `exact_solution.py`).
 
+Note to self: need to update `evolve.py`, `test_efficienct_explicit.py`, `test_efficienct_implicit.py`
+
 ## Runge-Kutta methods
 
 A list of Runge-Kutta methods in Butcher tableau notation can be found in `tables/butcher`. They are organized in two categories: `standard` for RKM and SDRK, and `embedded` for ERK.
