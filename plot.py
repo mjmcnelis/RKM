@@ -5,7 +5,7 @@ from explicit_runge_kutta import dt_MIN, dt_MAX
 
 
 
-def plot_test(y, t, dt, t0, tf, method, adaptive, rejection_rate, function_evaluations, plot_variables, error, average_error, error_type, log_plot = False):
+def plot_test(y, t, dt, t0, tf, method, adaptive, rejection_rate, function_evaluations, plot_variables, error, log_plot = False):
 
 	fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4), squeeze = False)
 
@@ -14,17 +14,7 @@ def plot_test(y, t, dt, t0, tf, method, adaptive, rejection_rate, function_evalu
 	# plot y
 	axes[0][0].plot(t, y[:,0], 'red', label = method, linewidth = 1.5)
 
-	if average_error:
-		if error_type == 'relative':
-			axes[0][0].text(t0 + 0.1*(tf-t0), 0.2*abs(np.amax(y)) + np.amax(y), r'$\mathcal{E}^{(\mathrm{avg})}_{\mathrm{rel}} = %.2e$' % error, fontsize=10)
-		else:
-			axes[0][0].text(t0 + 0.1*(tf-t0), 0.2*abs(np.amax(y)) + np.amax(y), r'$\mathcal{E}^{(\mathrm{avg})}_{\mathrm{abs}} = %.2e$' % error, fontsize=10)
-	else:
-		if error_type == 'relative':
-			axes[0][0].text(t0 + 0.1*(tf-t0), 0.2*abs(np.amax(y)) + np.amax(y), r'$\mathcal{E}^{(\mathrm{max})}_{\mathrm{rel}} = %.2e$' % error, fontsize=10)
-		else:
-			axes[0][0].text(t0 + 0.1*(tf-t0), 0.2*abs(np.amax(y)) + np.amax(y), r'$\mathcal{E}^{(\mathrm{max})}_{\mathrm{abs}} = %.2e$' % error, fontsize=10)
-
+	axes[0][0].text(t0 + 0.1*(tf-t0), 0.2*abs(np.amax(y)) + np.amax(y), r'$\mathcal{E}^{(\mathrm{avg})}_{\mathrm{abs}} = %.2e$' % error, fontsize=10)
 
 	for i in range(1, min(plot_variables, y.shape[1])):
 		axes[0][0].plot(t, y[:,i], linewidth = 1.5)

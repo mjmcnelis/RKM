@@ -219,22 +219,24 @@ def simple_collision_detection(y, y_prev, t, dt, y_prime, butcher):
 
 
 # main function
-def ode_solver(y0, t0, tf, dt0, y_prime, method_label, adaptive = None, jacobian = None, root = 'newton_fast', norm = None, eps = 1.e-8, n_max = 10000):
+def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
     # y0           = initial solution
     # t0           = initial time
     # tf           = final time
-    # dt0          = proposed initial step size
     # y_prime      = source function f
-    # adaptive     = adaptive stepsize scheme (currently not applicable to multistep solvers)
-    # method_label = code label of runge-kutta or multistep method
+    # parameters   = parameter list
     # jacobian     = jacobian of source function df/dy
-    # root         = root solver for implicit routines
-    # norm         = value of l in the l-norm
-    # eps          = error tolerance parameter
-    # n_max        = max number of evolution steps
 
     start = time.time()                                         # start timer
+
+    adaptive     = parameters['adaptive']                       # load parameters
+    method_label = parameters['method']
+    dt0          = parameters['dt_initial']
+    n_max        = parameters['max_steps']
+    eps          = parameters['eps']
+    norm         = parameters['norm']
+    root         = parameters['root']
 
     y = y0.copy()                                               # set initial conditions
     t = t0
