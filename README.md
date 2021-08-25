@@ -20,7 +20,7 @@ The RKM algorithm was first used in one of my papers to solve fluid dynamic equa
 
 This repository is currently under development, but you can run `test_ode_solver.py` to generate an example plot (also edit `solution` in `exact_solution.py`).
 
-Note to self: need to update `evolve.py`, `test_efficienct_explicit.py`, `test_efficienct_implicit.py`
+Note to self: need to update `evolve.py`, `test_efficiency_explicit.py`, `test_efficiency_implicit.py`
 
 ## Runge-Kutta methods
 
