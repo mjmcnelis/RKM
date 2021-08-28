@@ -1,19 +1,19 @@
 
 import numpy as np
 
-parameters = {'adaptive':		'ERK',
-	      'method':			'DP54',
-	      'dt_initial':		1,
-	      'max_steps':		100000,
-	      'eps':			1.e-8,
-	      'norm':			None,
-	      'dt_min':			1.e-7,
-	      'dt_max':			1,
-	      'root':			'newton_fast',
-	      'max_iterations':		2,
-	      'eps_root':		1.e-6,
-	      'interpolate':		False,
-	      'free_embedded':		None
+parameters = {'adaptive':               'ERK',
+	      'method':                 'DP54',
+	      'dt_initial':             1,
+	      'max_steps':              100000,
+	      'eps':                    1.e-8,
+	      'norm':                   None,
+	      'dt_min':                 1.e-7,
+	      'dt_max':                 1,
+	      'root':                   'newton_fast',
+	      'max_iterations':         2,
+	      'eps_root':               1.e-6,
+	      'interpolate':            False,
+	      'free_embedded':          None
 	     }
 
 #-------------------------------------------------------------------------------------------------------|
