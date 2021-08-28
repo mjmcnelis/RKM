@@ -398,7 +398,6 @@ dormand_prince_5_4 = np.array([
                 [1, 35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0],
                 [1, 5179/57600, 0, 7571/16695, 393/640, -92097/339200, 187/2100, 1/40]], dtype = myfloat)
 
-# note: does not include the 2nd fourth-order pair
 bogacki_shampine_5_4 = np.array([
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [1/6, 1/6, 0, 0, 0, 0, 0, 0],
@@ -898,9 +897,9 @@ embedded_runge_kutta_dict = {'F12':      ['fehlberg_1_2',            fehlberg_1_
                              'DP54':     ['dormand_prince_5_4',      dormand_prince_5_4],
                              'BS54':     ['bogacki_shampine_5_4',    bogacki_shampine_5_4],
                              'T54':      ['tsitouras_5_4',           tsitouras_5_4],
-                             'V56':      ['verner_5_6',              verner_5_6],
+                             'V56':      ['verner_5_6',              verner_5_6],              # free failed
                              'V65':      ['verner_6_5',              verner_6_5],
-                             'F78':      ['fehlberg_7_8',            fehlberg_7_8],
+                             'F78':      ['fehlberg_7_8',            fehlberg_7_8],            # free failed
                              'DP87':     ['dormand_prince_8_7',      dormand_prince_8_7],
                              'F108':     ['feagin_10_8',             feagin_10_8],
                              'F1412':    ['feagin_14_12',            feagin_14_12],
@@ -935,6 +934,24 @@ def debug_table(method, butcher):
 
     if error > 1.e-14:
         print('\ndebug_table warning:', method, 'table does not satisfy usual conditions, error = %.3e (may need to debug table)\n' % error)
+
+
+
+def method_is_FSAL(butcher, embedded = False):
+
+    if embedded:
+        if np.array_equal(butcher[-3,1:], butcher[-2,1:]):      # check if second-to-last and third-to-last rows match
+            return 'FSAL'
+        else:
+            return 'not FSAL'
+    else:
+
+        # todo: whether or not implicit method can use FSAL is less obvious
+
+        if np.array_equal(butcher[-2,1:], butcher[-1,1:]):      # check if last and second-to-last rows match
+            return 'FSAL'
+        else:
+            return 'not FSAL'
 
 
 def symplectic_method(butcher, embedded = False):
@@ -990,7 +1007,7 @@ def main():
                 method = standard_runge_kutta_dict[label][0]
                 table  = standard_runge_kutta_dict[label][1]
 
-                print(method, '\t\t', explicit_or_implicit_method(table), '\t\t', symplectic_method(table))
+                print(method, '\t\t', explicit_or_implicit_method(table), '\t\t', symplectic_method(table), '\t\t', method_is_FSAL(table))
 
                 debug_table(method, table)
 
@@ -1003,7 +1020,8 @@ def main():
                 method = embedded_runge_kutta_dict[label][0]
                 table  = embedded_runge_kutta_dict[label][1]
 
-                print(method, '\t\t', explicit_or_implicit_method(table, embedded = True), '\t\t', symplectic_method(table, embedded = True))
+                print(method, '\t\t', explicit_or_implicit_method(table, embedded = True), '\t\t',
+                      symplectic_method(table, embedded = True), '\t\t', method_is_FSAL(table, embedded = True))
 
                 debug_table(method, table)
 

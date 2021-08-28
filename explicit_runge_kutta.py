@@ -3,20 +3,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-dt_MIN = 1.e-7
-dt_MAX = 1
 
-# dt_MIN = 1/60                 # for game physics example
-# dt_MAX = 10/60
-
-LOW = 0.2
-HIGH = 5
-
-HIGH_RKM = 1.5
-# HIGH_RKM = 5
-
-
-# standard RK step
+# standard Runge-Kutta step
 def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
     # todo: pass y_prime as a function
@@ -28,7 +16,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
     # dt       = current stepsize dt_n
     # y_prime  = source function f
     # butcher  = Butcher table
-    # embedded = return primary/secondary solutions if True
+    # embedded = return primary/secondary solutions (and last stage for possible FSAL) if True
 
     if embedded:                                            # get c_i, A_ij, b_i and number of stages from Butcher table
         c = butcher[:-2, 0]
@@ -47,9 +35,11 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
     dy_array[0] = dy1                                       # first intermediate Euler step
 
     for i in range(1, stages):                              # loop over remaining intermediate Euler steps
+
         dy = 0
 
         for j in range(0, i):
+
             dy += dy_array[j] * A[i,j]
 
         dy_array[i] = dt * y_prime(t + dt*c[i], y + dy)
@@ -57,42 +47,61 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
     dy = 0
 
     for j in range(0, stages):                              # primary RK iteration (Butcher notation)
+
         dy += dy_array[j] * b[j]
 
     if embedded:                                            # secondary RK iteration (for embedded RK)
+
         dyhat = 0
 
         for j in range(0, stages):
+
             dyhat += dy_array[j] * bhat[j]
 
-        return (y + dyhat), (y + dy)                        # updated ERK solutions (secondary, primary)
+        k_last = dy_array[-1] / dt
+
+        return (y + dyhat), (y + dy), k_last                # updated ERK solutions (secondary, primary, last stage)
 
     return y + dy                                           # updated solution (primary)
 
 
 
-# my adaptive RK step
-def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps = 1.e-2, norm = None,
-             dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
+# new adaptive Runge-Kutta step
+def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 1.5, improve_y_star = False, flags = False):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
     # t         = current time t_n
     # dt_prev   = previous step size dt_{n-1}
     # y_prime   = source function f
-    # eps       = tolerance parameter
-    # norm      = order of vector norm (e.g. 1, 2 (None), np.inf)
-    # dt_min    = min step size
-    # dt_max    = max step size
-    # low, high = safety bounds for dt growth rate
+    # eps       = error tolerance parameter
+    # norm      = type of vector norm (e.g. 1, None (2), np.inf)
+    # dt_min    = min time step
+    # dt_max    = max time step
+    # low, high = safety bounds for dt variation (set to default values)
 
     order = int(method.split('_')[-1])                      # get order of method
 
-    high = high**(1/order)
+    high = high**(1/order)                                  # suppress growth rate
 
     f = y_prime(t, y)                                       # for first intermediate Euler step
 
-    y_star = y + dt_prev*f                                  # compute y_star and approximate C
+    dy1_star = dt_prev * f
+
+    if not improve_y_star:                                  # compute y_star and approximate C
+
+        y_star = y + dy1_star
+
+    else:                                                   # try generic second-order approximation (doesn't seem to help)
+
+        c1 = butcher[1,0]
+        a10 = butcher[1,1]
+        dy2_star = dt_prev * y_prime(t + c1*dt_prev, y + a10*dy1_star)
+        b1 = 1 - 1/(2*c1)
+        b2 = 1 - b1
+
+        y_star = y + b1*dy1_star + b2*dy2_star
+
 
     C = 2 * (y_star - 2*y + y_prev) / dt_prev**2
 
@@ -101,8 +110,11 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps = 1.e-2, norm 
     f_norm = np.linalg.norm(f, ord = norm)
 
     if C_norm == 0:                                         # prevent division by 0
+
         dt = dt_prev
+
     else:
+
         if (C_norm * y_norm) > (2 * eps * f_norm**2):       # compute adaptive step size
             dt = (2 * eps * y_norm / C_norm)**0.5
         else:
@@ -112,26 +124,27 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps = 1.e-2, norm 
 
     dt = min(dt_max, max(dt_min, dt))                       # impose dt_min <= dt <= dt_max
 
-    # if dt == dt_min or dt == dt_max:
-    #     print('RKM_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+    if flags and (dt == dt_min or dt == dt_max):
+        print('RKM_step flag: dt = %.2e hit min/max bounds at t = %.2f (change dt_min or dt_max)' % (dt, t))
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
 
     y_prev = y
+
     y = RK_standard(y, dy1, t, dt, y_prime, butcher)        # update y with standard Runge-Kutta method
 
     return y, y_prev, dt                                    # updated solution, current solution, current step size
 
 
 
-# embedded RK step
-def ERK_step(y0, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
-             dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
+# embedded Runge-Kutta step
+def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, dt_max, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
     # y0           = current solution y_n
-    # dt           = starting step size
+    # dt           = proposal for time step dt_n
+    # k1           = first stage f(t_n, y_n)
+    # S            = safety factor (set to default value)
     # max_attempts = max number of attempts
-    # S            = safety factor
 
     order = int(method.split('_')[-2])                      # order of primary method
     order_hat = int(method.split('_')[-1])                  # order of secondary method
@@ -140,20 +153,21 @@ def ERK_step(y0, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
     order_min = min(order, order_hat)
     power = 1 / (1 + order_min)
 
-    high = high**(order_min / order_max)
+    high = high**(order_min / order_max)                    # adjust growth rate
 
     rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
 
-    for i in range(0, max_attempts):
+    for n in range(0, max_attempts):
+
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        # if (dt == dt_min or dt == dt_max) and rescale < 1:
-        #     print('ERK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+        if flags and (dt_next == dt_min or dt_next == dt_max):
+            print('ERK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-        dy1 = dt * y_prime(t, y0)
+        dy1 = dt * k1                                       # first intermediate Euler step
 
-        # propose updated solution (secondary, primary)
-        yhat, y = RK_standard(y0, dy1, t, dt, y_prime, butcher, embedded = True)
+        # propose updated solution (secondary, primary, last stage)
+        yhat, y, k_last = RK_standard(y0, dy1, t, dt, y_prime, butcher, embedded = True)
 
         error_norm = np.linalg.norm(y - yhat, ord = norm)   # estimate local truncation error
         y_norm = np.linalg.norm(y, ord = norm)
@@ -168,27 +182,29 @@ def ERK_step(y0, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
             rescale = min(high, max(low, S*rescale))        # control rate of change
 
         if error_norm <= tolerance:                         # check if attempt succeeded
+
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
 
-            # if dt_next == dt_min or dt_next == dt_max:
-            #     print('ERK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+            if flags and (dt_next == dt_min or dt_next == dt_max):
+                print('ERK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-            return y, dt, dt_next, i + 1                    # updated solution, current step size, next step size, number of attempts
+            return y, k_last, dt, dt_next, n + 1            # updated solution, last stage, current dt, next dt, number of attempts
+
         else:
+
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 
-    # if dt_next == dt_min or dt_next == dt_max:
-    #             print('ERK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+    if flags and (dt_next == dt_min or dt_next == dt_max):
+        print('ERK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-    return y, dt, dt_next, i + 1                            # return last attempt
+    return y, k_last, dt, dt_next, n + 1                    # return last attempt
 
 
 
-# step doubling RK step
-def SDRK_step(y, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
-              dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
+# step doubling Runge-Kutta step
+def SDRK_step(y, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
     # routine is very similar to ERK_step()
 
@@ -199,15 +215,17 @@ def SDRK_step(y, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
 
     rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
 
-    for i in range(0, max_attempts):
+    f = y_prime(t, y)                                       # first intermediate Euler step
+
+    for n in range(0, max_attempts):
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        # if (dt == dt_min or dt == dt_max) and rescale < 1:
-        #     print('SDRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+        if flags and (dt_next == dt_min or dt_next == dt_max):
+            print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
         # full RK step
-        dy1 = dt * y_prime(t, y)
+        dy1 = dt * f
         y1 = RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False)
 
         # two half RK steps
@@ -232,30 +250,35 @@ def SDRK_step(y, t, dt, y_prime, method, butcher, eps = 1.e-8, norm = None,
             rescale = min(high, max(low, S*rescale))        # control rate of change
 
         if error_norm <= tolerance:                         # check if attempt succeeded
+
             dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
 
-            # if dt_next == dt_min or dt_next == dt_max:
-            #     print('SDRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+            if flags and (dt_next == dt_min or dt_next == dt_max):
+                print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-            return yR, dt, dt_next, i + 1                   # updated solution, current step size, next step size, number of attempts
+            return yR, dt, dt_next, n + 1                   # updated solution, current step size, next step size, number of attempts
+
         else:
+
             rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 
-    # if dt_next == dt_min or dt_next == dt_max:
-    #     print('SDRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+    if flags and (dt_next == dt_min or dt_next == dt_max):
+        print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-    return yR, dt, dt_next, i + 1                           # return last attempt
-
-
+    return yR, dt, dt_next, n + 1                           # return last attempt
 
 
 
+def estimate_step_size(y, t, y_prime, parameters, eps, low = 0.5, high = 10, max_attempts = 100, flags = False):
 
+    method  = 'euler_1'                                     # use euler step doubling
+    butcher = np.loadtxt('tables/butcher/standard/euler_1.dat')
 
-
-def estimate_step_size(y, t, y_prime, method, butcher, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = 0.5, high = 10, max_attempts = 100):
+    norm   = parameters['norm']                             # get parameters
+    dt_min = parameters['dt_min']
+    dt_max = parameters['dt_max']
 
     dt = dt_min
     dt_prev = dt
@@ -265,7 +288,7 @@ def estimate_step_size(y, t, y_prime, method, butcher, eps = 1.e-8, norm = None,
 
     rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
 
-    for i in range(0, max_attempts):
+    for n in range(0, max_attempts):
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # increase step size for next attempt
 
@@ -280,13 +303,10 @@ def estimate_step_size(y, t, y_prime, method, butcher, eps = 1.e-8, norm = None,
         y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher, embedded = False)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
-        # yR = y2 + error                                     # propose updated solution (Richardson extrapolation)
 
         error_norm = np.linalg.norm(error, ord = norm)      # error norm
-        # y_norm = np.linalg.norm(yR, ord = norm)
-        # dy_norm = np.linalg.norm(yR - y, ord = norm)
         y_norm = np.linalg.norm(y2, ord = norm)
-        dy_norm = np.linalg.norm(y2 - y, ord = norm)        # 8/23/21: use y2 instead (since not using extrapolation)
+        dy_norm = np.linalg.norm(y2 - y, ord = norm)
 
         tolerance = eps * max(y_norm, dy_norm)              # compute tolerance
 
@@ -297,13 +317,18 @@ def estimate_step_size(y, t, y_prime, method, butcher, eps = 1.e-8, norm = None,
             rescale = min(high, max(low, rescale))
 
         if error_norm >= tolerance or dt >= dt_max:         # check if attempt succeeded
-            break
+
+            return dt_prev, n + 1
+
         else:
             rescale = max(1.1, rescale)
 
         dt_prev = dt
 
-    return dt_prev, i+1
+    if flags:
+        print('estimate_step_size flag: exceeded max number of attempts')
+
+    return dt_prev, n + 1
 
 
 

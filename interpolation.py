@@ -32,3 +32,40 @@ def interpolate_solution(y, t, dt, method = 'cubic_spline', order = 3, points = 
     quit()
 
     return y_int, t_uniform, dt
+
+
+
+
+
+
+# old notes
+# from scipy import interpolate
+
+# points = 101
+# evals_array = np.linspace(6000, 16000, points)
+
+# tck = interpolate.splrep(evals_RK4_1, error_RK4_1, k = 3)
+# error_RK4_1_interp = interpolate.splev(evals_array, tck)
+
+# tck= interpolate.splrep(evals_RK4_2, error_RK4_2, k = 3)
+# error_RK4_2_interp = interpolate.splev(evals_array, tck)
+
+
+# plt.figure(figsize=(5,5))
+# plt.plot(evals_array, error_RK4_1_interp/error_RK4_2_interp, 'r', linewidth = 2.5)
+# plt.show()
+
+
+# tck = interpolate.splrep(evals_RK8_1, error_RK8_1, k = 3)
+# error_RK8_1_interp = interpolate.splev(evals_array, tck)
+
+# tck= interpolate.splrep(evals_RK8_2, error_RK8_2, k = 3)
+# error_RK8_2_interp = interpolate.splev(evals_array, tck)
+
+
+# plt.figure(figsize=(5,5))
+# plt.plot(evals_array, error_RK8_1_interp/error_RK8_2_interp, 'b', linewidth = 2.5)
+# plt.show()
+
+
+

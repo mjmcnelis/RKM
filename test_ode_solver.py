@@ -4,13 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from parameters import parameters
-import test_parameters											# for evolve.py, use a parameter file instead
-import exact_solution
-from exact_solution import t0, tf, solution, y_exact, y_prime, jacobian
+from exact_solution import t0, tf, solution, y_exact, y_prime, jacobian, compute_error_of_exact_solution
 from ode_solver import ode_solver
 from plot import plot_test
 
-y0 = y_exact(t0)												# set initial conditions
+# set initial conditions
+y0 = y_exact(t0)
 
 
 # evolve ode system
@@ -18,7 +17,7 @@ y, t, dt, evaluations, reject = ode_solver(y0, t0, tf, y_prime, parameters, jaco
 
 
 # evaluate numerical accuracy
-error = exact_solution.compute_error_of_exact_solution(t, y, y_exact)
+error = compute_error_of_exact_solution(t, y, y_exact)
 
 
 # plot solution

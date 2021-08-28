@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import math
 import numpy as np
-from numpy.core.numeric import identity
-from scipy.optimize import fsolve
 from precision import precision
-from explicit_runge_kutta import dt_MIN, dt_MAX, LOW, HIGH, HIGH_RKM	# todo: make a separate parameters file
+
 myfloat = type(precision(1))
 
-EPS_ROOT = 1.e-6
+dt_MIN = 1.e-7
+dt_MAX = 1
+
+EPS_ROOT = 1.e-6         # need to pass these to multistep functions
 ITERATIONS = 2
 
 # EPS_ROOT = 1.e-3
@@ -16,8 +17,7 @@ ITERATIONS = 2
 RECOMPUTE_K1 = False
 
 # compute dt using RKM algorithm
-def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None,
-				   dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH_RKM):
+def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = 0.2, high = 1.5):
 
 	# same subroutine in RKM_step()
 
@@ -49,14 +49,11 @@ def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None,
 
 
 
-# diagonal implicit Runge Kutta step
-def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = False,
-				  root = 'newton', eps_root = EPS_ROOT, max_iterations = ITERATIONS,
-				  adaptive = None, method = None, y_prev = None, eps = 1.e-8, norm = None):
-
+# diagonal implicit Runge-Kutta step
+def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root,
+				  embedded = False, eps = 1.e-8, adaptive = None, method = None, y_prev = None):
 
 	# I feel like now there's a bug with adaptive = None (does fixed time step skip any calculations, evaluations?)
-
 
 	# last five arguments are for RKM
 
@@ -65,9 +62,9 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 	# RKM idea: if first stage is not explicit, then should I save new dt for the next Newton iteration?
 
-	# print(y_prime(t, y), y_prime(t, y).shape)
+	# print(y_prime(t,y), y_prime(t,y).shape)
 	# print()
-	# print(jacobian(t, y), jacobian(t, y).shape)
+	# print(jacobian(t,y), jacobian(t,y).shape)
 
 	if embedded:
 		c = butcher[:-2, 0]
@@ -91,7 +88,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 	for i in range(0, stages):
 
 		if stage_explicit[i]:										# if stage is explicit, can evaluate it directly (no iterations required)
-			if i == 0 and adaptive is 'RKM':						# if first stage is explicit, then c[0] = dy = 0
+			if i == 0 and adaptive == 'RKM':						# if first stage is explicit, then c[0] = dy = 0
 				k1 = y_prime(t, y)
 
 				dt = compute_dt_RKM(dt, y, y_prev, k1, method, eps = eps, norm = norm)
@@ -118,7 +115,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 			z = dy_array[i]											# current stage dy^(i) that we need to iterate
 			z_prev = 0
 
-			if i == 0 and adaptive is 'RKM':
+			if i == 0 and adaptive == 'RKM':
 				k1 = y_prime(t + dt*c[i], y)
 
 				evaluations += 1
@@ -129,26 +126,26 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 					k1 = y_prime(t + dt*c[i], y)				     # should I re-evaluate it?
 					evaluations += 1                                 # I don't see much impact (just more evals)
 
-				if root is not 'fixed_point':
+				if root != 'fixed_point':
 					g = - dt * k1
 				else:
 					z = dt * k1
 
-			if root is 'newton':
+			if root == 'newton_fast':
 				J = identity  -  Aii * dt * jacobian(t, y)			# only evaluate jacobian once
 
 				evaluations += dimension
 
 			for n in range(0, max_iterations):						# start iteration loop
 
-				if root is not 'fixed_point':
+				if root != 'fixed_point':
 
 					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via Newton's method
 						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += 1
 
-					if root is 'newton_full':						# evaluate jacobian for every iteration
+					if root == 'newton':						# evaluate jacobian for every iteration
 						J = identity  -  Aii * dt * jacobian(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += dimension
@@ -171,7 +168,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 					# z_prev = z.copy()
 
 				else:
-					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via fixed point iteration
+					if adaptive == None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via fixed point iteration
 						z = dt * y_prime(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += 1
@@ -193,7 +190,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 	for j in range(0, stages):										# primary RK update
 		dy += dy_array[j] * b[j]
 
-	if adaptive is 'RKM':
+	if adaptive == 'RKM':
 		return y + dy, y, dt, evaluations							# return variables for RKM step
 
 	elif embedded:
@@ -210,7 +207,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded
 
 # fully implicit Runge Kutta step
 def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
-				  root = 'fixed_point', eps_root = EPS_ROOT, max_iterations = ITERATIONS):
+				  root = 'fixed_point', eps_root = 1.e-6, max_iterations = 2):
 
 	if embedded:
 		c = butcher[:-2, 0]
@@ -287,8 +284,8 @@ def FIRK_standard(y, t, dt, y_prime, jacobian, butcher, embedded = False,
 
 
 # step doubling DIRK step
-def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, root = 'fixed_point', eps = 1.e-8,
- 			    norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
+def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, eps, norm, dt_min, dt_max, root, max_iterations, eps_root,
+               low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
 	# routine is very similar to SDRK_step()
 
@@ -300,21 +297,22 @@ def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
 	evaluations = 0
 	rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
 
-	for i in range(0, max_attempts):
+
+	for n in range(0, max_attempts):
 
 		dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        # if (dt == dt_min or dt == dt_max) and rescale < 1:
-        #     print('SDDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+		if flags and (dt == dt_min or dt == dt_max) and rescale < 1:
+			print('SDDIRK_step flag: dt = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
         # full RK step
-		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
+		y1, evals_1 = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
 
         # two half RK steps
-		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
+		y_mid, evals_mid = DIRK_standard(y, t, dt/2, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
 		t_mid = t + dt/2
 
-		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, root = root, norm = norm)
+		y2, evals_2 = DIRK_standard(y_mid, t_mid, dt/2, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
 
 		evaluations += (evals_1 + evals_mid + evals_2)
 
@@ -336,26 +334,26 @@ def SDDIRK_step(y, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
 		if error_norm <= tolerance:                         # check if attempt succeeded
 			dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
 
-            # if dt_next == dt_min or dt_next == dt_max:
-            #     print('SDDIRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+			if flags and (dt_next == dt_min or dt_next == dt_max):
+				print('SDDIRK_step flag: dt_next = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-			return yR, dt, dt_next, i + 1, evaluations      # updated solution, current dt, next dt, number of attempts, function evaluations
+			return yR, dt, dt_next, n + 1, evaluations      # updated solution, current dt, next dt, number of attempts, function evaluations
 
 		else:
 			rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
 	dt_next = min(dt_max, max(dt_min, dt*rescale))
 
-    # if dt_next == dt_min or dt_next == dt_max:
-    #     print('SDDIRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+	if flags and (dt_next == dt_min or dt_next == dt_max):
+		print('SDDIRK_step flag: dt_next = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-	return yR, dt, dt_next, i + 1, evaluations              # return last attempt
+	return yR, dt, dt_next, n + 1, evaluations              # return last attempt
 
 
 
 # embedded DIRK step
-def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, root = 'fixed_point', eps = 1.e-8,
- 			   norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = LOW, high = HIGH, S = 0.9, max_attempts = 100):
+def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, eps, norm, dt_min, dt_max, root, max_iterations, eps_root,
+               low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
 	# routine is very similar to ERK_step()
 
@@ -369,15 +367,15 @@ def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
 	evaluations = 0
 	rescale = 1                                             # for scaling dt <- dt*rescale (starting value = 1)
 
-	for i in range(0, max_attempts):
+	for n in range(0, max_attempts):
 
 		dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        # if (dt == dt_min or dt == dt_max) and rescale < 1:
-        #     print('EDIRK_step flag: dt = %.2e at t = %.2f (change dt_min, dt_max)' % (dt, t))
+		if flags and (dt == dt_min or dt == dt_max) and rescale < 1:
+			print('EDIRK_step flag: dt = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
 		# propose updated solution (secondary, primary)
-		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, embedded = True, root = root, norm = norm)
+		yhat, y, evals = DIRK_standard(y0, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root, embedded = True)
 
 		evaluations += evals
 
@@ -396,17 +394,21 @@ def EDIRK_step(y0, t, dt, y_prime, jacobian, method, butcher, stage_explicit, ro
 		if error_norm <= tolerance:                         # check if attempt succeeded
 			dt_next = min(dt_max, max(dt_min, dt*rescale))  # impose dt_min <= dt <= dt_max
 
-            # if dt_next == dt_min or dt_next == dt_max:
-            #     print('EDIRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+			if flags and (dt_next == dt_min or dt_next == dt_max):
+				print('EDIRK_step flag: dt_next = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-			return y, dt, dt_next, i + 1, evaluations       # updated solution, current dt, next dt, number of attempts, function evaluations
+			return y, dt, dt_next, n + 1, evaluations       # updated solution, current dt, next dt, number of attempts, function evaluations
 
 		else:
 			rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
 	dt_next = min(dt_max, max(dt_min, dt*rescale))
 
-    # if dt_next == dt_min or dt_next == dt_max:
-    #     print('EDIRK_step flag: dt_next = %.2e at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+	if flags and (dt_next == dt_min or dt_next == dt_max):
+		print('EDIRK_step flag: dt_next = %.2e hit min/max bound at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
-	return y, dt, dt_next, i + 1, evaluations               # return last attempt
+	return y, dt, dt_next, n + 1, evaluations               # return last attempt
+
+
+
+
