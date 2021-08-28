@@ -44,43 +44,43 @@ parameters = {'adaptive':               'ERK',
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-#  		 |	type of norm used for error control (None, int, np.inf)				|
-#      norm      |											|
-#		 |	None, 1, np.inf									|
+#                |      type of norm used for error control (None, int, np.inf)                         |
+#      norm      |                                                                                      |
+#                |      None, 1, np.inf                                                                 |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-#     dt_min     |	min time step allowed (float)						 	|
+#     dt_min     |      min time step allowed (float)                                                   |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-#     dt_max     |	max time step allowed (float)						   	|
+#     dt_max     |      max time step allowed (float)                                                   |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-#       	 |	root-finder method for implicit routines (str)					|
-#      root      |											|
-#		 |	'fixed_point', 'newton', 'newton_fast'						|
+#                |      root-finder method for implicit routines (str)                                  |
+#      root      |                                                                                      |
+#                |      'fixed_point', 'newton', 'newton_fast'                                          |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-# max_iterations |	max number of root-finder iterations (int >= 1)					|
+# max_iterations |      max number of root-finder iterations (int >= 1)                                 |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-#    eps_root    |	tolerance parameter for root-finder convergence (float)				|
+#    eps_root    |      tolerance parameter for root-finder convergence (float)                         |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-# 		 |	option to interpolate numerical solution for dense output (bool)		|
-#  interpolate   |											|
-#		 |	True, False									|
+#                |      option to interpolate numerical solution for dense output (bool)                |
+#  interpolate   |                                                                                      |
+#                |      True, False                                                                     |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 #                |                                                                                      |
-# 		 |	option to replace embedded pair of explicit Runge-Kutta scheme with a free pair	|
-# free_embedded  |											|
-#		 |	None, 1 (Euler), 2 (generic 2nd order)		(e.g. Fehlberg 4(1))		|
+#                |      option to replace embedded pair of explicit Runge-Kutta scheme with a free pair |
+# free_embedded  |                                                                                      |
+#                |      None, 1 (Euler), 2 (generic 2nd order)    (e.g. Fehlberg 4(1))                  |
 #                |                                                                                      |
 #-------------------------------------------------------------------------------------------------------|
 
