@@ -10,7 +10,7 @@ from multistep_table import (adams_explicit_dict,
 							 numerical_differentiation_formula_dict)
 
 
-ode_method_dict = standard_runge_kutta_dict.copy()				# combine dictionaries
+ode_method_dict = standard_runge_kutta_dict.copy()				# combine table dictionaries
 ode_method_dict.update(embedded_runge_kutta_dict)
 ode_method_dict.update(adams_explicit_dict)
 ode_method_dict.update(adams_implicit_dict)

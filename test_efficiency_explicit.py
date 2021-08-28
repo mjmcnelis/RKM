@@ -74,7 +74,7 @@ if solution is 'logistic':
 
 if order == 0 or order == 2:
     if solution is 'gaussian':
-        eps_0 = 10**np.arange(-0.57, -4., -1)
+        eps_0 = 10**np.arange(-1.6, -4., -1)
         eps_1 = 10**np.arange(-2.25, -9.25, -1)
         eps_2 = 4 * 10**np.arange(-2., -7., -1)
         eps_3 = 4 * 10**np.arange(-2.4, -9., -1)
@@ -101,7 +101,7 @@ if order == 0 or order == 2:
     error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK2_2, eps_2, norm, error_type, average_error)
     error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK2_3, eps_3, norm, error_type, average_error)
 
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2.dat',     np.concatenate((error_0, evals_0), axis = 1))
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2.dat',   np.concatenate((error_0, evals_0), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2_M.dat', np.concatenate((error_1, evals_1), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2_E.dat', np.concatenate((error_2, evals_2), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK2_D.dat', np.concatenate((error_3, evals_3), axis = 1))
@@ -121,6 +121,7 @@ error_RK2_3, evals_RK2_3 = efficiency_3[:,0], efficiency_3[:,1]
 
 # RK3 peformance
 #---------------------------------------------------------------------------
+method_RK3_0 = 'H3'
 method_RK3_1 = 'H3'
 method_RK3_2 = 'BS32'
 method_RK3_3 = 'H3'
@@ -131,6 +132,8 @@ if solution is 'inverse_power':
 
 if order == 0 or order == 3:
     if solution is 'gaussian':
+        # eps_0 = 10**np.arange(-0.4, -4., -1)
+        eps_0 = 10**np.arange(-1.4, -4., -1)
         eps_1 = 10**np.arange(-2.2, -11.2, -1)
         eps_2 = 10**np.arange(-2.8, -8.8, -1)
         eps_3 = 10**np.arange(-2.1, -11., -1)
@@ -151,18 +154,22 @@ if order == 0 or order == 3:
         eps_2 = 10**np.arange(-5., -10., -1)
         eps_3 = 10**np.arange(-3.9, -11., -1)
 
+    error_0, evals_0 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_0, method_RK3_0, eps_0, norm, error_type, average_error)
     error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK3_1, eps_1, norm, error_type, average_error)
     error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK3_2, eps_2, norm, error_type, average_error)
     error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK3_3, eps_3, norm, error_type, average_error)
 
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3.dat',   np.concatenate((error_0, evals_0), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3_M.dat', np.concatenate((error_1, evals_1), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3_E.dat', np.concatenate((error_2, evals_2), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK3_D.dat', np.concatenate((error_3, evals_3), axis = 1))
 
+efficiency_0 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK3.dat')
 efficiency_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK3_M.dat')
 efficiency_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK3_E.dat')
 efficiency_3 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK3_D.dat')
 
+error_RK3_0, evals_RK3_0 = efficiency_0[:,0], efficiency_0[:,1]
 error_RK3_1, evals_RK3_1 = efficiency_1[:,0], efficiency_1[:,1]
 error_RK3_2, evals_RK3_2 = efficiency_2[:,0], efficiency_2[:,1]
 error_RK3_3, evals_RK3_3 = efficiency_3[:,0], efficiency_3[:,1]
@@ -172,15 +179,16 @@ error_RK3_3, evals_RK3_3 = efficiency_3[:,0], efficiency_3[:,1]
 
 # RK4 peformance
 #---------------------------------------------------------------------------
+method_RK4_0 = 'F4'
 method_RK4_1 = 'F4'
 method_RK4_2 = 'F45'
 method_RK4_3 = 'RK4'
 
 if order == 0 or order == 4:
     if solution is 'gaussian':
+        eps_0 = 10**np.arange(-1.35, -3.85, -0.5)
         eps_1 = 10**np.arange(-2.5, -12., -1)
         eps_2 = 10**np.arange(-4., -14., -1)
-        # eps_2 = 10**np.arange(-1., -4., -1)   # for F41
         eps_3 = 10**np.arange(-3.1, -13., -1)
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-8.5, -20., -1)
@@ -200,18 +208,22 @@ if order == 0 or order == 4:
         eps_2 = 10**np.arange(-5.5, -13., -1)
         eps_3 = 10**np.arange(-4.6, -13., -1)
 
+    error_0, evals_0 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_0, method_RK4_0, eps_0, norm, error_type, average_error)
     error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK4_1, eps_1, norm, error_type, average_error)
     error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK4_2, eps_2, norm, error_type, average_error)
     error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK4_3, eps_3, norm, error_type, average_error)
 
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4.dat',   np.concatenate((error_0, evals_0), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4_M.dat', np.concatenate((error_1, evals_1), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4_E.dat', np.concatenate((error_2, evals_2), axis = 1))
     np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK4_D.dat', np.concatenate((error_3, evals_3), axis = 1))
 
+efficiency_0 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK4.dat')
 efficiency_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK4_M.dat')
 efficiency_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK4_E.dat')
 efficiency_3 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK4_D.dat')
 
+error_RK4_0, evals_RK4_0 = efficiency_0[:,0], efficiency_0[:,1]
 error_RK4_1, evals_RK4_1 = efficiency_1[:,0], efficiency_1[:,1]
 error_RK4_2, evals_RK4_2 = efficiency_2[:,0], efficiency_2[:,1]
 error_RK4_3, evals_RK4_3 = efficiency_3[:,0], efficiency_3[:,1]
@@ -221,6 +233,7 @@ error_RK4_3, evals_RK4_3 = efficiency_3[:,0], efficiency_3[:,1]
 
 # RK5 peformance
 #---------------------------------------------------------------------------
+method_RK5_0 = 'BS5'
 method_RK5_1 = 'BS5'
 method_RK5_2 = 'BS54'
 method_RK5_3 = 'BS5'
@@ -236,6 +249,7 @@ elif solution is 'logistic':
 
 if order == 0 or order == 5:
     if solution is 'gaussian':
+        eps_0 = 10**np.arange(-1.2, -3.2, -0.5)
         eps_1 = 10**np.arange(-2., -12., -1)
         eps_2 = 10**np.arange(-5.3, -13., -0.5)
         eps_3 = 10**np.arange(-3.9, -13.9, -1)
@@ -256,18 +270,22 @@ if order == 0 or order == 5:
         eps_2 = 10**np.arange(-7.2, -13.2, -0.5)
         eps_3 = 10**np.arange(-5.7, -13.7, -1)
 
-    error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK5_1, eps_1, norm, error_type, average_error)
-    error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK5_2, eps_2, norm, error_type, average_error)
-    error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK5_3, eps_3, norm, error_type, average_error)
+    error_0, evals_0 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_0, method_RK5_0, eps_0, norm, error_type, average_error)
+    # error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK5_1, eps_1, norm, error_type, average_error)
+    # error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK5_2, eps_2, norm, error_type, average_error)
+    # error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK5_3, eps_3, norm, error_type, average_error)
 
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_M.dat', np.concatenate((error_1, evals_1), axis = 1))
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_E.dat', np.concatenate((error_2, evals_2), axis = 1))
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_D.dat', np.concatenate((error_3, evals_3), axis = 1))
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5.dat',   np.concatenate((error_0, evals_0), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_M.dat', np.concatenate((error_1, evals_1), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_E.dat', np.concatenate((error_2, evals_2), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK5_D.dat', np.concatenate((error_3, evals_3), axis = 1))
 
+efficiency_0 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK5.dat')
 efficiency_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK5_M.dat')
 efficiency_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK5_E.dat')
 efficiency_3 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK5_D.dat')
 
+error_RK5_0, evals_RK5_0 = efficiency_0[:,0], efficiency_0[:,1]
 error_RK5_1, evals_RK5_1 = efficiency_1[:,0], efficiency_1[:,1]
 error_RK5_2, evals_RK5_2 = efficiency_2[:,0], efficiency_2[:,1]
 error_RK5_3, evals_RK5_3 = efficiency_3[:,0], efficiency_3[:,1]
@@ -277,6 +295,7 @@ error_RK5_3, evals_RK5_3 = efficiency_3[:,0], efficiency_3[:,1]
 
 # RK8 peformance
 #---------------------------------------------------------------------------
+method_RK8_0 = 'DP8'
 method_RK8_1 = 'DP8'
 method_RK8_2 = 'DP87'
 method_RK8_3 = 'SP8'
@@ -294,9 +313,9 @@ elif solution is 'inverse_power':
 
 if order == 0 or order == 8:
     if solution is 'gaussian':
+        eps_0 = 10**np.arange(-1.1, -2.6, -0.5)
         eps_1 = 10**np.arange(-2., -12., -1)
         eps_2 = 10**np.arange(-6.5, -15., -0.5)
-        # eps_2 = 10**np.arange(-0.5, -3.5, -0.5)
         eps_3 = 10**np.arange(-5., -14., -0.5)
     elif solution is 'logistic':
         eps_1 = 10**np.arange(-1., -22., -1)
@@ -315,18 +334,22 @@ if order == 0 or order == 8:
         eps_2 = 10**np.arange(-8.5, -14.5, -0.5)
         eps_3 = 10**np.arange(-7., -14., -1)
 
-    error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK8_1, eps_1, norm, error_type, average_error)
-    error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK8_2, eps_2, norm, error_type, average_error)
-    error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK8_3, eps_3, norm, error_type, average_error)
+    error_0, evals_0 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_0, method_RK8_0, eps_0, norm, error_type, average_error)
+    # error_1, evals_1 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_1, method_RK8_1, eps_1, norm, error_type, average_error)
+    # error_2, evals_2 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_2, method_RK8_2, eps_2, norm, error_type, average_error)
+    # error_3, evals_3 = method_efficiency(y0, t0, tf, y_prime, parameters, adaptive_3, method_RK8_3, eps_3, norm, error_type, average_error)
 
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat', np.concatenate((error_1, evals_1), axis = 1))
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat', np.concatenate((error_2, evals_2), axis = 1))
-    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_3, evals_3), axis = 1))
+    np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8.dat',   np.concatenate((error_0, evals_0), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat', np.concatenate((error_1, evals_1), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat', np.concatenate((error_2, evals_2), axis = 1))
+    # np.savetxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat', np.concatenate((error_3, evals_3), axis = 1))
 
+efficiency_0 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8.dat')
 efficiency_1 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_M.dat')
 efficiency_2 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_E.dat')
 efficiency_3 = np.loadtxt('efficiency_plots/' + solution + '/data/efficiency_RK8_D.dat')
 
+error_RK8_0, evals_RK8_0 = efficiency_0[:,0], efficiency_0[:,1]
 error_RK8_1, evals_RK8_1 = efficiency_1[:,0], efficiency_1[:,1]
 error_RK8_2, evals_RK8_2 = efficiency_2[:,0], efficiency_2[:,1]
 error_RK8_3, evals_RK8_3 = efficiency_3[:,0], efficiency_3[:,1]
@@ -336,25 +359,29 @@ error_RK8_3, evals_RK8_3 = efficiency_3[:,0], efficiency_3[:,1]
 
 # efficiency plot
 #---------------------------------------------------------------------------
-plt.figure(figsize = (5, 5))
+plt.figure(figsize = (5,5))
 
 plt.plot(evals_RK2_0, error_RK2_0, 'red',         label = method_RK2_0,        linewidth = 1.5, alpha = 0.5)
 plt.plot(evals_RK2_1, error_RK2_1, 'red',         label = method_RK2_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK2_2, error_RK2_2, 'red',         label = method_RK2_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK2_3, error_RK2_3, 'red',         label = method_RK2_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
 
+plt.plot(evals_RK3_0, error_RK3_0, 'darkorange',  label = method_RK3_0,        linewidth = 1.5, alpha = 0.5)
 plt.plot(evals_RK3_1, error_RK3_1, 'darkorange',  label = method_RK3_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK3_2, error_RK3_2, 'darkorange',  label = method_RK3_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK3_3, error_RK3_3, 'darkorange',  label = method_RK3_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
 
+plt.plot(evals_RK4_0, error_RK4_0, 'gold',        label = method_RK4_0,        linewidth = 1.5, alpha = 0.5)
 plt.plot(evals_RK4_1, error_RK4_1, 'gold',        label = method_RK4_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK4_2, error_RK4_2, 'gold',        label = method_RK4_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK4_3, error_RK4_3, 'gold',        label = method_RK4_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
 
+plt.plot(evals_RK5_0, error_RK5_0, 'forestgreen', label = method_RK5_0,        linewidth = 1.5, alpha = 0.5)
 plt.plot(evals_RK5_1, error_RK5_1, 'forestgreen', label = method_RK5_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK5_2, error_RK5_2, 'forestgreen', label = method_RK5_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK5_3, error_RK5_3, 'forestgreen', label = method_RK5_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
 
+plt.plot(evals_RK8_0, error_RK8_0, 'blue',        label = method_RK8_0,        linewidth = 1.5, alpha = 0.5)
 plt.plot(evals_RK8_1, error_RK8_1, 'blue',        label = method_RK8_1 + 'M',  linewidth = 1.5)
 plt.plot(evals_RK8_2, error_RK8_2, 'blue',        label = method_RK8_2,        linestyle = 'dashed', linewidth = 1.5)
 plt.plot(evals_RK8_3, error_RK8_3, 'blue',        label = method_RK8_3 + 'SD', linestyle = 'dotted', linewidth = 1.5)
@@ -370,7 +397,13 @@ plt.xlabel('function evaluations', fontsize = 12)
 plt.legend(fontsize = 9.5, borderpad = 1, labelspacing = 0, handlelength = 1.4, handletextpad = 0.5, frameon = False)
 plt.tight_layout()
 plt.savefig('efficiency_plots/' + solution + '/' + solution + '_efficiency.png', dpi = 200)
-plt.show()
+# plt.show()
+
+
+
+
+
+
 
 
 
