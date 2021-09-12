@@ -41,7 +41,7 @@ You can adjust the runtime parameters in `parameters.py`. The most important one
     adaptive = adaptive time step algorithm (RKM, ERK, SDRK)
     method   = code label of ODE solver     (listed in the READMEs in tables/butcher, tables/multistep)
     
-By default, the code uses the Dormand-Prince 5(4) method (adaptive = ERK, method = DP54). 
+By default, the code uses the Dormand-Prince 5(4) method (adaptive = 'ERK', method = 'DP54'). 
 
 ## Status
 
