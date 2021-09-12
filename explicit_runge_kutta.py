@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 # standard Runge-Kutta step
 def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
-    # todo: pass y_prime as a function
-    # todo: make use of FSAL property in BS32, DP54 (for embedded = True)
-
     # y        = current solution y_n
     # dy1      = first intermediate Euler step \Delta y_n^{(1)}
     # t        = current time t_n
@@ -67,7 +64,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
 
 # new adaptive Runge-Kutta step
-def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 1.5, improve_y_star = False, flags = False):
+def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 1.5, flags = False):
 
     # y         = current solution y_n
     # y_prev    = previous solution y_{n-1}
@@ -86,22 +83,7 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min,
 
     f = y_prime(t, y)                                       # for first intermediate Euler step
 
-    dy1_star = dt_prev * f
-
-    if not improve_y_star:                                  # compute y_star and approximate C
-
-        y_star = y + dy1_star
-
-    else:                                                   # try generic second-order approximation (doesn't seem to help)
-
-        c1 = butcher[1,0]
-        a10 = butcher[1,1]
-        dy2_star = dt_prev * y_prime(t + c1*dt_prev, y + a10*dy1_star)
-        b1 = 1 - 1/(2*c1)
-        b2 = 1 - b1
-
-        y_star = y + b1*dy1_star + b2*dy2_star
-
+    y_star = y  +  dt_prev * f                              # compute y_star and approximate C w/ central differences
 
     C = 2 * (y_star - 2*y + y_prev) / dt_prev**2
 
@@ -110,11 +92,8 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min,
     f_norm = np.linalg.norm(f, ord = norm)
 
     if C_norm == 0:                                         # prevent division by 0
-
         dt = dt_prev
-
     else:
-
         if (C_norm * y_norm) > (2 * eps * f_norm**2):       # compute adaptive step size
             dt = (2 * eps * y_norm / C_norm)**0.5
         else:
@@ -190,10 +169,6 @@ def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, d
 
             return y, k_last, dt, dt_next, n + 1            # updated solution, last stage, current dt, next dt, number of attempts
 
-        else:
-
-            rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
-
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 
     if flags and (dt_next == dt_min or dt_next == dt_max):
@@ -257,10 +232,6 @@ def SDRK_step(y, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max, low
                 print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
 
             return yR, dt, dt_next, n + 1                   # updated solution, current step size, next step size, number of attempts
-
-        else:
-
-            rescale = min(S, rescale)                       # enforce rescale < 1 if attempt failed
 
     dt_next = min(dt_max, max(dt_min, dt*rescale))
 

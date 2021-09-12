@@ -53,32 +53,32 @@ def y_exact(t):
 
 # dy/dt = f of exact solution
 def y_prime(t, y):
-    if solution is 'logistic':
+    if solution == 'logistic':
         return (y + B) * (1 - y - B)
-    elif solution is 'gaussian':
+    elif solution == 'gaussian':
         return - 2 * t * y
-    elif solution is 'inverse_power':
+    elif solution == 'inverse_power':
         return -2 * (y**1.5)
-    elif solution is 'sine':
+    elif solution == 'sine':
         return np.array([y[1], - A*A*y[0]], dtype = myfloat).reshape(-1,1)
-    elif solution is 'exponential':
+    elif solution == 'exponential':
         return 10*y
-    elif solution is 'projectile':
+    elif solution == 'projectile':
         return np.array([y[1], -g], dtype = myfloat).reshape(-1,1)
-    elif solution is 'projectile_damped':
+    elif solution == 'projectile_damped':
         return np.array([y[1], -g - k*y[1]], dtype = myfloat).reshape(-1,1)
 
 
 
 # jacobian df/dy of exact solution
 def jacobian(t, y):
-    if solution is 'logistic':
+    if solution == 'logistic':
         return 1 - 2*(y + B)
-    elif solution is 'gaussian':
+    elif solution == 'gaussian':
         return - 2 * t
-    elif solution is 'inverse_power':
+    elif solution == 'inverse_power':
         return - 3 * (y**0.5)
-    elif solution is 'exponential':
+    elif solution == 'exponential':
         return 10
     else:
         return 0
@@ -105,7 +105,7 @@ def compute_error_of_exact_solution(t, y, y_exact, error_type = 'absolute', aver
 
         error = np.linalg.norm(y[i].reshape(-1,1) - Y, ord = norm)
 
-        if error_type is 'relative':
+        if error_type == 'relative':
             y_exact_norm = np.linalg.norm(Y, ord = norm)
 
             if y_exact_norm != 0:

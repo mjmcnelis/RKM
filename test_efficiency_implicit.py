@@ -26,14 +26,14 @@ adaptive_2 = 'ERK'
 adaptive_3 = 'SDRK'
 
 # parameters for computing error
-if solution is 'logistic':
+if solution == 'logistic':
     norm = None
     average = True
     error_type = 'absolute'
     error_label = 'average absolute error'
     evals_min = 1.e+2
 
-elif solution is 'exponential':
+elif solution == 'exponential':
     norm = None
     average = True
     error_type = 'relative'
@@ -55,7 +55,7 @@ root = 'newton_fast'
 
 if order == 0 or order == 2:
 
-    if solution is 'logistic':
+    if solution == 'logistic':
 
         eps_0 = 10**np.arange(0., -3., -0.5)      # fixed time step (todo: pass different dt0 values instead)
 
@@ -64,7 +64,7 @@ if order == 0 or order == 2:
         eps_2 = 10**np.arange(-3.1, -8.1, -1)
         eps_3 = 10**np.arange(-1.8, -7., -1)
 
-    elif solution is 'exponential':
+    elif solution == 'exponential':
         eps_1 = 10**np.arange(-1., -4., -1)
         # eps_1 = 10**np.arange(0., -3., -0.5)      # fixed time step
         eps_2 = 10**np.arange(-1., -4., -1)
@@ -103,7 +103,7 @@ method_RK3_3 = 'DIRKL3'
 root = 'newton'
 
 if order == 0 or order == 3:
-    if solution is 'logistic':
+    if solution == 'logistic':
         eps_1 = 10**np.arange(-2.5, -7.5, -1)
         eps_2 = 10**np.arange(-3.5, -10.5, -1)
         eps_3 = 10**np.arange(-1., -12., -1)

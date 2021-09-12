@@ -5,11 +5,8 @@ from precision import precision
 
 myfloat = type(precision(1))
 
-dt_MIN = 1.e-7
-dt_MAX = 1
-
-EPS_ROOT = 1.e-6         # need to pass these to multistep functions
-ITERATIONS = 2
+# EPS_ROOT = 1.e-6         # need to pass these to multistep functions
+# ITERATIONS = 2
 
 # EPS_ROOT = 1.e-3
 # ITERATIONS = 1
@@ -17,7 +14,7 @@ ITERATIONS = 2
 RECOMPUTE_K1 = False
 
 # compute dt using RKM algorithm
-def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, dt_min = dt_MIN, dt_max = dt_MAX, low = 0.2, high = 1.5):
+def compute_dt_RKM(dt_prev, y, y_prev, k1, method, eps = 1.e-8, norm = None, dt_min = 1.e-7, dt_max = 1, low = 0.2, high = 1.5):
 
 	# same subroutine in RKM_step()
 
@@ -140,7 +137,7 @@ def DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, ro
 
 				if root != 'fixed_point':
 
-					if adaptive is None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via Newton's method
+					if adaptive == None or n > 0 or i > 0:		# solve nonlinear system g(z) = 0 via Newton's method
 						g = z - dt*y_prime(t + dt*c[i], y + dy + z*Aii)
 
 						evaluations += 1

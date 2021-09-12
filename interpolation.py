@@ -20,7 +20,7 @@ def interpolate_solution(y, t, dt, method = 'cubic_spline', order = 3, points = 
     print(N)
     print(t.shape, y_int.shape)
 
-    if method is 'cubic_spline':
+    if method == 'cubic_spline':
     	for i in range(0, N):
     		y_int[i] = interpolate.splev(t_uniform, interpolate.splrep(t, y[:,i], k = order)).reshape(-1,1)
 

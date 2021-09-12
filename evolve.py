@@ -53,9 +53,9 @@ if interpolate:
 
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4), squeeze = False)
 
-if solver is 'RKM':
+if solver == 'RKM':
 	method += 'M'
-elif solver is 'SDRK':
+elif solver == 'SDRK':
 	method += 'SD'
 
 y = y[:,0:min(plot_variables, y.shape[1])]
@@ -75,7 +75,7 @@ axes[0][0].legend(fontsize = 10, borderpad = 1, labelspacing = 0, handlelength =
 axes[0][0].tick_params(labelsize = 10)
 
 axes[0][1].plot(t, dt, 'black', linewidth = 1.5)
-if solver is not 'RKM':
+if solver != 'RKM':
 	axes[0][1].text(t0 + 0.7*(tf-t0), 1.1*max(dt), 'R = %.1f%%' % reject, fontsize = 10)
 axes[0][1].text(t0 + 0.1*(tf-t0), 1.1*max(dt), 'FE = %d' % evaluations, fontsize = 10)
 axes[0][1].set_ylabel(r'${\Delta t}_n$', fontsize=12)

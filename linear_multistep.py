@@ -45,18 +45,18 @@ def adams_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, norm, root,
     z = 0                                                   # z = dy
     z_prev = 0
 
-    if root is 'newton_fast':
+    if root == 'newton_fast':
         J = identity  -  adams[0] * dt * jacobian(t, y)     # only evaluate jacobian once
         evaluations += dimension
 
     for n in range(0, max_iterations):
 
-        if root is not 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
+        if root != 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
             g = z  -  z0  -  adams[0] * dt * y_prime(t + dt, y + z)
 
             evaluations += 1
 
-            if root is 'newton':                            # evaluate jacobian for every iteration
+            if root == 'newton':                            # evaluate jacobian for every iteration
                 J = identity  -  adams[0] * dt * jacobian(t + dt, y + z)
 
                 evaluations += dimension
@@ -120,18 +120,18 @@ def adams_bashforth_moulton(y, t, dt, f_list, y_prime, jacobian, adams, steps, n
     z = zP.copy()                                           # initialize z = dy as predictor value
     z_prev = 0
 
-    if root is 'newton_fast':
+    if root == 'newton_fast':
         J = identity  -  adams[1,0] * dt * jacobian(t, y)	# only evaluate jacobian once (should t-argument be t or t+dt?)
         evaluations += dimension
 
     for n in range(0, max_iterations):                      # compute corrector w/ adams-moulton row adams[1,:]
 
-        if root is not 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
+        if root != 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
             g = z  -  z0  -  adams[1,0] * dt * y_prime(t + dt, y + z)
 
             evaluations += 1
 
-            if root is 'newton':							# evaluate jacobian for every iteration
+            if root == 'newton':							# evaluate jacobian for every iteration
                 J = identity  -  adams[1,0] * dt * jacobian(t + dt, y + z)
 
                 evaluations += dimension
@@ -204,17 +204,17 @@ def differentiation_formula(y, t, dt, y_list, y_prime, jacobian, df, steps, norm
 
     z = dy_0
 
-    if root is 'newton_fast':
+    if root == 'newton_fast':
         J = identity  -  df[0,0] * dt * jacobian(t, y)		# only evaluate jacobian once
         evaluations += dimension
 
     for n in range(0, max_iterations):
 
-        if root is not 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
+        if root != 'fixed_point':                       # solve nonlinear system g(z) = 0 via newton
             g = z  -  z0  -  df[0,0] * dt * y_prime(t + dt, y + z)
             evaluations += 1
 
-            if root is 'newton':							# evaluate jacobian for every iteration
+            if root == 'newton':							# evaluate jacobian for every iteration
                 J = identity  -  df[0,0] * dt * jacobian(t + dt, y + z)
                 evaluations += dimension
 

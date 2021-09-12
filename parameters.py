@@ -10,8 +10,8 @@ parameters = {'adaptive':               'ERK',
               'dt_min':                 1.e-7,
               'dt_max':                 1,
               'root':                   'newton_fast',
-              'max_iterations':         2,
-              'eps_root':               1.e-6,
+              'max_iterations':         3,
+              'eps_root':               1.e-8,
               'interpolate':            False,
               'free_embedded':          None
              }
