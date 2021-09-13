@@ -4,11 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-import ode_solver as ode
-import interpolation as interp
+from ode_solver import ode_solver
+from interpolation import interpolate_solution
 from explicit_runge_kutta import dt_MAX
-from precision import precision
-myfloat = type(precision(1))
+from precision import myfloat
+
 
 #------------------------------------------------------------
 def f(t, y):

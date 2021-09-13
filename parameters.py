@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 import numpy as np
 
 parameters = {'adaptive':               'ERK',

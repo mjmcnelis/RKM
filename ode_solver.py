@@ -9,9 +9,7 @@ from implicit_runge_kutta import DIRK_standard, EDIRK_step, SDDIRK_step
 from linear_multistep import adams_bashforth, adams_moulton, adams_bashforth_moulton, differentiation_formula, compute_DF_predictor
 from exact_solution import y_exact, compute_error_of_exact_solution
 from dictionaries import ode_method_dict
-from precision import precision                                 # for myfloat
-
-myfloat = type(precision(1))
+from precision import myfloat
 
 
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from precision import precision     # for myfloat
-
-myfloat = type(precision(1))
+from precision import myfloat
 
 # this script writes a list of butcher tables to file, which are read in by the ode solver
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from precision import precision
-myfloat = type(precision(1))
-
+from precision import myfloat
 
 
 # Adams-Bashforth (orders 2-5)

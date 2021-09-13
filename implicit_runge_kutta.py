@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 import math
 import numpy as np
-from precision import precision
-
-myfloat = type(precision(1))
 
 # EPS_ROOT = 1.e-6         # need to pass these to multistep functions
 # ITERATIONS = 2

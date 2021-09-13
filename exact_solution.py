@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import math
 import numpy as np
-from precision import precision                     # for myfloat
 from scipy import integrate
+from precision import myfloat
 
-myfloat = type(precision(1))                        # todo: can I define these elsewhere? (for running ode solver)
 
 solution = 'gaussian'                               # solution type
 
