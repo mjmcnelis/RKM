@@ -4,14 +4,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import explicit_runge_kutta
-import implicit_runge_kutta
-import linear_multistep
-import exact_solution as exact
+from explicit_runge_kutta import RK_standard, RKM_step, ERK_step, SDRK_step, estimate_step_size
+from implicit_runge_kutta import DIRK_standard, EDIRK_step, SDDIRK_step
+from linear_multistep import adams_bashforth, adams_moulton, adams_bashforth_moulton, differentiation_formula, compute_DF_predictor
+from exact_solution import y_exact, compute_error_of_exact_solution
 from dictionaries import ode_method_dict
 from precision import precision                                 # for myfloat
-
-# COLLISION_DETECTION = False                                     # for playing with collision detection
 
 myfloat = type(precision(1))
 
@@ -114,7 +112,7 @@ def get_multistep_table(solver, method):
 
     if method in ['adams_bashforth_1', 'adams_moulton_1']:      # for some reason, they have no shape when filed opened
         table = table.reshape(1)
-    elif method is 'adams_bashforth_moulton_1':
+    elif method == 'adams_bashforth_moulton_1':
         table = table.reshape(2,1)
 
     return table
@@ -142,8 +140,6 @@ def solver_is_multistep(method_label):
 
 
 def method_is_FSAL(butcher, adaptive):
-
-    # todo: generalize this to standard butcher tables (could possibly have FSAL property)
 
     if adaptive == 'ERK':
         if np.array_equal(butcher[-3,1:], butcher[-2,1:]):      # check if second-to-last and third-to-last rows match
@@ -252,38 +248,6 @@ def rescale_epsilon(eps, adaptive, order, method):
     return eps                                                  # use for implicit routines (testing)
 
 
-'''
-def simple_collision_detection(y, y_prev, t, dt, y_prime, butcher, dt_min):
-
-    last_position = y_prev[0,0]
-    position = y[0,0]
-
-    collision = False
-
-    if position <= 0:                                           # check if projectile hit flat ground (height = 0)
-
-        collision = True
-
-        dt *= last_position / (last_position - position)        # estimate collision time t + dt
-
-        y[0] = 0                                                # adjust coordinates via elastic collision
-        y[1] *= -1
-
-        print("hit ground at t = %.3f (dt' = %.3f)" % ((t + dt), dt))
-
-        if dt < dt_min:                                         # briefly continue after collision
-
-            y[0] += (dt_min - dt) * y[1]                        # assume velocity constant in remainder dt interval
-
-            # dt_remainder = dt_min - dt                        # more sophisticated version
-            # dy1 = dt_remainder * y_prime(t,y)
-            # y = explicit_runge_kutta.RK_standard(y, dy1, t + dt, dt_remainder, y_prime, butcher)
-
-            dt = dt_min
-
-    return y, dt, collision
-'''
-
 
 # main function
 def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
@@ -377,7 +341,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
             if adaptive == None:                                # use a fixed step size
 
                 dy1 = dt * y_prime(t, y)
-                y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
+                y = RK_standard(y, dy1, t, dt, y_prime, butcher)
 
                 evaluations += stages
                 total_attempts += 1
@@ -386,16 +350,16 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 if n == 0:                                      # adjust initial time step w/ euler step-doubling
 
-                    dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, parameters, eps/2)
+                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters, eps/2)
                     evaluations += 2 * tries_SD
 
                     dt = dt_next                                # then use standard Runge-Kutta step
                     dy1 = dt * y_prime(t, y)
-                    y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher)
+                    y = RK_standard(y, dy1, t, dt, y_prime, butcher)
 
                 else:                                           # use RKM for remainder
 
-                    y, y_prev, dt = explicit_runge_kutta.RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max)
+                    y, y_prev, dt = RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max)
 
                 evaluations += stages
                 total_attempts += 1
@@ -407,8 +371,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
                 else:
                     k1 = y_prime(t, y)                          # compute first stage
 
-                y, k_last, dt, dt_next, tries = explicit_runge_kutta.ERK_step(y, t, dt_next, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, dt_max,
-                                                                              high = high)
+                y, k_last, dt, dt_next, tries = ERK_step(y, t, dt_next, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, dt_max, high = high)
 
                 if FSAL:                                        # need to count FSAL stage if step rejected
                     evaluations += (stages  +  (tries - 1) * stages)
@@ -419,7 +382,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
             elif adaptive == 'SDRK':                            # step doubling Runge-Kutta algorithm
 
-                y, dt, dt_next, tries = explicit_runge_kutta.SDRK_step(y, t, dt_next, y_prime, method, butcher, eps, norm, dt_min, dt_max)
+                y, dt, dt_next, tries = SDRK_step(y, t, dt_next, y_prime, method, butcher, eps, norm, dt_min, dt_max)
 
                 evaluations += (stages  +  (tries - 1) * (stages - 1))
                 total_attempts += tries
@@ -428,7 +391,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
             if adaptive == None:                                # use a fixed step size
 
-                y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
+                y, evals = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
 
                 evaluations += evals
                 total_attempts += 1
@@ -449,33 +412,31 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
                     # evaluations += evals
 
                     # temp: use explicit version
-                    dt_next, tries_SD = explicit_runge_kutta.estimate_step_size(y, t, y_prime, parameters, eps/2)
+                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters, eps/2)
                     evaluations += 2 * tries_SD
 
                     dt = dt_next
 
-                    y, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
+                    y, evals = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root)
 
                 else:
 
-                    y, y_prev, dt, evals = implicit_runge_kutta.DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations,                                                      eps_root, eps = eps, adaptive = 'RKM', method = method, y_prev = y_prev)
-
+                    y, y_prev, dt, evals = DIRK_standard(y, t, dt, y_prime, jacobian, butcher, stage_explicit, norm, root, max_iterations, eps_root, 
+                                                         eps = eps, adaptive = 'RKM', method = method, y_prev = y_prev)
                 evaluations += evals
                 total_attempts += 1
 
             elif adaptive == 'ERK':                             # embedded Runge-Kutta algorithm
 
-                y, dt, dt_next, tries, evals = implicit_runge_kutta.EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
-                                                                               eps, norm, dt_min, dt_max, root, max_iterations, eps_root)
-
+                y, dt, dt_next, tries, evals = EDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
+                                                          eps, norm, dt_min, dt_max, root, max_iterations, eps_root)
                 evaluations += evals
                 total_attempts += tries
 
             elif adaptive == 'SDRK':                            # step doubling Runge-Kutta algorithm
 
-                y, dt, dt_next, tries, evals = implicit_runge_kutta.SDDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
-                                                                                eps, norm, dt_min, dt_max, root, max_iterations, eps_root)
-
+                y, dt, dt_next, tries, evals = SDDIRK_step(y, t, dt_next, y_prime, jacobian, method, butcher, stage_explicit,
+                                                           eps, norm, dt_min, dt_max, root, max_iterations, eps_root)
                 evaluations += evals
                 total_attempts += tries
 
@@ -494,7 +455,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
                 f_list.insert(0, f)
                 y_list.insert(0, y)
 
-                y = explicit_runge_kutta.RK_standard(y, dy1, t, dt, y_prime, butcher_RK)
+                y = RK_standard(y, dy1, t, dt, y_prime, butcher_RK)
 
                 total_attempts += 1
                 evaluations += stages_RK
@@ -503,7 +464,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 if solver == 'adams_bashforth':                 # adams-bashforth (explicit)
 
-                    y, f, evals = linear_multistep.adams_bashforth(y, t, dt, f_list, y_prime, multistep, past_steps)
+                    y, f, evals = adams_bashforth(y, t, dt, f_list, y_prime, multistep, past_steps)
 
                     f_list.insert(0, f)
                     f_list.pop()
@@ -513,7 +474,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 elif solver == 'adams_moulton':                 # adams-moulton (implicit)
 
-                    y, f, evals = linear_multistep.adams_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, norm, root, max_iterations, eps_root)
+                    y, f, evals = adams_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, norm, root, max_iterations, eps_root)
 
                     f_list.insert(0, f)
                     f_list.pop()
@@ -523,8 +484,8 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 elif solver == 'adams_bashforth_moulton':       # adams-bashforth-moulton (predictor-corrector, implicit)
 
-                    y, f, evals = linear_multistep.adams_bashforth_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, norm, root,
-                                                                           max_iterations, eps_root)
+                    y, f, evals = adams_bashforth_moulton(y, t, dt, f_list, y_prime, jacobian, multistep, past_steps, norm, root, max_iterations, 
+                                                          eps_root)
                     f_list.insert(0, f)
                     f_list.pop()
 
@@ -533,23 +494,19 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 else:                                           # backward/numerical differentiation formula (predictor-corrector, implicit)
 
-                    y, y_prev, evals = linear_multistep.differentiation_formula(y, t, dt, y_list, y_prime, jacobian, multistep, past_steps, norm, root,
-                                                                                max_iterations, eps_root, dy_0 = dy_0)
+                    y, y_prev, evals = differentiation_formula(y, t, dt, y_list, y_prime, jacobian, multistep, past_steps, norm, root,
+                                                               max_iterations, eps_root, dy_0 = dy_0)
                     y_list.insert(0, y_prev)
 
                     if solver == 'backward_differentiation_formula':
-                        dy_0 = linear_multistep.compute_DF_predictor(y, y_list, multistep)
+                        dy_0 = compute_DF_predictor(y, y_list, multistep)
                     else:
-                        dy_0 = linear_multistep.compute_DF_predictor(y, y_list, multistep[:,1:])    # todo: can I compute before update?
+                        dy_0 = compute_DF_predictor(y, y_list, multistep[:,1:])    # todo: can I compute before update?
 
                     y_list.pop()
 
                     total_attempts += 1
                     evaluations += evals
-
-        # for game physics sample
-        # if COLLISION_DETECTION and exact.solution in ['projectile', 'projectile_damped'] and adaptive != None:
-            # y, dt, collision = simple_collision_detection(y, y_prev, t, dt, y_prime, butcher)
 
         dt_array = np.append(dt_array, dt)
 
@@ -598,13 +555,11 @@ def method_efficiency(y0, t0, tf, y_prime, parameters, adaptive, method_label, e
 
         y, t, dt, evaluations, reject = ode_solver(y0, t0, tf, y_prime, parameters, jacobian = jacobian)
 
-        y_exact = exact.y_exact
-        error = exact.compute_error_of_exact_solution(t, y, y_exact, error_type = error_type, average_error = average_error, norm = norm)
+        error = compute_error_of_exact_solution(t, y, y_exact, error_type = error_type, average_error = average_error, norm = norm)
 
         error_array[i] = error
         evaluations_array[i] = evaluations
 
-    # print('\ndone\n')
     print()
 
     return error_array, evaluations_array
