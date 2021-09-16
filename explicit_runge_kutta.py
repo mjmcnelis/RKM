@@ -12,7 +12,7 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
     # dt       = current stepsize dt_n
     # y_prime  = source function f
     # butcher  = Butcher table
-    # embedded = return primary/secondary solutions (and last stage for possible FSAL) if True
+    # embedded = if true, return primary/secondary solutions (and last stage for possible FSAL)
 
     if embedded:                                            # get c_i, A_ij, b_i and number of stages from Butcher table
         c = butcher[:-2, 0]
@@ -63,18 +63,24 @@ def RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False):
 
 
 # new adaptive Runge-Kutta step
-def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 1.5, flags = False):
+def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, parameters, eps, low = 0.2, high = 1.5, flags = False):
 
-    # y         = current solution y_n
-    # y_prev    = previous solution y_{n-1}
-    # t         = current time t_n
-    # dt_prev   = previous step size dt_{n-1}
-    # y_prime   = source function f
-    # eps       = error tolerance parameter
-    # norm      = type of vector norm (e.g. 1, None (2), np.inf)
-    # dt_min    = min time step
-    # dt_max    = max time step
-    # low, high = safety bounds for dt variation (set to default values)
+    # y          = current solution y_n
+    # y_prev     = previous solution y_{n-1}
+    # t          = current time t_n
+    # dt_prev    = previous step size dt_{n-1}
+    # y_prime    = source function f
+    # method     = Runge-Kutta method (filename)
+    # butcher    = Butcher table
+    # parameters = parameters dict
+    # eps        = rescaled error tolerance parameter
+    # low        = lower bound for dt drop rate
+    # high       = upper bound for dt growth rate
+    # flags      = option to print warning if dt outside dt_min <= dt <= dt_max
+                  
+    norm   = parameters['norm']                             # get parameters
+    dt_min = parameters['dt_min']
+    dt_max = parameters['dt_max']
 
     order = int(method.split('_')[-1])                      # get order of method
 
@@ -82,9 +88,9 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min,
 
     f = y_prime(t, y)                                       # for first intermediate Euler step
 
-    y_star = y  +  dt_prev * f                              # compute y_star and approximate C w/ central differences
+    y_star = y  +  dt_prev * f                              # compute y_star
 
-    C = 2 * (y_star - 2*y + y_prev) / dt_prev**2
+    C = 2 * (y_star - 2*y + y_prev) / dt_prev**2            # approximate C w/ central differences
 
     C_norm = np.linalg.norm(C, ord = norm)
     y_norm = np.linalg.norm(y, ord = norm)
@@ -107,7 +113,7 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min,
 
     dy1 = f * dt                                            # recycle first intermediate Euler step
 
-    y_prev = y
+    y_prev = y.copy()                                       # y_n (previous solution at new time t_{n+1})
 
     y = RK_standard(y, dy1, t, dt, y_prime, butcher)        # update y with standard Runge-Kutta method
 
@@ -116,20 +122,34 @@ def RKM_step(y, y_prev, t, dt_prev, y_prime, method, butcher, eps, norm, dt_min,
 
 
 # embedded Runge-Kutta step
-def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, dt_max, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
+def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, parameters, eps, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
     # y0           = current solution y_n
+    # t            = current time t_n
     # dt           = proposal for time step dt_n
     # k1           = first stage f(t_n, y_n)
-    # S            = safety factor (set to default value)
+    # y_prime      = source function f
+    # method       = Runge-Kutta method (filename)
+    # butcher      = Butcher table
+    # FSAL         = true if method has FSAL property
+    # parameters   = parameters dict
+    # eps          = rescaled error tolerance parameter (currently ERK eps not rescaled)
+    # low          = lower bound for dt drop rate
+    # high         = upper bound for dt growth rate
+    # S            = safety factor
     # max_attempts = max number of attempts
+    # flags        = option to print warning if dt outside dt_min <= dt <= dt_max
 
-    order = int(method.split('_')[-2])                      # order of primary method
+    norm   = parameters['norm']                             # get parameters
+    dt_min = parameters['dt_min']
+    dt_max = parameters['dt_max']
+
+    order     = int(method.split('_')[-2])                  # order of primary method
     order_hat = int(method.split('_')[-1])                  # order of secondary method
 
     order_max = max(order, order_hat)
     order_min = min(order, order_hat)
-    power = 1 / (1 + order_min)
+    power = 1 / (1 + order_min)                             # get power for rescale formula
 
     high = high**(order_min / order_max)                    # adjust growth rate
 
@@ -139,8 +159,8 @@ def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, d
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        if flags and (dt_next == dt_min or dt_next == dt_max):
-            print('ERK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+        if flags and (dt == dt_min or dt == dt_max):
+            print('ERK_step flag: dt = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
         dy1 = dt * k1                                       # first intermediate Euler step
 
@@ -178,9 +198,27 @@ def ERK_step(y0, t, dt, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, d
 
 
 # step doubling Runge-Kutta step
-def SDRK_step(y, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
+def SDRK_step(y, t, dt, y_prime, method, butcher, parameters, eps, low = 0.2, high = 5, S = 0.9, max_attempts = 100, flags = False):
 
     # routine is very similar to ERK_step()
+
+    # y            = current solution y_n
+    # t            = current time t_n
+    # dt           = proposal for time step dt_n
+    # y_prime      = source function f
+    # method       = Runge-Kutta method (filename)
+    # butcher      = Butcher table
+    # parameters   = parameters dict
+    # eps          = rescaled error tolerance parameter (currently SDRK eps not rescaled)
+    # low          = lower bound for dt drop rate
+    # high         = upper bound for dt growth rate
+    # S            = safety factor (set to default value)
+    # max_attempts = max number of attempts
+    # flags        = option to print warning if dt outside dt_min <= dt <= dt_max
+
+    norm   = parameters['norm']                             # get parameters
+    dt_min = parameters['dt_min']
+    dt_max = parameters['dt_max']
 
     order = int(method.split('_')[-1])                      # get order of method
     power = 1 / (1 + order)
@@ -195,18 +233,16 @@ def SDRK_step(y, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max, low
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # decrease step size for next attempt
 
-        if flags and (dt_next == dt_min or dt_next == dt_max):
-            print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt_next, t))
+        if flags and (dt == dt_min or dt == dt_max):
+            print('SDRK_step flag: dt_next = %.2e hit min/max bounds at t = %.2f (change dt_min, dt_max)' % (dt, t))
 
-        # full RK step
-        dy1 = dt * f
-        y1 = RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False)
+        dy1 = dt * f                                                # full step
+        y1 = RK_standard(y, dy1, t, dt, y_prime, butcher)
 
-        # two half RK steps
-        y_mid = RK_standard(y, dy1/2, t, dt/2, y_prime, butcher, embedded = False)
+        y_mid = RK_standard(y, dy1/2, t, dt/2, y_prime, butcher)    # two half-steps
         t_mid = t + dt/2
         dy1_mid = (dt/2) * y_prime(t_mid, y_mid)
-        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher, embedded = False)
+        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
         yR = y2 + error                                     # propose updated solution (Richardson extrapolation)
@@ -241,14 +277,26 @@ def SDRK_step(y, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max, low
 
 
 
-def estimate_step_size(y, t, y_prime, parameters, eps, low = 0.5, high = 10, max_attempts = 100, flags = False):
+def estimate_step_size(y, t, y_prime, parameters, low = 0.5, high = 10, max_attempts = 100, flags = False):
+
+    # use step doubling technique to estimate initial time step for RKM routine
+
+    # y            = initial solution y_0
+    # t            = initial time t_0
+    # y_prime      = source function f
+    # parameters   = parameters dict  
+    # low          = lower bound for dt drop rate
+    # high         = upper bound for dt growth rate
+    # max_attempts = max number of attempts
+    # flags        = option to print warning if dt outside dt_min <= dt <= dt_max
 
     method  = 'euler_1'                                     # use euler step doubling
     butcher = np.loadtxt('tables/butcher/standard/euler_1.dat')
 
-    norm   = parameters['norm']                             # get parameters
+    eps    = parameters['eps'] / 2                          # get parameters 
+    norm   = parameters['norm']                             
     dt_min = parameters['dt_min']
-    dt_max = parameters['dt_max']
+    dt_max = parameters['dt_max']                       
 
     dt = dt_min
     dt_prev = dt
@@ -262,15 +310,13 @@ def estimate_step_size(y, t, y_prime, parameters, eps, low = 0.5, high = 10, max
 
         dt = min(dt_max, max(dt_min, dt*rescale))           # increase step size for next attempt
 
-        # full RK step
-        dy1 = dt * y_prime(t, y)
-        y1 = RK_standard(y, dy1, t, dt, y_prime, butcher, embedded = False)
+        dy1 = dt * y_prime(t, y)                                    # full step
+        y1 = RK_standard(y, dy1, t, dt, y_prime, butcher)
 
-        # two half RK steps
-        y_mid = RK_standard(y, dy1/2, t, dt/2, y_prime, butcher, embedded = False)
+        y_mid = RK_standard(y, dy1/2, t, dt/2, y_prime, butcher)    # two half-steps
         t_mid = t + dt/2
         dy1_mid = (dt/2) * y_prime(t_mid, y_mid)
-        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher, embedded = False)
+        y2 = RK_standard(y_mid, dy1_mid, t_mid, dt/2, y_prime, butcher)
 
         error = (y2 - y1) / (2**order - 1)                  # estimate local truncation error
 
@@ -288,10 +334,10 @@ def estimate_step_size(y, t, y_prime, parameters, eps, low = 0.5, high = 10, max
 
         if error_norm >= tolerance or dt >= dt_max:         # check if attempt succeeded
 
-            return dt_prev, n + 1
+            return dt_prev, n + 1                           # return previous dt that satisfied error_norm < tolerance
 
         else:
-            rescale = max(1.1, rescale)
+            rescale = max(1.1, rescale)                     # increase dt by at least 10%
 
         dt_prev = dt
 

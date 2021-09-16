@@ -348,7 +348,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 if n == 0:                                      # adjust initial time step w/ euler step-doubling
 
-                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters, eps/2)
+                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters)
                     evaluations += 2 * tries_SD
 
                     dt = dt_next                                # then use standard Runge-Kutta step
@@ -357,7 +357,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
                 else:                                           # use RKM for remainder
 
-                    y, y_prev, dt = RKM_step(y, y_prev, t, dt, y_prime, method, butcher, eps, norm, dt_min, dt_max)
+                    y, y_prev, dt = RKM_step(y, y_prev, t, dt, y_prime, method, butcher, parameters, eps)
 
                 evaluations += stages
                 total_attempts += 1
@@ -369,7 +369,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
                 else:
                     k1 = y_prime(t, y)                          # compute first stage
 
-                y, k_last, dt, dt_next, tries = ERK_step(y, t, dt_next, k1, y_prime, method, butcher, FSAL, eps, norm, dt_min, dt_max, high = high)
+                y, k_last, dt, dt_next, tries = ERK_step(y, t, dt_next, k1, y_prime, method, butcher, FSAL, parameters, eps, high = high)
 
                 if FSAL:                                        # need to count FSAL stage if step rejected
                     evaluations += (stages  +  (tries - 1) * stages)
@@ -380,7 +380,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
 
             elif adaptive == 'SDRK':                            # step doubling Runge-Kutta algorithm
 
-                y, dt, dt_next, tries = SDRK_step(y, t, dt_next, y_prime, method, butcher, eps, norm, dt_min, dt_max)
+                y, dt, dt_next, tries = SDRK_step(y, t, dt_next, y_prime, method, butcher, parameters, eps)
 
                 evaluations += (stages  +  (tries - 1) * (stages - 1))
                 total_attempts += tries
@@ -410,7 +410,7 @@ def ode_solver(y0, t0, tf, y_prime, parameters, jacobian = None):
                     # evaluations += evals
 
                     # temp: use explicit version
-                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters, eps/2)
+                    dt_next, tries_SD = estimate_step_size(y, t, y_prime, parameters)
                     evaluations += 2 * tries_SD
 
                     dt = dt_next
