@@ -1,20 +1,29 @@
 #!/usr/bin/env julia
-
-using Profile
-
 include("ode_solver.jl")
+include("parameters.jl")
+# using ExactSolution                   # how to do something like this?
+include("exact_solution.jl")
 
-y0 = 1.0
-t0 = Precision(0)
-tf = Precision(1.0)
+using .ExactSolution 
+using Plots: plot, savefig
 
-@time begin
-y, t = ode_solver(y0, t0, tf)
-end
+v(x) = (println(x); x)	
 
+y0 = y_exact(t0)
 
-println(y, "\t", exp(t), "\t", t)
+jacobian = 4
 
+y, t, dt, evals, rejection = ode_solver(y0, t0, tf, y_prime, parameters, jacobian = jacobian)
 
+v(y[end])
+# v(y)
+v(t[end])      
+v(evals)   
+v(rejection)
 
+v(typeof(y))
+
+fig = plot(t, y)                        # basic figure 
+# @show fig                             # this didn't plt show after terminal
+savefig(fig, "plot.png")
 
