@@ -1,6 +1,8 @@
 #!/usr/bin/env julia
 include("precision.jl")
+include("butcher.jl")
 include("explicit_runge_kutta.jl")
+using .Butcher
 
 v(x) = (println(x); x)	
 
@@ -21,6 +23,9 @@ function ode_solver(y0, t0::Precision, tf::Precision, y_prime, parameters; jacob
     eps_root::Precision = parameters["eps_root"]
     free_embedded       = parameters["free_embedded"]
 
+    method  = butcher_dict[method_label][1]                 # may be convenient than loading file
+    butcher = butcher_dict[method_label][2]
+
     y = copy(y0)                                            # set initial conditions
     t = t0
     dt = dt0
@@ -28,26 +33,30 @@ function ode_solver(y0, t0::Precision, tf::Precision, y_prime, parameters; jacob
     y_prev = copy(y0)                                       # for RKM
     dt_next = dt                                            # for ERK/SDRK
 
-    stages = 1  # temp
+
+    stages = 1                                              # temp
+    
   
     steps = 0
     evaluations = 0
     total_attempts = 0
     finish = false
+
+    dimension = size(y)[1]                                  # dimension of solution vector
   
-    y_array = Vector{Precision}()                           # okay for y?
+    y_array = Array{Precision}(undef, dimension, 0)
     t_array = Vector{Precision}()
     dt_array = Vector{Precision}()
-
+ 
     for n in 1:n_max
-
-        push!(y_array, y)                                   # append y,t arrays
+        
+        y_array = hcat(y_array, y)                          # append y,t arrays
         push!(t_array, t)
-
+      
         if adaptive == false                                # use a fixed time step 
         
             dy1 = dt * y_prime(t, y)
-            y = RK_standard(y, dy1, t, dt, y_prime)
+            y = RK_standard(y, dy1, t, dt, y_prime, butcher)
             
             evaluations += stages
             total_attempts += 1
@@ -81,10 +90,8 @@ function ode_solver(y0, t0::Precision, tf::Precision, y_prime, parameters; jacob
             break
         end
 
-
         t += dt
         steps += 1
-
     end
 
     rejection_rate = 100. * (1  -  (steps + 1)/total_attempts)          
@@ -99,8 +106,6 @@ function ode_solver(y0, t0::Precision, tf::Precision, y_prime, parameters; jacob
     end
 
     return y_array, t_array, dt_array, evaluations, rejection_rate
-    # return y, t_array, dt_array, evaluations, rejection_rate
-
 end
 
 
